@@ -178,26 +178,49 @@ const PLACEHOLDER_POSTS = [
       </section>
 
       <section class="trust-bar" aria-label="Cam kết dịch vụ">
-        <div class="container trust-grid">
-          @for (t of trustItems; track t.title) {
-            <div class="trust-item">
-              <span class="trust-ico">
-                @if (t.title === 'Giao hàng toàn quốc') {
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 3h15v13H1zM16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                } @else if (t.title === 'Sản phẩm chất lượng') {
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                } @else if (t.title === 'Đổi trả dễ dàng') {
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                } @else if (t.title === 'Hỗ trợ tận tâm') {
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/></svg>
-                }
-              </span>
-              <div>
-                <strong>{{ t.title }}</strong>
-                <span>{{ t.sub }}</span>
+        <div class="trust-marquee-wrapper">
+          <div class="trust-marquee-content">
+            <!-- Set 1 -->
+            @for (t of trustItems; track t.title + '-1') {
+              <div class="trust-item">
+                <span class="trust-ico">
+                  @if (t.title === 'Giao hàng toàn quốc') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 3h15v13H1zM16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                  } @else if (t.title === 'Sản phẩm chất lượng') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  } @else if (t.title === 'Đổi trả dễ dàng') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                  } @else if (t.title === 'Hỗ trợ tận tâm') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/></svg>
+                  }
+                </span>
+                <div>
+                  <strong>{{ t.title }}</strong>
+                  <span>{{ t.sub }}</span>
+                </div>
               </div>
-            </div>
-          }
+            }
+            <!-- Set 2 -->
+            @for (t of trustItems; track t.title + '-2') {
+              <div class="trust-item trust-item-duplicate">
+                <span class="trust-ico">
+                  @if (t.title === 'Giao hàng toàn quốc') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 3h15v13H1zM16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                  } @else if (t.title === 'Sản phẩm chất lượng') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  } @else if (t.title === 'Đổi trả dễ dàng') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                  } @else if (t.title === 'Hỗ trợ tận tâm') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/></svg>
+                  }
+                </span>
+                <div>
+                  <strong>{{ t.title }}</strong>
+                  <span>{{ t.sub }}</span>
+                </div>
+              </div>
+            }
+          </div>
         </div>
       </section>
 
@@ -534,9 +557,18 @@ const PLACEHOLDER_POSTS = [
         background: #fff;
         border-bottom: 1px solid #e4e7ec;
         padding: 1.35rem 0;
+        overflow: hidden;
       }
 
-      .trust-grid {
+      .trust-marquee-wrapper {
+        width: 100%;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 1.25rem;
+        overflow: hidden;
+      }
+
+      .trust-marquee-content {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 1.5rem;
@@ -547,6 +579,10 @@ const PLACEHOLDER_POSTS = [
         align-items: center;
         gap: 0.75rem;
         justify-content: center;
+      }
+
+      .trust-item-duplicate {
+        display: none !important;
       }
 
       .trust-ico {
@@ -834,17 +870,34 @@ const PLACEHOLDER_POSTS = [
           margin-bottom: 0.25rem;
         }
 
-        .trust-grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 0.75rem;
+        .trust-marquee-wrapper {
+          padding: 0;
+          overflow: hidden;
+        }
+
+        .trust-marquee-content {
+          display: flex;
+          width: max-content;
+          gap: 1rem;
+          animation: marqueeScroll 20s linear infinite;
+        }
+
+        .trust-marquee-content:hover {
+          animation-play-state: paused;
         }
 
         .trust-item {
+          width: 240px;
+          flex-shrink: 0;
           background: #f9fafb;
           border: 1px solid #f0f2f5;
           border-radius: 8px;
           padding: 0.75rem;
           justify-content: flex-start;
+        }
+
+        .trust-item-duplicate {
+          display: flex !important;
         }
 
         .cat-row {
@@ -857,12 +910,8 @@ const PLACEHOLDER_POSTS = [
       }
 
       @media (max-width: 600px) {
-        .trust-grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 0.5rem;
-        }
-
         .trust-item {
+          width: 210px;
           padding: 0.5rem;
           gap: 0.5rem;
         }
@@ -895,6 +944,15 @@ const PLACEHOLDER_POSTS = [
 
         .product-row {
           grid-template-columns: 1fr;
+        }
+      }
+
+      @keyframes marqueeScroll {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-50%);
         }
       }
     `

@@ -1,0 +1,148 @@
+.store-page {
+  padding: 2rem 0 3rem;
+  background: #f5f5f5;
+}
+
+.store-page .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.store-page .page-head {
+  margin-bottom: 1.5rem;
+}
+
+.store-page .page-head h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1d21;
+}
+
+.store-page .page-head p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.store-card {
+  background: #fff;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.store-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.store-btn-primary {
+  background: #5c4033;
+  color: #fff;
+}
+
+.store-btn-primary:hover:not(:disabled) {
+  background: #4a3329;
+}
+
+.store-btn-outline {
+  background: #fff;
+  color: #5c4033;
+  border: 2px solid #5c4033;
+}
+
+.store-btn-outline:hover {
+  background: #faf5f2;
+}
+
+.store-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.store-field {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.store-field label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.store-field input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #e4e7ec;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.store-field input:focus {
+  outline: none;
+  border-color: #9ca3af;
+  box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.12);
+}
+
+.store-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: #6b7280;
+}
+
+.store-empty svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 0.75rem;
+  color: #c5c9d0;
+}
+
+.store-alert-error {
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 768px) {
+  .store-page {
+    padding: 1.25rem 0 2rem;
+  }
+
+  .store-page .page-head h1 {
+    font-size: 1.25rem;
+  }
+
+  .auth-card {
+    max-width: none;
+    margin: 0;
+  }
+
+  .account-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .info-list div {
+    grid-template-columns: 1fr !important;
+  }
+}

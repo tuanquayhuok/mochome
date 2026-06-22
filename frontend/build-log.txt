@@ -1,0 +1,55 @@
+﻿> Building...
+ΓêÜ Building...
+Initial chunk files | Names                |  Raw size
+chunk-2MMJ2JKH.js   | -                    |   1.44 MB | 
+polyfills.js        | polyfills            |  89.77 kB | 
+main.js             | main                 |  39.63 kB | 
+styles.css          | styles               |   7.68 kB | 
+chunk-SRHHDAR5.js   | -                    |   2.02 kB | 
+chunk-TPBVHXDL.js   | -                    |   1.42 kB | 
+
+                    | Initial total        |   1.58 MB
+
+Lazy chunk files    | Names                |  Raw size
+chunk-C4PZVXN2.js   | -                    | 228.35 kB | 
+chunk-KTXLSHWB.js   | dashboard-component  |  37.13 kB | 
+chunk-I3TEZ6FR.js   | orders-component     |  27.78 kB | 
+chunk-IKX3EH2B.js   | login-component      |  14.67 kB | 
+chunk-OGQHYFOI.js   | products-component   |   8.24 kB | 
+chunk-LQXLF3TR.js   | -                    |   7.94 kB | 
+chunk-XEFHAUSE.js   | posts-component      |   7.87 kB | 
+chunk-SEB4WS5D.js   | users-component      |   7.82 kB | 
+chunk-23KV2VYV.js   | categories-component |   7.00 kB | 
+chunk-RLGUIYFW.js   | reviews-component    |   6.98 kB | 
+chunk-KFVSEROM.js   | contacts-component   |   6.32 kB | 
+chunk-QVGDL4L2.js   | account-component    |   5.79 kB | 
+chunk-CGKLU2H3.js   | -                    |   2.11 kB | 
+
+Application bundle generation complete. [4.654 seconds] - 2026-05-31T14:18:37.827Z
+
+node.exe : Γû▓ [WARNING] Deprecation [plugin angular-sass]
+At line:1 char:1
++ & "D:\/node.exe" "D:\/node_modules/npm/bin/npx-cli.js" ng build --con ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Γû▓ [WARNING] D...n angular-sass]:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+    src/styles.scss:175:8:
+      175 Γöé @import './styles/admin-pages.scss';
+          Γò╡         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:1:8:
+      1 Γöé @import 'src/styles.scss';
+        Γò╡         ~~~~~~~~~~~~~~~~~
+
+
+Output location: D:\admin\frontend\dist\frontend
+

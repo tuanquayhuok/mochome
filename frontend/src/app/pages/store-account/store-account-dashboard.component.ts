@@ -1,0 +1,1053 @@
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, inject, input, OnInit, output, signal } from '@angular/core';
+
+import { LoyaltyMarkerIconComponent } from './loyalty-marker-icon.component';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { StoreProfileService } from '../../core/services/store-profile.service';
+import { StoreAuthService, StoreUser } from '../../core/services/store-auth.service';
+import { StoreAccountOrdersComponent } from './store-account-orders.component';
+import { createDefaultLoyalty } from '../../core/models/loyalty-defaults';
+import {
+  MONTH_TRACK_MAX,
+  monthTrackMarkers,
+  spendPercent,
+  YEAR_TRACK_MAX,
+  yearTrackMarkers,
+  LoyaltyTrackMarker
+} from '../../core/models/loyalty-track.config';
+import { LoyaltyInfo, LoyaltyMilestone, LoyaltyTierId } from '../../core/models/store-profile.models';
+
+type Panel = 'profile' | 'orders' | 'security';
+
+const TIER_BADGE: Record<string, string> = {
+  bronze: 'tier-bronze',
+  silver: 'tier-silver',
+  gold: 'tier-gold',
+  diamond: 'tier-diamond',
+  vip: 'tier-vip',
+  partner: 'tier-partner',
+  super_loyal: 'tier-super'
+};
+
+@Component({
+  selector: 'app-store-account-dashboard',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, DecimalPipe, LoyaltyMarkerIconComponent, StoreAccountOrdersComponent],
+  template: `
+    <div class="account-grid">
+      <aside class="store-card account-nav">
+        <div class="account-nav-inner">
+        <div class="profile-summary">
+          @if (user().avatarUrl) {
+            <img [src]="user().avatarUrl" alt="" class="avatar-img" />
+          } @else {
+            <span class="avatar">{{ initials(user().fullName) }}</span>
+          }
+          <div>
+            <strong>{{ user().fullName }}</strong>
+            <span class="email-line">{{ user().email }}</span>
+          </div>
+        </div>
+        <nav class="account-menu">
+          <button type="button" class="menu-item" [class.active]="panel() === 'profile'" (click)="setPanel('profile')">
+            Thông tin cá nhân
+          </button>
+          <button type="button" class="menu-item" [class.active]="panel() === 'orders'" (click)="setPanel('orders')">
+            Đơn hàng của tôi
+          </button>
+          <button type="button" class="menu-item" [class.active]="panel() === 'security'" (click)="setPanel('security')">
+            Bảo mật
+          </button>
+          <a routerLink="/gio-hang" class="menu-item">Giỏ hàng</a>
+          <a routerLink="/yeu-thich" class="menu-item">Yêu thích</a>
+        </nav>
+        <button type="button" class="logout-btn" (click)="logout.emit()">Đăng xuất</button>
+        </div>
+      </aside>
+
+      <div class="store-card account-panel">
+
+        @if (panel() === 'profile') {
+          <h2>Thông tin cá nhân</h2>
+          @if (profileMsg()) {
+            <div class="store-alert-success">{{ profileMsg() }}</div>
+          }
+          @if (profileErr()) {
+            <div class="store-alert-error">{{ profileErr() }}</div>
+          }
+
+          <div class="avatar-edit">
+            @if (user().avatarUrl) {
+              <img [src]="user().avatarUrl" alt="" class="avatar-lg" />
+            } @else {
+              <span class="avatar avatar-lg">{{ initials(user().fullName) }}</span>
+            }
+            <div>
+              <label class="store-btn store-btn-outline avatar-btn">
+                Đổi ảnh đại diện
+                <input type="file" accept="image/*" hidden (change)="onAvatarPick($event)" />
+              </label>
+              <p class="hint">JPG/PNG, tối đa ~500KB</p>
+            </div>
+          </div>
+
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
+            <div class="form-row">
+              <div class="store-field">
+                <label>Họ tên <em>*</em></label>
+                <input type="text" formControlName="fullName" />
+              </div>
+              <div class="store-field">
+                <label>Email</label>
+                <input type="email" [value]="user().email" disabled />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="store-field">
+                <label>Số điện thoại</label>
+                <input type="tel" formControlName="phone" placeholder="09xxxxxxxx" />
+              </div>
+              <div class="store-field">
+                <label>Ngày sinh</label>
+                <input type="date" formControlName="dateOfBirth" />
+              </div>
+              <div class="store-field">
+                <label>Giới tính</label>
+                <select formControlName="gender">
+                  <option value="">— Chọn —</option>
+                  <option value="male">Nam</option>
+                  <option value="female">Nữ</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
+            </div>
+
+            <h3 class="section-title">Địa chỉ giao hàng</h3>
+            <div class="form-row" formGroupName="address">
+              <div class="store-field">
+                <label>Tỉnh / Thành phố</label>
+                <input type="text" formControlName="province" placeholder="TP. Hồ Chí Minh" />
+              </div>
+              <div class="store-field">
+                <label>Quận / Huyện</label>
+                <input type="text" formControlName="district" />
+              </div>
+              <div class="store-field">
+                <label>Phường / Xã</label>
+                <input type="text" formControlName="ward" />
+              </div>
+            </div>
+            <div class="form-row" formGroupName="address">
+              <div class="store-field flex-2">
+                <label>Địa chỉ chi tiết</label>
+                <input type="text" formControlName="street" placeholder="Số nhà, tên đường" />
+              </div>
+              <div class="store-field">
+                <label>Mã bưu điện</label>
+                <input type="text" formControlName="zip" />
+              </div>
+            </div>
+
+            <button type="submit" class="store-btn store-btn-primary" [disabled]="savingProfile()">
+              {{ savingProfile() ? 'Đang lưu...' : 'Lưu thông tin' }}
+            </button>
+          </form>
+        }
+
+        @if (panel() === 'orders') {
+          <app-store-account-orders />
+        }
+
+        @if (panel() === 'security') {
+          <h2>Bảo mật tài khoản</h2>
+          @if (pwdMsg()) {
+            <div class="store-alert-success">{{ pwdMsg() }}</div>
+          }
+          @if (pwdErr()) {
+            <div class="store-alert-error">{{ pwdErr() }}</div>
+          }
+
+          <form [formGroup]="pwdForm" (ngSubmit)="changePassword()" class="profile-form">
+            <div class="store-field">
+              <label>Mật khẩu hiện tại</label>
+              <input type="password" formControlName="currentPassword" autocomplete="current-password" />
+            </div>
+            <div class="store-field">
+              <label>Mật khẩu mới</label>
+              <input type="password" formControlName="newPassword" autocomplete="new-password" />
+            </div>
+            <div class="store-field">
+              <label>Nhập lại mật khẩu mới</label>
+              <input type="password" formControlName="confirmPassword" autocomplete="new-password" />
+            </div>
+            <button type="submit" class="store-btn store-btn-primary" [disabled]="savingPwd()">Đổi mật khẩu</button>
+          </form>
+
+          <hr class="divider" />
+          <h3 class="section-title">Quên mật khẩu</h3>
+          <p class="hint">
+            Nhập email hoặc số điện thoại đã đăng ký. Hệ thống gửi <strong>mật khẩu khôi phục</strong> tới email của
+            tài khoản.
+          </p>
+          <form [formGroup]="forgotForm" (ngSubmit)="submitForgot()" class="forgot-panel">
+            <div class="form-row">
+              <div class="store-field">
+                <label>Email đăng ký</label>
+                <input type="email" formControlName="email" placeholder="email@example.com" />
+              </div>
+              <div class="store-field">
+                <label>Số điện thoại (nếu có)</label>
+                <input type="tel" formControlName="phone" placeholder="09xxxxxxxx" />
+              </div>
+            </div>
+            <button type="submit" class="store-btn store-btn-primary" [disabled]="forgotLoading()">
+              {{ forgotLoading() ? 'Đang gửi...' : 'Gửi mật khẩu khôi phục' }}
+            </button>
+          </form>
+          @if (forgotMsg()) {
+            <p class="forgot-msg" [class.forgot-msg--hint]="forgotDevHint()">{{ forgotMsg() }}</p>
+          }
+          @if (forgotDevHint()) {
+            <p class="forgot-dev">{{ forgotDevHint() }}</p>
+          }
+        }
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .account-grid {
+        display: grid;
+        grid-template-columns: 260px minmax(0, 1fr);
+        gap: 1.5rem;
+        align-items: stretch;
+        width: 100%;
+      }
+
+      .account-nav,
+      .account-panel {
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+      }
+
+      .account-nav {
+        padding: 1.25rem;
+      }
+
+      .account-nav-inner {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 100%;
+      }
+
+      .profile-summary {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid #f0f2f5;
+      }
+
+      .avatar,
+      .avatar-img {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .avatar {
+        background: linear-gradient(145deg, #8b6914, #5c4033);
+        color: #fff;
+        font-weight: 700;
+        display: grid;
+        place-items: center;
+      }
+
+      .avatar-img {
+        object-fit: cover;
+      }
+
+      .profile-summary strong {
+        display: block;
+        font-size: 0.9375rem;
+      }
+
+      .email-line {
+        display: block;
+        font-size: 0.7rem;
+        color: #9ca3af;
+        margin-top: 0.15rem;
+      }
+
+      .tier-pill {
+        display: inline-block;
+        margin-top: 0.25rem;
+        padding: 0.1rem 0.45rem;
+        border-radius: 999px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .tier-bronze {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .tier-silver {
+        background: #f3f4f6;
+        color: #374151;
+      }
+      .tier-gold {
+        background: #fef9c3;
+        color: #a16207;
+      }
+      .tier-diamond {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+      .tier-vip {
+        background: #ede9fe;
+        color: #6d28d9;
+      }
+      .tier-partner {
+        background: #ccfbf1;
+        color: #0f766e;
+      }
+      .tier-super {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      .account-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        flex: 1;
+      }
+
+      .menu-item {
+        display: block;
+        width: 100%;
+        padding: 0.55rem 0.65rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        color: #4b5563;
+        text-decoration: none;
+        text-align: left;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .menu-item.active {
+        background: #f3f4f6;
+        color: #1a1d21;
+        font-weight: 600;
+      }
+
+      .logout-btn {
+        margin-top: auto;
+        width: 100%;
+        padding: 0.55rem;
+        border: 1px solid #e4e7ec;
+        border-radius: 6px;
+        background: #fff;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #6b7280;
+        cursor: pointer;
+      }
+
+      .account-panel {
+        padding: 1.5rem 1.75rem;
+        min-width: 0;
+        overflow: visible;
+      }
+
+      .account-panel--wide {
+        padding: 1.75rem 2rem 2rem;
+      }
+
+      .account-panel h2 {
+        margin: 0 0 1.25rem;
+        font-size: 1.125rem;
+      }
+
+      .section-title {
+        margin: 1.5rem 0 0.75rem;
+        font-size: 0.9375rem;
+        font-weight: 700;
+      }
+
+      .loyalty-hero {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.25rem;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--tier-color, #5c4033), #1a1d21);
+        color: #fff;
+      }
+
+      .loyalty-tier-name {
+        font-size: 1.5rem;
+        font-weight: 800;
+      }
+
+      .loyalty-hero p {
+        margin: 0.35rem 0 0;
+        font-size: 0.8125rem;
+        opacity: 0.9;
+      }
+
+      .loyalty-stats {
+        display: flex;
+        gap: 1.5rem;
+      }
+
+      .stat-label {
+        display: block;
+        font-size: 0.7rem;
+        opacity: 0.85;
+      }
+
+      .track-block {
+        margin-top: 1.25rem;
+      }
+
+      .track-hint {
+        margin: 0 0 1rem;
+        font-size: 0.75rem;
+        color: #6b7280;
+      }
+
+      .track-section + .track-section {
+        margin-top: 1.5rem;
+      }
+
+      .track-head {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.35rem;
+        margin-bottom: 0.65rem;
+      }
+
+      .track-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #1a1d21;
+      }
+
+      .track-spend {
+        font-size: 0.8125rem;
+      }
+
+      .track-spend .muted {
+        color: #9ca3af;
+        font-weight: 400;
+        margin-left: 0.25rem;
+      }
+
+      .track-bar-outer {
+        padding: 3.25rem 1.25rem 3rem;
+        margin: 0 0.25rem;
+        overflow: visible;
+      }
+
+      .track-bar {
+        position: relative;
+        height: 10px;
+        background: #e5e7eb;
+        border-radius: 999px;
+        margin: 0 0.5rem;
+      }
+
+      .track-fill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        background: linear-gradient(90deg, #8b6914, #5c4033);
+        border-radius: 999px;
+        transition: width 0.35s ease;
+        pointer-events: none;
+      }
+
+      .track-fill--year {
+        background: linear-gradient(90deg, #ca8a04, #a16207);
+      }
+
+      .track-marker {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: default;
+      }
+
+      .track-marker--start {
+        transform: translate(0, -50%);
+      }
+
+      .track-marker--end {
+        transform: translate(-100%, -50%);
+      }
+
+      .track-marker.reached ::ng-deep .loyalty-marker-icon {
+        box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.28);
+      }
+
+      .track-marker.current ::ng-deep .loyalty-marker-icon {
+        box-shadow: 0 0 0 3px rgba(92, 64, 51, 0.35);
+        transform: scale(1.08);
+      }
+
+      .marker-name {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: 5.5rem;
+        font-size: 0.625rem;
+        font-weight: 700;
+        color: #6b7280;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.2;
+        letter-spacing: 0.01em;
+      }
+
+      .track-marker--start .marker-name {
+        left: 0;
+        transform: none;
+        text-align: left;
+      }
+
+      .track-marker--end .marker-name {
+        left: auto;
+        right: 0;
+        transform: none;
+        text-align: right;
+      }
+
+      .track-marker.current .marker-name {
+        color: #5c4033;
+      }
+
+      .marker-tooltip {
+        position: absolute;
+        bottom: calc(100% + 10px);
+        left: 50%;
+        transform: translateX(-50%) translateY(4px);
+        min-width: 200px;
+        max-width: 260px;
+        padding: 0.65rem 0.75rem;
+        background: #1a1d21;
+        color: #f9fafb;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        line-height: 1.4;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+        z-index: 10;
+      }
+
+      .marker-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -6px;
+        border: 6px solid transparent;
+        border-top-color: #1a1d21;
+      }
+
+      .track-marker:hover .marker-tooltip,
+      .track-marker:focus-within .marker-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+        pointer-events: auto;
+      }
+
+      .track-marker:hover ::ng-deep .loyalty-marker-icon,
+      .track-marker:focus-within ::ng-deep .loyalty-marker-icon {
+        transform: scale(1.1);
+      }
+
+      .tt-amount {
+        margin: 0.25rem 0 0;
+        color: #d1d5db;
+      }
+
+      .tt-pct {
+        margin: 0.35rem 0 0;
+        font-size: 0.8125rem;
+        font-weight: 800;
+        color: #fde68a;
+      }
+
+      .tt-voucher {
+        margin: 0.2rem 0 0;
+        color: #fef3c7;
+      }
+
+      .tt-code {
+        display: inline-block;
+        margin-top: 0.35rem;
+        padding: 0.15rem 0.4rem;
+        background: #374151;
+        border-radius: 4px;
+        font-size: 0.7rem;
+      }
+
+      .tt-status {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 0.7rem;
+      }
+
+      .tt-status.done {
+        color: #6ee7b7;
+      }
+
+      .tt-status.lock {
+        color: #fcd34d;
+      }
+
+      .tt-claim {
+        display: block;
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.4rem 0.5rem;
+        border: none;
+        border-radius: 4px;
+        background: #5c4033;
+        color: #fff;
+        font-size: 0.7rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .tt-claim:hover:not(:disabled) {
+        background: #4a3329;
+      }
+
+      .tt-claim:disabled {
+        opacity: 0.6;
+      }
+
+      .avatar-edit {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1.25rem;
+      }
+
+      .avatar-lg {
+        width: 80px;
+        height: 80px;
+        font-size: 1.5rem;
+      }
+
+      .avatar-btn {
+        cursor: pointer;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0 1rem;
+      }
+
+      .flex-2 {
+        grid-column: span 2;
+      }
+
+      .profile-form em {
+        color: #dc2626;
+        font-style: normal;
+      }
+
+      .store-alert-success {
+        padding: 0.65rem 0.85rem;
+        margin-bottom: 1rem;
+        background: #ecfdf5;
+        color: #047857;
+        border-radius: 6px;
+        font-size: 0.8125rem;
+      }
+
+      .hint {
+        font-size: 0.8125rem;
+        color: #9ca3af;
+        margin: 0 0 0.75rem;
+      }
+
+      .divider {
+        margin: 1.5rem 0;
+        border: none;
+        border-top: 1px solid #f0f2f5;
+      }
+
+      .forgot-panel {
+        max-width: 520px;
+      }
+
+      .forgot-panel .store-field {
+        margin-bottom: 0.75rem;
+      }
+
+      .forgot-msg {
+        margin-top: 0.75rem;
+        font-size: 0.8125rem;
+        color: #047857;
+      }
+
+      .forgot-msg--hint {
+        color: #b45309;
+      }
+
+      .forgot-dev {
+        margin-top: 0.35rem;
+        font-size: 0.75rem;
+        color: #6b7280;
+      }
+
+      .max-tier {
+        margin: 1rem 0 0;
+        padding: 0.75rem;
+        background: #f0fdf4;
+        color: #047857;
+        border-radius: 6px;
+        font-size: 0.8125rem;
+      }
+
+      @media (max-width: 768px) {
+        .account-grid {
+          grid-template-columns: 1fr;
+        }
+        .flex-2 {
+          grid-column: span 1;
+        }
+      }
+    `
+  ]
+})
+export class StoreAccountDashboardComponent implements OnInit {
+  private readonly profileApi = inject(StoreProfileService);
+  private readonly storeAuth = inject(StoreAuthService);
+  private readonly fb = inject(FormBuilder);
+
+  readonly user = input.required<StoreUser>();
+  readonly userChange = output<StoreUser>();
+  readonly logout = output<void>();
+
+  readonly monthMax = MONTH_TRACK_MAX;
+  readonly yearMax = YEAR_TRACK_MAX;
+  readonly panel = signal<Panel>('profile');
+  readonly loyaltyView = signal<LoyaltyInfo>(createDefaultLoyalty());
+  readonly loyaltyLoading = signal(false);
+  readonly loyaltyError = signal('');
+  readonly savingProfile = signal(false);
+  readonly savingPwd = signal(false);
+  readonly claiming = signal(false);
+  readonly profileMsg = signal('');
+  readonly profileErr = signal('');
+  readonly pwdMsg = signal('');
+  readonly pwdErr = signal('');
+  readonly claimMsg = signal('');
+  readonly forgotMsg = signal('');
+  readonly forgotDevHint = signal('');
+  readonly forgotLoading = signal(false);
+
+  profileForm = this.fb.group({
+    fullName: ['', Validators.required],
+    phone: [''],
+    dateOfBirth: [''],
+    gender: [''],
+    address: this.fb.group({
+      province: [''],
+      district: [''],
+      ward: [''],
+      street: [''],
+      zip: ['']
+    })
+  });
+
+  pwdForm = this.fb.group({
+    currentPassword: ['', Validators.required],
+    newPassword: ['', [Validators.required, Validators.minLength(6)]],
+    confirmPassword: ['', Validators.required]
+  });
+
+  forgotForm = this.fb.group(
+    {
+      email: ['', Validators.email],
+      phone: ['']
+    },
+    {
+      validators: (group) => {
+        const email = String(group.get('email')?.value || '').trim();
+        const phone = String(group.get('phone')?.value || '').replace(/\D/g, '');
+        return email || phone ? null : { contactRequired: true };
+      }
+    }
+  );
+
+  ngOnInit(): void {
+    this.patchProfileForm(this.user());
+    this.forgotForm.patchValue({ email: this.user().email });
+    if (this.user().loyalty) {
+      this.loyaltyView.set(this.user().loyalty!);
+    }
+    this.loadLoyalty();
+  }
+
+  loadLoyalty(): void {
+    this.loyaltyLoading.set(true);
+    this.loyaltyError.set('');
+    this.profileApi.fetchLoyalty().subscribe({
+      next: (res) => {
+        this.loyaltyLoading.set(false);
+        this.loyaltyError.set('');
+        this.loyaltyView.set(res.loyalty);
+        this.syncLoyaltyToUser(res.loyalty);
+      },
+      error: (err) => {
+        this.loyaltyLoading.set(false);
+        if (this.user().loyalty) {
+          this.loyaltyView.set(this.user().loyalty!);
+          this.loyaltyError.set('');
+          return;
+        }
+        if (err instanceof HttpErrorResponse && err.status === 0) {
+          this.loyaltyError.set('Không kết nối backend. Chạy: cd backend && npm start');
+        } else if (err instanceof HttpErrorResponse && err.status === 404) {
+          this.loyaltyError.set('Backend chưa có API tích lũy — tắt tiến trình cũ port 5000 rồi npm start lại.');
+        } else {
+          this.loyaltyError.set(this.errMsg(err, 'Chưa tải được số liệu — đang dùng mốc tham khảo (0đ).'));
+        }
+      }
+    });
+  }
+
+  private syncLoyaltyToUser(loyalty: LoyaltyInfo): void {
+    const u = { ...this.user(), loyalty };
+    this.storeAuth.persistUser(u);
+    this.userChange.emit(u);
+  }
+
+  setPanel(p: Panel): void {
+    this.panel.set(p);
+  }
+
+  tierClass(tier?: LoyaltyTierId | string): string {
+    return (tier && TIER_BADGE[tier]) || 'tier-bronze';
+  }
+
+  monthMarkers(L: LoyaltyInfo) {
+    return monthTrackMarkers(L);
+  }
+
+  yearMarkers(L: LoyaltyInfo) {
+    return yearTrackMarkers(L);
+  }
+
+  monthPercent(L: LoyaltyInfo): number {
+    return spendPercent(L.spendMonth, MONTH_TRACK_MAX);
+  }
+
+  yearPercent(L: LoyaltyInfo): number {
+    return spendPercent(L.spendYear, YEAR_TRACK_MAX);
+  }
+
+  markerGap(spend: number, amount: number): number {
+    return Math.max(0, amount - spend);
+  }
+
+  claimByMarker(mk: LoyaltyTrackMarker): void {
+    if (!mk.milestoneId || !mk.canClaim) return;
+    const m = this.loyaltyView().milestones.find((x) => x.id === mk.milestoneId);
+    if (m) this.claim(m);
+  }
+
+  claim(m: LoyaltyMilestone): void {
+    this.claiming.set(true);
+    this.claimMsg.set('');
+    this.profileApi.claimMilestone(m.id).subscribe({
+      next: (res) => {
+        this.claiming.set(false);
+        this.claimMsg.set(res.message);
+        this.loyaltyView.set(res.user.loyalty || this.loyaltyView());
+        this.emitUser(res.user);
+      },
+      error: (err) => {
+        this.claiming.set(false);
+        this.claimMsg.set(this.errMsg(err, 'Không nhận được voucher.'));
+      }
+    });
+  }
+
+  onAvatarPick(ev: Event): void {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (file.size > 500_000) {
+      this.profileErr.set('Ảnh tối đa 500KB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result || '');
+      this.profileApi.updateAvatar(dataUrl).subscribe({
+        next: (res) => {
+          this.profileMsg.set(res.message);
+          this.emitUser(res.user);
+        },
+        error: (err) => this.profileErr.set(this.errMsg(err, 'Không cập nhật được ảnh.'))
+      });
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  }
+
+  saveProfile(): void {
+    this.profileForm.markAllAsTouched();
+    if (this.profileForm.invalid) {
+      this.profileErr.set('Vui lòng kiểm tra họ tên.');
+      return;
+    }
+    const v = this.profileForm.getRawValue();
+    this.savingProfile.set(true);
+    this.profileErr.set('');
+    this.profileMsg.set('');
+    this.profileApi
+      .updateProfile({
+        fullName: v.fullName!,
+        phone: v.phone || '',
+        dateOfBirth: v.dateOfBirth || '',
+        gender: v.gender || '',
+        address: v.address as StoreUser['address']
+      })
+      .subscribe({
+        next: (res) => {
+          this.savingProfile.set(false);
+          this.profileMsg.set(res.message);
+          this.emitUser(res.user);
+        },
+        error: (err) => {
+          this.savingProfile.set(false);
+          this.profileErr.set(this.errMsg(err, 'Lưu thất bại.'));
+        }
+      });
+  }
+
+  changePassword(): void {
+    this.pwdForm.markAllAsTouched();
+    const v = this.pwdForm.getRawValue();
+    if (v.newPassword !== v.confirmPassword) {
+      this.pwdErr.set('Mật khẩu xác nhận không khớp.');
+      return;
+    }
+    if (this.pwdForm.invalid) {
+      this.pwdErr.set('Vui lòng điền đủ thông tin.');
+      return;
+    }
+    this.savingPwd.set(true);
+    this.pwdErr.set('');
+    this.pwdMsg.set('');
+    this.profileApi.changePassword(v.currentPassword!, v.newPassword!).subscribe({
+      next: (res) => {
+        this.savingPwd.set(false);
+        this.pwdMsg.set(res.message);
+        this.pwdForm.reset();
+      },
+      error: (err) => {
+        this.savingPwd.set(false);
+        this.pwdErr.set(this.errMsg(err, 'Đổi mật khẩu thất bại.'));
+      }
+    });
+  }
+
+  submitForgot(): void {
+    this.forgotForm.markAllAsTouched();
+    if (this.forgotForm.hasError('contactRequired')) {
+      this.forgotMsg.set('Vui lòng nhập email hoặc số điện thoại.');
+      return;
+    }
+    if (this.forgotForm.invalid) return;
+    const { email, phone } = this.forgotForm.getRawValue();
+    this.forgotLoading.set(true);
+    this.forgotMsg.set('');
+    this.forgotDevHint.set('');
+    this.profileApi
+      .forgotPassword({
+        email: String(email || '').trim() || undefined,
+        phone: String(phone || '').trim() || undefined
+      })
+      .subscribe({
+        next: (res) => {
+          this.forgotLoading.set(false);
+          this.forgotMsg.set(res.message);
+          this.forgotDevHint.set(res.devHint || '');
+        },
+        error: (err) => {
+          this.forgotLoading.set(false);
+          this.forgotMsg.set(this.errMsg(err, 'Không gửi được yêu cầu.'));
+        }
+      });
+  }
+
+  initials(name: string): string {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  }
+
+  private patchProfileForm(u: StoreUser): void {
+    this.profileForm.patchValue({
+      fullName: u.fullName,
+      phone: u.phone || '',
+      dateOfBirth: u.dateOfBirth || '',
+      gender: u.gender || '',
+      address: {
+        province: u.address?.province || '',
+        district: u.address?.district || '',
+        ward: u.address?.ward || '',
+        street: u.address?.street || '',
+        zip: u.address?.zip || ''
+      }
+    });
+  }
+
+  private emitUser(u: StoreUser): void {
+    this.storeAuth.persistUser(u);
+    this.userChange.emit(u);
+    this.patchProfileForm(u);
+  }
+
+  private errMsg(err: unknown, fallback: string): string {
+    if (err instanceof HttpErrorResponse) {
+      return err.error?.message || fallback;
+    }
+    return fallback;
+  }
+}

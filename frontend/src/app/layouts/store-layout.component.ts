@@ -32,9 +32,8 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
               </svg>
             </button>
 
-            <a routerLink="/" class="brand" aria-label="Mộc Home">
-              <span class="brand-mark"></span>
-              <span class="brand-name">MỘC HOME</span>
+            <a routerLink="/" class="brand logo-wrap" aria-label="Mộc Home">
+              <img src="/logo.jpg" class="logo-img" alt="Mộc Home" />
             </a>
 
             <nav class="nav-compact desktop-nav-compact" aria-label="Menu chính">
@@ -125,7 +124,7 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
               </button>
 
               <a routerLink="/" class="logo-wrap" aria-label="Mộc Home">
-                <span class="logo-box">LOGO</span>
+                <img src="/logo.jpg" class="logo-img" alt="Mộc Home" />
               </a>
 
               <form class="search-form" (submit)="onSearch($event)">
@@ -248,9 +247,8 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
         @if (compactLayout()) {
           <div class="container footer-grid footer-grid--contact">
             <div class="footer-col footer-brand">
-              <div class="brand footer-brand-row">
-                <span class="brand-mark sm"></span>
-                <span class="brand-name">MỘC HOME</span>
+              <div class="brand footer-brand-row logo-wrap">
+                <img src="/logo.jpg" class="logo-img sm" alt="Mộc Home" />
               </div>
               <p>
                 Thương hiệu nội thất gỗ tự nhiên, cam kết chất lượng và mang đến không gian sống tinh
@@ -320,7 +318,7 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
         } @else {
           <div class="container footer-grid">
             <div class="footer-col footer-about">
-              <span class="logo-box sm">LOGO</span>
+              <img src="/logo.jpg" class="logo-img sm" alt="Mộc Home" style="margin-bottom: 0.75rem;" />
               <p>
                 Mộc Home — thương hiệu nội thất gỗ tự nhiên, mang đến không gian sống tinh tế và ấm
                 cúng cho gia đình Việt.
@@ -541,6 +539,17 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
         width: 88px;
         height: 36px;
         margin-bottom: 0.75rem;
+      }
+
+      .logo-img {
+        height: 40px;
+        width: auto;
+        display: block;
+        object-fit: contain;
+      }
+
+      .logo-img.sm {
+        height: 32px;
       }
 
       .search-form {

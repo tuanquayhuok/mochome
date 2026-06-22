@@ -33,7 +33,7 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
             </button>
 
             <a routerLink="/" class="brand logo-wrap" aria-label="Mộc Home">
-              <img src="/logo.jpg" class="logo-img" alt="Mộc Home" />
+              <img src="/logo.png" class="logo-img" alt="Mộc Home" />
             </a>
 
             <nav class="nav-compact desktop-nav-compact" aria-label="Menu chính">
@@ -124,7 +124,7 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
               </button>
 
               <a routerLink="/" class="logo-wrap" aria-label="Mộc Home">
-                <img src="/logo.jpg" class="logo-img" alt="Mộc Home" />
+                <img src="/logo.png" class="logo-img" alt="Mộc Home" />
               </a>
 
               <form class="search-form" (submit)="onSearch($event)">
@@ -248,7 +248,7 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
           <div class="container footer-grid footer-grid--contact">
             <div class="footer-col footer-brand">
               <div class="brand footer-brand-row logo-wrap">
-                <img src="/logo.jpg" class="logo-img sm" alt="Mộc Home" />
+                <img src="/logo.png" class="logo-img sm" alt="Mộc Home" />
               </div>
               <p>
                 Thương hiệu nội thất gỗ tự nhiên, cam kết chất lượng và mang đến không gian sống tinh
@@ -318,7 +318,7 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
         } @else {
           <div class="container footer-grid">
             <div class="footer-col footer-about">
-              <img src="/logo.jpg" class="logo-img sm" alt="Mộc Home" style="margin-bottom: 0.75rem;" />
+              <img src="/logo.png" class="logo-img sm" alt="Mộc Home" style="margin-bottom: 0.75rem;" />
               <p>
                 Mộc Home — thương hiệu nội thất gỗ tự nhiên, mang đến không gian sống tinh tế và ấm
                 cúng cho gia đình Việt.

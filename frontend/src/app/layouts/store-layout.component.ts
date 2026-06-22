@@ -896,22 +896,24 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
         inset: 0;
         z-index: 90;
         background: rgba(0, 0, 0, 0.4);
+        animation: fadeIn 0.2s ease-out;
       }
 
       .mobile-drawer {
         position: fixed;
         top: 0;
-        right: 0;
+        left: 0;
         z-index: 100;
         width: min(300px, 88vw);
         height: 100%;
         background: #fff;
-        box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
         padding: 1.25rem 1rem;
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
         overflow-y: auto;
+        animation: slideInLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
       .mobile-drawer a {
@@ -927,6 +929,20 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
       .mobile-drawer a.active {
         background: #f3f4f6;
         color: #1a1d21;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes slideInLeft {
+        from {
+          transform: translateX(-100%);
+        }
+        to {
+          transform: translateX(0);
+        }
       }
 
       @media (max-width: 1024px) {

@@ -181,7 +181,17 @@ const PLACEHOLDER_POSTS = [
         <div class="container trust-grid">
           @for (t of trustItems; track t.title) {
             <div class="trust-item">
-              <span class="trust-ico" [innerHTML]="t.icon"></span>
+              <span class="trust-ico">
+                @if (t.title === 'Giao hàng toàn quốc') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 3h15v13H1zM16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                } @else if (t.title === 'Sản phẩm chất lượng') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                } @else if (t.title === 'Đổi trả dễ dàng') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                } @else if (t.title === 'Hỗ trợ tận tâm') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/></svg>
+                }
+              </span>
               <div>
                 <strong>{{ t.title }}</strong>
                 <span>{{ t.sub }}</span>
@@ -791,11 +801,50 @@ const PLACEHOLDER_POSTS = [
 
       @media (max-width: 900px) {
         .hero-banner {
-          min-height: 360px;
+          min-height: auto;
+          height: auto;
+          aspect-ratio: 16 / 9;
+        }
+
+        .hero-content-wrap {
+          padding: 1rem 1.25rem;
+        }
+
+        .hero-content h1 {
+          font-size: 1.25rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .hero-content p {
+          font-size: 0.75rem;
+          margin-bottom: 0.75rem;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .hero-cta {
+          padding: 0.5rem 1rem;
+          font-size: 0.7rem;
+        }
+
+        .hero-tag {
+          font-size: 0.6rem;
+          margin-bottom: 0.25rem;
         }
 
         .trust-grid {
           grid-template-columns: repeat(2, 1fr);
+          gap: 0.75rem;
+        }
+
+        .trust-item {
+          background: #f9fafb;
+          border: 1px solid #f0f2f5;
+          border-radius: 8px;
+          padding: 0.75rem;
+          justify-content: flex-start;
         }
 
         .cat-row {
@@ -809,7 +858,31 @@ const PLACEHOLDER_POSTS = [
 
       @media (max-width: 600px) {
         .trust-grid {
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.5rem;
+        }
+
+        .trust-item {
+          padding: 0.5rem;
+          gap: 0.5rem;
+        }
+
+        .trust-ico {
+          width: 32px;
+          height: 32px;
+        }
+
+        .trust-ico :deep(svg) {
+          width: 22px;
+          height: 22px;
+        }
+
+        .trust-item strong {
+          font-size: 0.75rem;
+        }
+
+        .trust-item span {
+          font-size: 0.625rem;
         }
 
         .cat-row {

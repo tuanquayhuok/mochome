@@ -16,6 +16,22 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
       <header class="site-header">
         @if (compactLayout()) {
           <div class="container header-compact">
+            <button
+              type="button"
+              class="icon-btn menu-toggle-compact"
+              (click)="toggleMobileNav()"
+              [attr.aria-expanded]="mobileNavOpen()"
+              aria-label="Menu"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                @if (mobileNavOpen()) {
+                  <path d="M18 6L6 18M6 6l12 12" />
+                } @else {
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                }
+              </svg>
+            </button>
+
             <a routerLink="/" class="brand" aria-label="Mộc Home">
               <span class="brand-mark"></span>
               <span class="brand-name">MỘC HOME</span>
@@ -45,6 +61,18 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
             @if (mobileNavOpen()) {
               <div class="mobile-overlay" (click)="closeMobileNav()" aria-hidden="true"></div>
               <nav class="mobile-drawer" aria-label="Menu di động">
+                <form class="mobile-search-form" (submit)="onSearch($event)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="M21 21l-4.35-4.35" />
+                  </svg>
+                  <input
+                    type="search"
+                    placeholder="Tìm kiếm sản phẩm..."
+                    [value]="searchQuery()"
+                    (input)="searchQuery.set($any($event.target).value)"
+                  />
+                </form>
                 <a routerLink="/" (click)="closeMobileNav()" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Trang chủ</a>
                 <a routerLink="/san-pham" (click)="closeMobileNav()" routerLinkActive="active">Sản phẩm</a>
                 <a routerLink="/tin-tuc" (click)="closeMobileNav()" routerLinkActive="active">Bài viết</a>
@@ -54,21 +82,6 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
             }
 
             <div class="header-icons">
-              <button
-                type="button"
-                class="icon-btn menu-toggle-compact"
-                (click)="toggleMobileNav()"
-                [attr.aria-expanded]="mobileNavOpen()"
-                aria-label="Menu"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  @if (mobileNavOpen()) {
-                    <path d="M18 6L6 18M6 6l12 12" />
-                  } @else {
-                    <path d="M4 6h16M4 12h16M4 18h16" />
-                  }
-                </svg>
-              </button>
               <button type="button" class="icon-btn" title="Tìm kiếm" (click)="toggleSearch()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
                   <circle cx="11" cy="11" r="8" />
@@ -95,6 +108,22 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
         } @else {
           <div class="topbar">
             <div class="container topbar-row">
+              <button
+                type="button"
+                class="menu-toggle"
+                (click)="toggleMobileNav()"
+                [attr.aria-expanded]="mobileNavOpen()"
+                aria-label="Mở menu điều hướng"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  @if (mobileNavOpen()) {
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  } @else {
+                    <path d="M4 6h16M4 12h16M4 18h16" />
+                  }
+                </svg>
+              </button>
+
               <a routerLink="/" class="logo-wrap" aria-label="Mộc Home">
                 <span class="logo-box">LOGO</span>
               </a>
@@ -113,21 +142,6 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
               </form>
 
               <div class="topbar-actions">
-                <button
-                  type="button"
-                  class="menu-toggle"
-                  (click)="toggleMobileNav()"
-                  [attr.aria-expanded]="mobileNavOpen()"
-                  aria-label="Mở menu điều hướng"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    @if (mobileNavOpen()) {
-                      <path d="M18 6L6 18M6 6l12 12" />
-                    } @else {
-                      <path d="M4 6h16M4 12h16M4 18h16" />
-                    }
-                  </svg>
-                </button>
                 <a routerLink="/tai-khoan" class="action-link">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
@@ -184,6 +198,18 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
           @if (mobileNavOpen()) {
             <div class="mobile-overlay" (click)="closeMobileNav()" aria-hidden="true"></div>
             <nav class="mobile-drawer" aria-label="Menu di động">
+              <form class="mobile-search-form" (submit)="onSearch($event)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+                <input
+                  type="search"
+                  placeholder="Tìm kiếm sản phẩm..."
+                  [value]="searchQuery()"
+                  (input)="searchQuery.set($any($event.target).value)"
+                />
+              </form>
               <a routerLink="/" (click)="closeMobileNav()" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Trang chủ</a>
               <a routerLink="/san-pham" (click)="closeMobileNav()" routerLinkActive="active">Sản phẩm</a>
               <a routerLink="/san-pham" (click)="closeMobileNav()" routerLinkActive="active">Bộ sưu tập</a>
@@ -915,36 +941,85 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
         }
 
         .header-compact {
-          grid-template-columns: 1fr auto;
-        }
-
-        .topbar-row {
-          grid-template-columns: auto 1fr auto;
+          grid-template-columns: auto auto 1fr;
           align-items: center;
-          gap: 0.5rem;
-          padding: 0.65rem 0;
+          gap: 0.75rem;
         }
 
-        .logo-wrap {
+        .menu-toggle-compact {
           order: 1;
         }
 
-        .topbar-actions {
+        .brand {
           order: 2;
+        }
+
+        .header-icons {
+          order: 3;
+          justify-self: end;
+        }
+
+        .topbar-row {
+          grid-template-columns: auto auto 1fr;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.65rem 0;
+        }
+
+        .menu-toggle {
+          order: 1;
+        }
+
+        .logo-wrap {
+          order: 2;
+        }
+
+        .topbar-actions {
+          order: 3;
           justify-self: end;
           gap: 0.35rem;
         }
 
         .search-form {
-          order: 3;
-          grid-column: 1 / -1;
-          max-width: none;
+          display: none !important;
         }
 
         .footer-grid,
         .footer-grid--contact {
           grid-template-columns: 1fr 1fr;
         }
+      }
+
+      .mobile-search-form {
+        position: relative;
+        margin-bottom: 1rem;
+        padding: 0 0.5rem;
+      }
+
+      .mobile-search-form svg {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        color: #8b939e;
+      }
+
+      .mobile-search-form input {
+        width: 100%;
+        padding: 0.55rem 1rem 0.55rem 2.25rem;
+        border: 1px solid #e4e7ec;
+        border-radius: 999px;
+        font-size: 0.8125rem;
+        background: #fafafa;
+        color: #1a1d21;
+      }
+
+      .mobile-search-form input:focus {
+        outline: none;
+        border-color: #9ca3af;
+        background: #fff;
       }
 
       @media (max-width: 640px) {

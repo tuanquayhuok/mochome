@@ -315,45 +315,10 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
                     </div>
 
                     <div class="auth-links-row">
-                      <button type="button" class="link-btn" (click)="forgotOpen.set(true)">Quên mật khẩu?</button>
+                      <a routerLink="/quen-mat-khau" class="link-btn">Quên mật khẩu?</a>
                       <span class="auth-divider">|</span>
                       <button type="button" class="link-btn" (click)="setTab('register')">Đăng ký ngay</button>
                     </div>
-
-                    @if (forgotOpen()) {
-                      <div class="forgot-box">
-                        <p class="forgot-title">Khôi phục mật khẩu</p>
-                        <p class="forgot-desc">Nhập thông tin tài khoản của bạn để khôi phục mật khẩu.</p>
-                        
-                        <div class="forgot-input-group">
-                          <input
-                            type="email"
-                            [formControl]="forgotEmailControl"
-                            placeholder="Email đã đăng ký"
-                            class="forgot-input"
-                          />
-                          <input
-                            type="tel"
-                            [formControl]="forgotPhoneControl"
-                            placeholder="Số điện thoại"
-                            class="forgot-input"
-                          />
-                        </div>
-
-                        <div class="forgot-actions">
-                          <button type="button" class="store-btn store-btn-primary" (click)="submitForgotLogin()" [disabled]="forgotLoading()">
-                            {{ forgotLoading() ? 'Đang gửi...' : 'Gửi yêu cầu' }}
-                          </button>
-                          <button type="button" class="forgot-close-btn" (click)="forgotOpen.set(false)">Đóng</button>
-                        </div>
-                        @if (forgotMsg()) {
-                          <p class="forgot-result">{{ forgotMsg() }}</p>
-                        }
-                        @if (forgotDevHint()) {
-                          <p class="forgot-dev">{{ forgotDevHint() }}</p>
-                        }
-                      </div>
-                    }
                   </form>
                 } @else {
                   <form [formGroup]="registerForm" (ngSubmit)="submitRegister()" class="auth-form" novalidate>
@@ -1658,12 +1623,6 @@ export class StoreAccountComponent implements OnInit {
 
   readonly user = signal<StoreUser | null>(this.storeAuth.getUser());
   readonly checkoutReturn = signal(false);
-  readonly forgotOpen = signal(false);
-  readonly forgotLoading = signal(false);
-  readonly forgotMsg = signal('');
-  readonly forgotDevHint = signal('');
-  forgotEmailControl = this.fb.control('', [Validators.email]);
-  forgotPhoneControl = this.fb.control('');
   readonly authTab = signal<AuthTab>('login');
   readonly loading = signal(false);
   readonly error = signal('');
@@ -1760,29 +1719,7 @@ export class StoreAccountComponent implements OnInit {
     }, 850);
   }
 
-  submitForgotLogin(): void {
-    const email = String(this.forgotEmailControl.value || '').trim();
-    const phone = String(this.forgotPhoneControl.value || '').trim();
-    if (!email && !phone.replace(/\D/g, '')) {
-      this.forgotMsg.set('Vui lòng nhập email hoặc số điện thoại.');
-      return;
-    }
-    if (email && this.forgotEmailControl.invalid) return;
-    this.forgotLoading.set(true);
-    this.forgotMsg.set('');
-    this.forgotDevHint.set('');
-    this.profileApi.forgotPassword({ email: email || undefined, phone: phone || undefined }).subscribe({
-      next: (res) => {
-        this.forgotLoading.set(false);
-        this.forgotMsg.set(res.message);
-        this.forgotDevHint.set(res.devHint || '');
-      },
-      error: (err) => {
-        this.forgotLoading.set(false);
-        this.forgotMsg.set(this.authErrorMessage(err, 'Không gửi được yêu cầu.'));
-      }
-    });
-  }
+
 
   initGoogleAuth(): void {
     const checkGsi = setInterval(() => {

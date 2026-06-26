@@ -69,6 +69,10 @@ export const appRoutes: Routes = [
       {
         path: 'tai-khoan',
         loadComponent: () => import('./pages/store-account/account.component').then((m) => m.StoreAccountComponent)
+      },
+      {
+        path: 'quen-mat-khau',
+        loadComponent: () => import('./pages/forgot-password/forgot-password.component').then((m) => m.ForgotPasswordComponent)
       }
     ]
   },

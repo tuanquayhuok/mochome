@@ -11,6 +11,7 @@ const postSchema = new mongoose.Schema(
     isVisible: { type: Boolean, default: true },
     viewCount: { type: Number, default: 0, min: 0 },
     likeCount: { type: Number, default: 0, min: 0 },
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     shareCount: { type: Number, default: 0, min: 0 }
   },
   { timestamps: true }

@@ -96,6 +96,7 @@ export interface PostRow {
   isVisible?: boolean;
   viewCount?: number;
   likeCount?: number;
+  likes?: string[];
   shareCount?: number;
   createdAt?: string;
   updatedAt?: string;

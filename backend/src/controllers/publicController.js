@@ -1,6 +1,7 @@
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Post = require('../models/Post');
+const PostComment = require('../models/PostComment');
 
 const SOFA_PLACEHOLDER =
   'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=80';
@@ -109,7 +110,98 @@ const getCatalog = async (req, res) => {
   });
 };
 
+const getPostBySlug = async (req, res) => {
+  const post = await Post.findOneAndUpdate(
+    { slug: req.params.slug, isVisible: { $ne: false } },
+    { $inc: { viewCount: 1 } },
+    { new: true }
+  );
+
+  if (!post) {
+    return res.status(404).json({ message: 'Không tìm thấy bài viết' });
+  }
+
+  return res.json(post);
+};
+
+const likePost = async (req, res) => {
+  const post = await Post.findById(req.params.id);
+  if (!post) {
+    return res.status(404).json({ message: 'Không tìm thấy bài viết' });
+  }
+
+  const userId = req.user._id;
+  const isLiked = post.likes.includes(userId);
+
+  if (isLiked) {
+    post.likes = post.likes.filter((id) => id.toString() !== userId.toString());
+  } else {
+    post.likes.push(userId);
+  }
+
+  post.likeCount = post.likes.length;
+  await post.save();
+
+  return res.json({
+    likeCount: post.likeCount,
+    isLiked: !isLiked
+  });
+};
+
+const getPostComments = async (req, res) => {
+  const comments = await PostComment.find({ post: req.params.id })
+    .populate('user', 'fullName email')
+    .sort({ createdAt: 1 });
+
+  return res.json(comments);
+};
+
+const createPostComment = async (req, res) => {
+  const { content, parentId } = req.body;
+  if (!content || !content.trim()) {
+    return res.status(400).json({ message: 'Nội dung bình luận không được trống' });
+  }
+
+  const comment = new PostComment({
+    post: req.params.id,
+    user: req.user._id,
+    content: content.trim(),
+    parentId: parentId || null
+  });
+
+  await comment.save();
+  await comment.populate('user', 'fullName email');
+
+  return res.status(201).json(comment);
+};
+
+const likePostComment = async (req, res) => {
+  const comment = await PostComment.findById(req.params.id);
+  if (!comment) {
+    return res.status(404).json({ message: 'Không tìm thấy bình luận' });
+  }
+
+  const userId = req.user._id;
+  const isLiked = comment.likes.includes(userId);
+
+  if (isLiked) {
+    comment.likes = comment.likes.filter((id) => id.toString() !== userId.toString());
+  } else {
+    comment.likes.push(userId);
+  }
+
+  await comment.save();
+  await comment.populate('user', 'fullName email');
+
+  return res.json(comment);
+};
+
 module.exports = {
   getCatalog,
-  getProductBySlug
+  getProductBySlug,
+  getPostBySlug,
+  likePost,
+  getPostComments,
+  createPostComment,
+  likePostComment
 };

@@ -13,6 +13,10 @@ app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 app.use(morgan('dev'));
 
+app.get('/', (req, res) => {
+  res.send('Mộc Home Backend API is running successfully!');
+});
+
 app.get('/api/health', (req, res) => {
   res.json({
     message: 'API is running',

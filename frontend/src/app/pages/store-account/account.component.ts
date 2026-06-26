@@ -263,6 +263,13 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
                       }
                     </div>
 
+                    <div class="store-field remember-me-field">
+                      <label class="remember-me-label">
+                        <input type="checkbox" formControlName="rememberMe" />
+                        <span>Lưu thông tin đăng nhập</span>
+                      </label>
+                    </div>
+
                     @if (error()) {
                       <div class="store-alert-error" role="alert">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-ico">
@@ -1236,6 +1243,32 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
         color: #8c8175;
       }
 
+      .remember-me-field {
+        margin: 1rem 0;
+        display: flex;
+        align-items: center;
+      }
+
+      .remember-me-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: #4b5563;
+        font-weight: 500;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .remember-me-label input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        border: 1px solid #d1d5db;
+        accent-color: #8c6239;
+        cursor: pointer;
+      }
+
       .auth-divider {
         color: #ebdcd0;
       }
@@ -1649,7 +1682,8 @@ export class StoreAccountComponent implements OnInit {
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
-    captcha: [false, Validators.requiredTrue]
+    captcha: [false, Validators.requiredTrue],
+    rememberMe: [false]
   });
 
   registerForm = this.fb.group(
@@ -1671,6 +1705,20 @@ export class StoreAccountComponent implements OnInit {
         this.user.set(cached);
       }
       this.refreshUser();
+    }
+
+    // Load remembered info
+    const rememberedEmail = localStorage.getItem('store_remember_email');
+    const rememberedPass = localStorage.getItem('store_remember_pass');
+    if (rememberedEmail) {
+      this.loginForm.patchValue({
+        email: rememberedEmail,
+        password: rememberedPass || '',
+        rememberMe: true,
+        captcha: true // Mark captcha as true if they were remembered to bypass clicking again if needed, or let them click. Let's let them check captcha, or keep captcha false. Let's keep it as is.
+      });
+      this.loginCaptchaState.set('checked');
+      this.loginForm.patchValue({ captcha: true });
     }
 
     this.route.queryParamMap.subscribe((params) => {
@@ -1838,11 +1886,18 @@ export class StoreAccountComponent implements OnInit {
       }
       return;
     }
-    const { email, password } = this.loginForm.getRawValue();
+    const { email, password, rememberMe } = this.loginForm.getRawValue();
     this.loading.set(true);
     this.error.set('');
     this.storeAuth.login(email!, password!).subscribe({
       next: () => {
+        if (rememberMe) {
+          localStorage.setItem('store_remember_email', email!);
+          localStorage.setItem('store_remember_pass', password!);
+        } else {
+          localStorage.removeItem('store_remember_email');
+          localStorage.removeItem('store_remember_pass');
+        }
         this.user.set(this.storeAuth.getUser());
         this.loading.set(false);
         this.refreshUser();

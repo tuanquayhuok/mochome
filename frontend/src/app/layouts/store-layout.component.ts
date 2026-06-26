@@ -421,6 +421,7 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
         display: flex;
         flex-direction: column;
         background: #f5f5f5;
+        overflow-x: hidden;
       }
 
       .container {
@@ -1111,7 +1112,8 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
           grid-template-columns: auto auto 1fr;
           align-items: center;
           gap: 0.75rem;
-          padding: 0.65rem 0;
+          padding-top: 0.65rem;
+          padding-bottom: 0.65rem;
         }
 
         .menu-toggle {

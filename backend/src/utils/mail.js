@@ -46,13 +46,18 @@ const sendViaSmtp = async ({ to, subject, html }) => {
     auth: { user, pass }
   });
 
-  await transporter.sendMail({
-    from: process.env.MAIL_FROM || `"MỘC HOME" <${user}>`,
-    to,
-    subject,
-    html
-  });
-  return { sent: true };
+  try {
+    await transporter.sendMail({
+      from: process.env.MAIL_FROM || `"MỘC HOME" <${user}>`,
+      to,
+      subject,
+      html
+    });
+    return { sent: true };
+  } catch (error) {
+    console.error('SMTP sendMail Error:', error);
+    return { sent: false, reason: 'smtp_send_failed', error: error.message };
+  }
 };
 
 const getSmtpDebugInfo = () => {

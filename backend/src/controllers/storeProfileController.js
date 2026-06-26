@@ -181,17 +181,17 @@ const forgotStorePassword = async (req, res) => {
 
   const mailResult = await sendPasswordResetEmail(user, tempPassword);
 
-  const payload = {
-    message: mailResult.sent
-      ? `Đã gửi mật khẩu khôi phục tới ${user.email}. Vui lòng đổi mật khẩu sau khi đăng nhập.`
-      : genericMsg
-  };
-
-  if (process.env.NODE_ENV !== 'production' && mailResult.logged) {
-    payload.devHint = 'SMTP chưa cấu hình — xem mật khẩu tạm trong log terminal backend.';
+  if (!mailResult.sent) {
+    return res.status(500).json({
+      message: 'Không thể gửi email khôi phục mật khẩu. Vui lòng kiểm tra cấu hình SMTP (SMTP_HOST, SMTP_USER, SMTP_PASS) trong biến môi trường của Vercel/Local.',
+      reason: mailResult.reason,
+      errorDetail: mailResult.error || null
+    });
   }
 
-  return res.json(payload);
+  return res.json({
+    message: `Đã gửi mật khẩu khôi phục tới ${user.email}. Vui lòng kiểm tra hòm thư của bạn (và cả mục thư rác/spam).`
+  });
 };
 
 const claimMilestone = async (req, res) => {

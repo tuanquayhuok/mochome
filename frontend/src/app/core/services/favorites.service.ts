@@ -27,7 +27,11 @@ export class FavoritesService {
       this.remove(item.productId);
       return false;
     }
-    this.save([...this.items(), item]);
+    let imageUrl = item.imageUrl;
+    if (imageUrl && imageUrl.startsWith('data:')) {
+      imageUrl = '';
+    }
+    this.save([...this.items(), { ...item, imageUrl }]);
     return true;
   }
 
@@ -38,14 +42,33 @@ export class FavoritesService {
   private read(): FavoriteItem[] {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
+      if (!raw) return [];
+      const list = JSON.parse(raw) as FavoriteItem[];
+      let hasBase64 = false;
+      const cleaned = list.map(item => {
+        if (item.imageUrl && item.imageUrl.startsWith('data:')) {
+          hasBase64 = true;
+          return { ...item, imageUrl: '' };
+        }
+        return item;
+      });
+      if (hasBase64) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+        } catch {}
+      }
+      return cleaned;
     } catch {
       return [];
     }
   }
 
   private save(list: FavoriteItem[]): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    } catch (e) {
+      console.error('Failed to save favorites to localStorage', e);
+    }
     this.items.set(list);
   }
 }

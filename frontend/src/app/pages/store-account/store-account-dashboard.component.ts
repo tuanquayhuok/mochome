@@ -19,7 +19,7 @@ import {
 } from '../../core/models/loyalty-track.config';
 import { LoyaltyInfo, LoyaltyMilestone, LoyaltyTierId } from '../../core/models/store-profile.models';
 
-type Panel = 'profile' | 'orders' | 'security';
+type Panel = 'profile' | 'orders' | 'security' | 'loyalty';
 
 const TIER_BADGE: Record<string, string> = {
   bronze: 'tier-bronze',
@@ -56,6 +56,9 @@ const TIER_BADGE: Record<string, string> = {
           </button>
           <button type="button" class="menu-item" [class.active]="panel() === 'orders'" (click)="setPanel('orders')">
             Đơn hàng của tôi
+          </button>
+          <button type="button" class="menu-item" [class.active]="panel() === 'loyalty'" (click)="setPanel('loyalty')">
+            Ưu đãi thành viên
           </button>
           <button type="button" class="menu-item" [class.active]="panel() === 'security'" (click)="setPanel('security')">
             Bảo mật
@@ -158,6 +161,174 @@ const TIER_BADGE: Record<string, string> = {
 
         @if (panel() === 'orders') {
           <app-store-account-orders />
+        }
+
+        @if (panel() === 'loyalty') {
+          <h2>Ưu đãi thành viên</h2>
+          @if (loyaltyError()) {
+            <div class="store-alert-error" style="display: flex; align-items: center; gap: 0.5rem;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; flex-shrink: 0;">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>{{ loyaltyError() }}</span>
+            </div>
+          }
+          @if (claimMsg()) {
+            <div class="store-alert-success" style="display: flex; align-items: center; gap: 0.5rem;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; flex-shrink: 0;">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span>{{ claimMsg() }}</span>
+            </div>
+          }
+
+          @if (loyaltyLoading()) {
+            <div class="loyalty-loading-wrap" style="padding: 4rem 0; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;">
+              <span class="spinner" style="border-top-color: #5c4033; display: inline-block;"></span>
+              <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">Đang tải thông tin tích lũy của bạn...</p>
+            </div>
+          } @else {
+            <div class="loyalty-hero" [style.--tier-color]="loyaltyView().tierColor">
+              <div>
+                <span class="stat-label">Hạng thành viên</span>
+                <div class="loyalty-tier-name">{{ loyaltyView().tierLabel }}</div>
+                <p>Hạng thẻ được cập nhật dựa trên chi tiêu tích lũy của bạn</p>
+              </div>
+              <div class="loyalty-stats">
+                <div>
+                  <span class="stat-label">Doanh thu tháng này</span>
+                  <strong>{{ loyaltyView().spendMonth | number:'1.0-0' }}đ</strong>
+                </div>
+                <div>
+                  <span class="stat-label">Doanh thu năm nay</span>
+                  <strong>{{ loyaltyView().spendYear | number:'1.0-0' }}đ</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="track-block">
+              <p class="track-hint">Di chuột lên các mốc phần quà bên dưới để xem chi tiết và nhận Voucher ưu đãi.</p>
+
+              <!-- Month Track -->
+              <div class="track-section">
+                <div class="track-head">
+                  <span class="track-title">Hạng thẻ & Chi tiêu theo Tháng</span>
+                  <span class="track-spend">
+                    {{ loyaltyView().spendMonth | number:'1.0-0' }}đ
+                    <span class="muted">/ {{ monthMax | number:'1.0-0' }}đ</span>
+                  </span>
+                </div>
+                <div class="track-bar-outer">
+                  <div class="track-bar">
+                    <div class="track-fill" [style.width.%]="monthPercent(loyaltyView())"></div>
+                    @for (mk of monthMarkers(loyaltyView()); track mk.label) {
+                      <div
+                        class="track-marker"
+                        [class.reached]="mk.reached"
+                        [class.current]="loyaltyView().tier === mk.tierId"
+                        [class.track-marker--start]="mk.percent === 0"
+                        [class.track-marker--end]="mk.percent === 100"
+                        [style.left.%]="mk.percent"
+                      >
+                        <app-loyalty-marker-icon [icon]="mk.iconKey" [color]="mk.color" />
+                        <span class="marker-name">{{ mk.label }}</span>
+
+                        <div class="marker-tooltip">
+                          <strong style="display: block; font-size: 0.8125rem; margin-bottom: 0.25rem;">{{ mk.label }}</strong>
+                          <p class="tt-amount">Yêu cầu: {{ mk.amount | number:'1.0-0' }}đ</p>
+                          @if (mk.milestoneId) {
+                            <p class="tt-pct">Ưu đãi giảm giá {{ mk.discountPercent }}%</p>
+                            <p class="tt-voucher">{{ mk.voucherTitle }}</p>
+                            <div style="margin-top: 0.35rem;">
+                              <span class="tt-code">Mã: {{ mk.voucherCode }}</span>
+                            </div>
+
+                            @if (mk.claimed) {
+                              <span class="tt-status done">✓ Đã nhận voucher</span>
+                            } @else if (mk.canClaim) {
+                              <button
+                                type="button"
+                                class="tt-claim"
+                                [disabled]="claiming()"
+                                (click)="claimByMarker(mk)"
+                              >
+                                {{ claiming() ? 'Đang nhận...' : 'Nhận Voucher' }}
+                              </button>
+                            } @else {
+                              <span class="tt-status lock">🔒 Chưa đạt (Cần thêm {{ markerGap(loyaltyView().spendMonth, mk.amount) | number:'1.0-0' }}đ)</span>
+                            }
+                          } @else {
+                            <p class="tt-amount" style="margin-top:0.25rem; font-size:0.7rem; opacity:0.85;">Mốc khởi đầu</p>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Year Track -->
+              <div class="track-section">
+                <div class="track-head">
+                  <span class="track-title">Mốc Chi tiêu theo Năm</span>
+                  <span class="track-spend">
+                    {{ loyaltyView().spendYear | number:'1.0-0' }}đ
+                    <span class="muted">/ {{ yearMax | number:'1.0-0' }}đ</span>
+                  </span>
+                </div>
+                <div class="track-bar-outer">
+                  <div class="track-bar">
+                    <div class="track-fill track-fill--year" [style.width.%]="yearPercent(loyaltyView())"></div>
+                    @for (mk of yearMarkers(loyaltyView()); track mk.label) {
+                      <div
+                        class="track-marker"
+                        [class.reached]="mk.reached"
+                        [class.current]="loyaltyView().tier === mk.tierId"
+                        [class.track-marker--start]="mk.percent === 0"
+                        [class.track-marker--end]="mk.percent === 100"
+                        [style.left.%]="mk.percent"
+                      >
+                        <app-loyalty-marker-icon [icon]="mk.iconKey" [color]="mk.color" />
+                        <span class="marker-name">{{ mk.label }}</span>
+
+                        <div class="marker-tooltip">
+                          <strong style="display: block; font-size: 0.8125rem; margin-bottom: 0.25rem;">{{ mk.label }}</strong>
+                          <p class="tt-amount">Yêu cầu: {{ mk.amount | number:'1.0-0' }}đ</p>
+                          @if (mk.milestoneId) {
+                            <p class="tt-pct">Ưu đãi giảm giá {{ mk.discountPercent }}%</p>
+                            <p class="tt-voucher">{{ mk.voucherTitle }}</p>
+                            <div style="margin-top: 0.35rem;">
+                              <span class="tt-code">Mã: {{ mk.voucherCode }}</span>
+                            </div>
+
+                            @if (mk.claimed) {
+                              <span class="tt-status done">✓ Đã nhận voucher</span>
+                            } @else if (mk.canClaim) {
+                              <button
+                                type="button"
+                                class="tt-claim"
+                                [disabled]="claiming()"
+                                (click)="claimByMarker(mk)"
+                              >
+                                {{ claiming() ? 'Đang nhận...' : 'Nhận Voucher' }}
+                              </button>
+                            } @else {
+                              <span class="tt-status lock">🔒 Chưa đạt (Cần thêm {{ markerGap(loyaltyView().spendYear, mk.amount) | number:'1.0-0' }}đ)</span>
+                            }
+                          } @else {
+                            <p class="tt-amount" style="margin-top:0.25rem; font-size:0.7rem; opacity:0.85;">Mốc khởi đầu</p>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          }
         }
 
         @if (panel() === 'security') {
@@ -327,45 +498,69 @@ const TIER_BADGE: Record<string, string> = {
       .account-menu {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.35rem;
         flex: 1;
+        margin-top: 0.5rem;
       }
 
       .menu-item {
-        display: block;
+        display: flex;
+        align-items: center;
         width: 100%;
-        padding: 0.55rem 0.65rem;
+        padding: 0.75rem 1rem;
         border: none;
-        border-radius: 6px;
-        font-size: 0.875rem;
-        color: #4b5563;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #5c524a;
         text-decoration: none;
         text-align: left;
         background: transparent;
         cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .menu-item:hover {
+        background: rgba(140, 98, 57, 0.05);
+        color: #8c6239;
+        transform: translateX(4px);
       }
 
       .menu-item.active {
-        background: #f3f4f6;
-        color: #1a1d21;
-        font-weight: 600;
+        background: #fcf8f5;
+        color: #8c6239;
+        font-weight: 700;
+        border-left: 3px solid #8c6239;
+        border-radius: 0 10px 10px 0;
+        padding-left: calc(1rem - 3px);
       }
 
       .logout-btn {
-        margin-top: auto;
+        margin-top: 2rem;
         width: 100%;
-        padding: 0.55rem;
-        border: 1px solid #e4e7ec;
-        border-radius: 6px;
-        background: #fff;
-        font-size: 0.8125rem;
-        font-weight: 600;
-        color: #6b7280;
+        padding: 0.75rem;
+        border: 1px solid #ebdcd0;
+        border-radius: 10px;
+        background: #ffffff;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #8c8175;
         cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .logout-btn:hover {
+        background: #fdfaf6;
+        color: #dc2626;
+        border-color: #fca5a5;
       }
 
       .account-panel {
-        padding: 1.5rem 1.75rem;
+        padding: 2rem 2.25rem;
+        background: #ffffff;
+        border: 1px solid #ebdcd0;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(62, 42, 30, 0.04);
         min-width: 0;
         overflow: visible;
       }
@@ -389,47 +584,64 @@ const TIER_BADGE: Record<string, string> = {
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
-        gap: 1rem;
-        padding: 1.25rem;
-        border-radius: 10px;
-        background: linear-gradient(135deg, var(--tier-color, #5c4033), #1a1d21);
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.75rem 2rem;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--tier-color, #5c4033) 0%, #2b1d14 100%);
         color: #fff;
+        box-shadow: 0 12px 28px rgba(43, 29, 20, 0.15);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .loyalty-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+        pointer-events: none;
       }
 
       .loyalty-tier-name {
-        font-size: 1.5rem;
+        font-size: 1.75rem;
         font-weight: 800;
+        letter-spacing: -0.02em;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
       }
 
       .loyalty-hero p {
         margin: 0.35rem 0 0;
         font-size: 0.8125rem;
-        opacity: 0.9;
+        opacity: 0.85;
       }
 
       .loyalty-stats {
         display: flex;
-        gap: 1.5rem;
+        gap: 2rem;
       }
 
       .stat-label {
         display: block;
-        font-size: 0.7rem;
-        opacity: 0.85;
+        font-size: 0.75rem;
+        opacity: 0.8;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
       .track-block {
-        margin-top: 1.25rem;
+        margin-top: 1.5rem;
       }
 
       .track-hint {
-        margin: 0 0 1rem;
-        font-size: 0.75rem;
-        color: #6b7280;
+        margin: 0 0 1.5rem;
+        font-size: 0.8125rem;
+        color: #8c8175;
       }
 
       .track-section + .track-section {
-        margin-top: 1.5rem;
+        margin-top: 2rem;
       }
 
       .track-head {
@@ -442,17 +654,19 @@ const TIER_BADGE: Record<string, string> = {
       }
 
       .track-title {
-        font-size: 0.875rem;
+        font-size: 0.9375rem;
         font-weight: 700;
-        color: #1a1d21;
+        color: #3e2a1e;
       }
 
       .track-spend {
-        font-size: 0.8125rem;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #8c6239;
       }
 
       .track-spend .muted {
-        color: #9ca3af;
+        color: #a89a8e;
         font-weight: 400;
         margin-left: 0.25rem;
       }
@@ -465,10 +679,10 @@ const TIER_BADGE: Record<string, string> = {
 
       .track-bar {
         position: relative;
-        height: 10px;
-        background: #e5e7eb;
+        height: 8px;
+        background: #e2d7cd;
         border-radius: 999px;
-        margin: 0 0.5rem;
+        margin: 0 1rem;
       }
 
       .track-fill {
@@ -476,9 +690,9 @@ const TIER_BADGE: Record<string, string> = {
         left: 0;
         top: 0;
         height: 100%;
-        background: linear-gradient(90deg, #8b6914, #5c4033);
+        background: linear-gradient(90deg, #ca8a04, #8c6239);
         border-radius: 999px;
-        transition: width 0.35s ease;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         pointer-events: none;
       }
 

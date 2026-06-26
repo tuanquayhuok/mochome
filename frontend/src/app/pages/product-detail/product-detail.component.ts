@@ -279,6 +279,9 @@ const TAB_LABELS: Record<InfoTab, string> = {
         </div>
       }
     </div>
+    @if (toastText()) {
+      <div class="toast-notification">{{ toastText() }}</div>
+    }
   `,
   styles: [
     `
@@ -891,6 +894,32 @@ const TAB_LABELS: Record<InfoTab, string> = {
           width: 100%;
         }
       }
+
+      .toast-notification {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: #1e293b;
+        color: #ffffff;
+        padding: 0.75rem 1.25rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        z-index: 9999;
+        animation: slideUp 0.3s ease-out;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
     `
   ]
 })
@@ -913,6 +942,8 @@ export class ProductDetailComponent implements OnInit {
   readonly selectedColor = signal('');
   readonly selectedSize = signal('');
   readonly quantity = signal(1);
+  readonly toastText = signal('');
+  private toastTimeout: any;
 
   readonly activeImage = computed(() => {
     const p = this.product();
@@ -979,6 +1010,16 @@ export class ProductDetailComponent implements OnInit {
     this.quantity.set(next);
   }
 
+  showToast(msg: string): void {
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
+    this.toastText.set(msg);
+    this.toastTimeout = setTimeout(() => {
+      this.toastText.set('');
+    }, 3000);
+  }
+
   addToCart(buyNow: boolean): void {
     const p = this.product();
     if (!p) return;
@@ -996,18 +1037,21 @@ export class ProductDetailComponent implements OnInit {
 
     if (buyNow) {
       this.router.navigate(['/gio-hang']);
+    } else {
+      this.showToast(`Đã thêm "${p.name}" vào giỏ hàng!`);
     }
   }
 
   toggleFavorite(): void {
     const p = this.product();
     if (!p) return;
-    this.favorites.toggle({
+    const added = this.favorites.toggle({
       productId: p._id,
       slug: p.slug,
       name: p.name,
       price: p.price,
       imageUrl: p.imageUrl ?? this.activeImage()
     });
+    this.showToast(added ? `Đã thêm "${p.name}" vào danh sách yêu thích!` : `Đã xóa "${p.name}" khỏi danh sách yêu thích!`);
   }
 }

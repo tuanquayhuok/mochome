@@ -26,6 +26,8 @@ export class CartService {
   add(item: Omit<CartLine, 'quantity'> & { quantity?: number }): void {
     const qty = item.quantity ?? 1;
     const list = [...this.items()];
+    const cleanItem = { ...item };
+
     const idx = list.findIndex(
       (l) =>
         l.productId === item.productId &&
@@ -35,7 +37,7 @@ export class CartService {
     if (idx >= 0) {
       list[idx] = { ...list[idx], quantity: list[idx].quantity + qty };
     } else {
-      list.push({ ...item, quantity: qty });
+      list.push({ ...cleanItem, quantity: qty });
     }
     this.save(list);
   }
@@ -69,14 +71,19 @@ export class CartService {
   private read(): CartLine[] {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
+      if (!raw) return [];
+      return JSON.parse(raw) as CartLine[];
     } catch {
       return [];
     }
   }
 
   private save(list: CartLine[]): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    } catch (e) {
+      console.error('Failed to save cart to localStorage', e);
+    }
     this.items.set(list);
   }
 }

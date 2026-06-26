@@ -548,9 +548,27 @@ const STATUS_LABEL: Record<string, string> = {
         }
       }
 
-      @media (max-width: 768px) {
+      @media (max-width: 1024px) {
         .kpi-row {
           grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .kpi-row {
+          grid-template-columns: 1fr;
+        }
+        
+        .line-chart-wrap {
+          flex-direction: column;
+        }
+        
+        .y-axis {
+          text-align: left;
+          flex-direction: row;
+          justify-content: space-between;
+          padding-bottom: 0.5rem;
+          min-width: 100%;
         }
       }
     `

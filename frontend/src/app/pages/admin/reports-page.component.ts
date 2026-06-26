@@ -621,6 +621,13 @@ const PAGE_META: Record<
           flex-direction: column;
           gap: 1.5rem;
         }
+        .stat-grid {
+          grid-template-columns: 1fr;
+        }
+        .filter-row {
+          flex-direction: column;
+          align-items: stretch;
+        }
       }
 
       .donut-chart-svg {

@@ -311,73 +311,93 @@ const CANCEL_REASONS: { code: CancellationReasonCode; label: string }[] = [
 
       .orders-table th,
       .orders-table td {
-        padding: 0.65rem 0.5rem;
+        padding: 0.85rem 0.75rem;
         text-align: left;
-        border-bottom: 1px solid #f0f2f5;
+        border-bottom: 1px solid #ebdcd0;
+      }
+
+      .orders-table tr {
+        transition: background-color 0.2s ease;
+      }
+
+      .orders-table tr:hover td {
+        background-color: #fcf8f5;
       }
 
       .orders-table th {
         font-size: 0.75rem;
-        font-weight: 600;
-        color: #6b7280;
+        font-weight: 700;
+        color: #8c8175;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid #ebdcd0;
       }
 
       .cell-strong {
-        font-weight: 600;
+        font-weight: 700;
+        color: #3e2a1e;
       }
 
       .cell-muted {
-        color: #9ca3af;
+        color: #8c8175;
         font-size: 0.8125rem;
       }
 
       .order-status {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
         font-size: 0.75rem;
-        padding: 0.15rem 0.45rem;
-        border-radius: 4px;
-        background: #f3f4f6;
+        font-weight: 700;
+        padding: 0.25rem 0.65rem;
+        border-radius: 999px;
+        background: #faf8f5;
+        border: 1px solid #ebdcd0;
+        color: #5c524a;
       }
 
       .order-status.completed {
         background: #ecfdf5;
-        color: #047857;
+        color: #065f46;
+        border-color: #a7f3d0;
       }
 
       .order-status.cancelled {
-        background: #fef2f2;
-        color: #b91c1c;
+        background: #fdf2f2;
+        color: #991b1b;
+        border-color: #fecaca;
       }
 
       .order-status.shipping {
         background: #eff6ff;
-        color: #1d4ed8;
+        color: #1e40af;
+        border-color: #bfdbfe;
       }
 
       .btn-sm {
-        padding: 0.35rem 0.65rem;
+        padding: 0.45rem 0.85rem;
         font-size: 0.8125rem;
+        border-radius: 6px;
       }
 
       .modal-backdrop {
         position: fixed;
         inset: 0;
         z-index: 1000;
-        background: rgba(15, 23, 42, 0.45);
+        background: rgba(43, 29, 20, 0.4);
+        backdrop-filter: blur(4px);
         display: grid;
         place-items: center;
-        padding: 1rem;
+        padding: 1.25rem;
       }
 
       .modal-panel {
         width: min(640px, 100%);
         max-height: 90vh;
         overflow: auto;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.18);
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid rgba(229, 192, 123, 0.2);
+        box-shadow: 0 25px 60px -15px rgba(62, 42, 30, 0.2);
       }
 
       .modal-panel--sm {
@@ -488,47 +508,52 @@ const CANCEL_REASONS: { code: CancellationReasonCode; label: string }[] = [
       }
 
       .status-step-dot {
-        width: 26px;
-        height: 26px;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         display: grid;
         place-items: center;
-        font-size: 0.7rem;
+        font-size: 0.75rem;
         font-weight: 700;
-        border: 2px solid #e5e7eb;
-        color: #9ca3af;
-        background: #fff;
+        border: 2px solid #e2d7cd;
+        color: #8c8175;
+        background: #ffffff;
+        transition: all 0.3s ease;
       }
 
       .status-step.done .status-step-dot,
       .status-step.current .status-step-dot {
-        border-color: #15803d;
-        background: #dcfce7;
-        color: #15803d;
+        border-color: #059669;
+        background: #ecfdf5;
+        color: #059669;
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
       }
 
       .status-step-label {
-        font-size: 0.625rem;
-        color: #9ca3af;
-        line-height: 1.2;
+        font-size: 0.7rem;
+        color: #8c8175;
+        line-height: 1.25;
+        font-weight: 500;
+        transition: all 0.3s ease;
       }
 
       .status-step.done .status-step-label,
       .status-step.current .status-step-label {
-        color: #1a1d21;
-        font-weight: 600;
+        color: #3e2a1e;
+        font-weight: 700;
       }
 
       .status-step-line {
         flex: 1;
-        min-width: 20px;
+        min-width: 24px;
         height: 2px;
-        background: #e5e7eb;
-        margin-bottom: 1rem;
+        background: #e2d7cd;
+        margin-bottom: 1.25rem;
+        transition: all 0.3s ease;
       }
 
       .status-step-line.done {
-        background: #15803d;
+        background: #059669;
       }
 
       .terminal-status {

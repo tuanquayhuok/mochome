@@ -103,6 +103,7 @@ const STATUS_LABEL: Record<ProductSaleStatus, string> = {
                 <th>Giá (đ)</th>
                 <th>Tồn kho</th>
                 <th>Trạng thái</th>
+                <th>Nổi bật</th>
                 <th>Hiển thị</th>
                 <th>Ngày tạo</th>
                 <th class="col-actions">Thao tác</th>
@@ -140,6 +141,16 @@ const STATUS_LABEL: Record<ProductSaleStatus, string> = {
                     <span class="status-badge" [class]="saleStatusClass(item)">
                       {{ statusLabel(item) }}
                     </span>
+                  </td>
+                  <td>
+                    <label class="toggle" [attr.title]="item.featured ? 'Sản phẩm nổi bật' : 'Bình thường'">
+                      <input
+                        type="checkbox"
+                        [checked]="item.featured === true"
+                        (change)="toggleFeatured(item, $event)"
+                      />
+                      <span class="toggle-slider"></span>
+                    </label>
                   </td>
                   <td>
                     <label class="toggle" [attr.title]="item.isVisible !== false ? 'Đang hiển thị' : 'Đã ẩn'">
@@ -400,6 +411,15 @@ export class ProductsComponent implements OnInit {
   toggleVisible(item: ProductRow, event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
     this.api.update<ProductRow>('products', item._id, { isVisible: checked }).subscribe({
+      next: (updated) => {
+        this.rows.update((list) => list.map((r) => (r._id === item._id ? { ...r, ...updated } : r)));
+      }
+    });
+  }
+
+  toggleFeatured(item: ProductRow, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.api.update<ProductRow>('products', item._id, { featured: checked }).subscribe({
       next: (updated) => {
         this.rows.update((list) => list.map((r) => (r._id === item._id ? { ...r, ...updated } : r)));
       }

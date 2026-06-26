@@ -33,7 +33,7 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
             </button>
 
             <a routerLink="/" class="brand logo-wrap" aria-label="Mộc Home">
-              <img src="/logo.png" class="logo-img" alt="Mộc Home" />
+              <img src="/logonew.png" class="logo-img" alt="Mộc Home" />
             </a>
 
             <nav class="nav-compact desktop-nav-compact" aria-label="Menu chính">
@@ -87,12 +87,25 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
                   <path d="M21 21l-4.35-4.35" />
                 </svg>
               </button>
-              <a routerLink="/tai-khoan" class="icon-btn" title="Tài khoản">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </a>
+              <div class="account-dropdown-container">
+                <a routerLink="/tai-khoan" class="icon-btn" title="Tài khoản">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </a>
+                @if (storeAuth.isLoggedIn() && storeAuth.getUser(); as u) {
+                  <div class="account-dropdown">
+                    <div class="dropdown-user-info">
+                      <strong class="user-name">{{ u.fullName }}</strong>
+                      <span class="user-email">{{ u.email }}</span>
+                    </div>
+                    <hr class="dropdown-divider" />
+                    <a routerLink="/tai-khoan" class="dropdown-item">Trang tài khoản</a>
+                    <button type="button" class="dropdown-item logout-item" (click)="storeAuth.logout()">Đăng xuất</button>
+                  </div>
+                }
+              </div>
               <a routerLink="/gio-hang" class="icon-btn cart-btn" title="Giỏ hàng">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
                   <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
@@ -124,7 +137,7 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
               </button>
 
               <a routerLink="/" class="logo-wrap" aria-label="Mộc Home">
-                <img src="/logo.png" class="logo-img" alt="Mộc Home" />
+                <img src="/logonew.png" class="logo-img" alt="Mộc Home" />
               </a>
 
               <form class="search-form" (submit)="onSearch($event)">
@@ -141,13 +154,26 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
               </form>
 
               <div class="topbar-actions">
-                <a routerLink="/tai-khoan" class="action-link">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                  <span>Tài khoản</span>
-                </a>
+                <div class="account-dropdown-container">
+                  <a routerLink="/tai-khoan" class="action-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <span>Tài khoản</span>
+                  </a>
+                  @if (storeAuth.isLoggedIn() && storeAuth.getUser(); as u) {
+                    <div class="account-dropdown">
+                      <div class="dropdown-user-info">
+                        <strong class="user-name">{{ u.fullName }}</strong>
+                        <span class="user-email">{{ u.email }}</span>
+                      </div>
+                      <hr class="dropdown-divider" />
+                      <a routerLink="/tai-khoan" class="dropdown-item">Trang tài khoản</a>
+                      <button type="button" class="dropdown-item logout-item" (click)="storeAuth.logout()">Đăng xuất</button>
+                    </div>
+                  }
+                </div>
                 <a routerLink="/yeu-thich" class="action-link">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
                     <path
@@ -248,7 +274,7 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
           <div class="container footer-grid footer-grid--contact">
             <div class="footer-col footer-brand">
               <div class="brand footer-brand-row logo-wrap">
-                <img src="/logo.png" class="logo-img sm" alt="Mộc Home" />
+                <img src="/logonew.png" class="logo-img sm" alt="Mộc Home" />
               </div>
               <p>
                 Thương hiệu nội thất gỗ tự nhiên, cam kết chất lượng và mang đến không gian sống tinh
@@ -318,7 +344,7 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
         } @else {
           <div class="container footer-grid">
             <div class="footer-col footer-about">
-              <img src="/logo.png" class="logo-img sm" alt="Mộc Home" style="margin-bottom: 0.75rem;" />
+              <img src="/logonew.png" class="logo-img sm" alt="Mộc Home" style="margin-bottom: 0.75rem;" />
               <p>
                 Mộc Home — thương hiệu nội thất gỗ tự nhiên, mang đến không gian sống tinh tế và ấm
                 cúng cho gia đình Việt.
@@ -507,6 +533,97 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
         background: #f3f4f6;
       }
 
+      .account-dropdown-container {
+        position: relative;
+        display: inline-block;
+      }
+
+      .account-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 0.5rem;
+        background: #ffffff;
+        border: 1px solid #ebdcd0;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(62, 42, 30, 0.12);
+        min-width: 220px;
+        z-index: 100;
+        padding: 0.75rem 0;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: all 0.25s ease;
+      }
+
+      .account-dropdown-container:hover .account-dropdown {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .dropdown-user-info {
+        padding: 0.5rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+      }
+
+      .dropdown-user-info .user-name {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #3e2a1e;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .dropdown-user-info .user-email {
+        font-size: 0.75rem;
+        color: #8c8175;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .dropdown-divider {
+        margin: 0.5rem 0;
+        border: none;
+        border-top: 1px solid #ebdcd0;
+      }
+
+      .dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 1rem;
+        border: none;
+        background: transparent;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #5c524a;
+        text-align: left;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        box-sizing: border-box;
+      }
+
+      .dropdown-item:hover {
+        background: #faf6f2;
+        color: #8c6239;
+      }
+
+      .dropdown-item.logout-item {
+        color: #dc2626;
+      }
+
+      .dropdown-item.logout-item:hover {
+        background: #fff5f5;
+        color: #dc2626;
+      }
+
       /* —— Default header (Trang chủ) —— */
       .topbar {
         border-bottom: 1px solid #f0f2f5;
@@ -542,14 +659,20 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
       }
 
       .logo-img {
-        height: 40px;
+        height: 64px;
         width: auto;
         display: block;
         object-fit: contain;
       }
 
       .logo-img.sm {
-        height: 32px;
+        height: 56px;
+      }
+
+      @media (max-width: 1024px) {
+        .logo-img {
+          height: 48px;
+        }
       }
 
       .search-form {

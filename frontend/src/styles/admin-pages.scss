@@ -498,3 +498,82 @@
   color: var(--muted);
   font-size: 0.8125rem;
 }
+
+/* Responsive adjustments for admin pages */
+@media (max-width: 1024px) {
+  .page-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .page-toolbar-start,
+  .page-toolbar-end {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .search-field {
+    flex: 1;
+    min-width: 100%;
+  }
+
+  .catalog-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .catalog-filter-bar .filter-fields {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .catalog-filter-bar select {
+    width: 100%;
+  }
+
+  .form-panel {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .pagination-btns {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .table-bulk-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .bulk-left {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .bulk-right {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .row-actions {
+    gap: 0.25rem;
+  }
+}
+

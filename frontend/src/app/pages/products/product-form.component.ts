@@ -88,7 +88,7 @@ interface VariantDraft {
               </label>
             </div>
 
-            <div class="field-row field-row--3">
+            <div class="field-row field-row--4">
               <label class="field">
                 <span class="label">Danh mục <em>*</em></span>
                 <select name="categoryId" [(ngModel)]="categoryId" [class.has-error]="fieldErrors()['categoryId']">
@@ -115,6 +115,13 @@ interface VariantDraft {
                 <select name="visibility" [(ngModel)]="visibility">
                   <option value="visible">Hiển thị</option>
                   <option value="hidden">Ẩn</option>
+                </select>
+              </label>
+              <label class="field">
+                <span class="label">Nổi bật</span>
+                <select name="featured" [(ngModel)]="featured">
+                  <option [ngValue]="false">Bình thường</option>
+                  <option [ngValue]="true">Sản phẩm nổi bật</option>
                 </select>
               </label>
             </div>
@@ -186,9 +193,9 @@ interface VariantDraft {
                     @for (v of variants; track v.localId; let i = $index) {
                       <tr>
                         <td>{{ i + 1 }}</td>
-                        <td><input type="text" [(ngModel)]="v.size" [name]="'size_' + v.localId" /></td>
-                        <td><input type="text" [(ngModel)]="v.material" [name]="'mat_' + v.localId" /></td>
-                        <td><input type="text" [(ngModel)]="v.color" [name]="'color_' + v.localId" /></td>
+                        <td><input type="text" [(ngModel)]="v.size" [name]="'size_' + v.localId" class="variant-input-suggest" list="sizes-suggestions" /></td>
+                        <td><input type="text" [(ngModel)]="v.material" [name]="'mat_' + v.localId" class="variant-input-suggest" list="materials-suggestions" /></td>
+                        <td><input type="text" [(ngModel)]="v.color" [name]="'color_' + v.localId" class="variant-input-suggest" list="colors-suggestions" /></td>
                         <td>
                           <input type="text" [(ngModel)]="v.sku" [name]="'sku_' + v.localId" [class.has-error]="fieldErrors()['variant_sku_' + v.localId]" />
                           @if (fieldErrors()['variant_sku_' + v.localId]) {
@@ -233,6 +240,44 @@ interface VariantDraft {
                     }
                   </tbody>
                 </table>
+
+                <datalist id="sizes-suggestions">
+                  <option value="120x200cm (1m2)">
+                  <option value="140x200cm (1m4)">
+                  <option value="160x200cm (1m6)">
+                  <option value="180x200cm (1m8)">
+                  <option value="200x220cm (2m2)">
+                  <option value="Băng 2 chỗ (1m6)">
+                  <option value="Băng 3 chỗ (2m1)">
+                  <option value="Góc L (2m6x1m6)">
+                  <option value="Bàn ăn 4 ghế (1m2)">
+                  <option value="Bàn ăn 6 ghế (1m6)">
+                  <option value="Bàn ăn 8 ghế (2m)">
+                </datalist>
+
+                <datalist id="materials-suggestions">
+                  <option value="Gỗ sồi tự nhiên">
+                  <option value="Gỗ công nghiệp MDF">
+                  <option value="Khung sắt sơn tĩnh điện">
+                  <option value="Hợp kim nhôm cao cấp">
+                  <option value="Đồng thau">
+                  <option value="Vải nỉ nhập khẩu">
+                  <option value="Vải bố (Canvas)">
+                  <option value="Da bò tự nhiên">
+                  <option value="Da PU cao cấp">
+                </datalist>
+
+                <datalist id="colors-suggestions">
+                  <option value="Trắng">
+                  <option value="Đen">
+                  <option value="Xám nhạt">
+                  <option value="Xám đậm">
+                  <option value="Kem (Beige)">
+                  <option value="Nâu óc chó (Walnut)">
+                  <option value="Vàng sồi (Oak)">
+                  <option value="Màu gỗ tự nhiên">
+                  <option value="Xanh dương">
+                </datalist>
               </div>
             }
 
@@ -551,6 +596,10 @@ interface VariantDraft {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
+      .field-row--4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
       .variant-note {
         margin: 0.75rem 0 0;
         padding: 0.65rem 0.85rem;
@@ -737,6 +786,10 @@ interface VariantDraft {
         font-size: 0.75rem;
       }
 
+      .variant-input-suggest {
+        min-width: 120px !important;
+      }
+
       .variant-img-btn {
         display: grid;
         place-items: center;
@@ -821,6 +874,10 @@ interface VariantDraft {
           grid-template-columns: 1fr;
         }
 
+        .field-row--4 {
+          grid-template-columns: 1fr;
+        }
+
         .field-row--3 {
           grid-template-columns: 1fr;
         }
@@ -831,6 +888,37 @@ interface VariantDraft {
 
         .gallery-grid {
           grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .gallery-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .rte-toolbar {
+          flex-wrap: wrap;
+        }
+
+        .variant-table-wrap {
+          overflow-x: auto;
+        }
+
+        .form-footer {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .form-footer-end {
+          flex-direction: column;
+          width: 100%;
+        }
+
+        .form-footer-end button,
+        .form-footer-end a {
+          width: 100%;
+          text-align: center;
+          justify-content: center;
         }
       }
 
@@ -919,6 +1007,7 @@ export class ProductFormComponent implements OnInit {
   categoryId = '';
   collection = '';
   visibility: 'visible' | 'hidden' = 'visible';
+  featured = false;
   shortDescription = '';
   longDescription = '';
   brand = '';
@@ -1120,6 +1209,7 @@ export class ProductFormComponent implements OnInit {
     this.categoryId = typeof p.category === 'object' && p.category?._id ? p.category._id : '';
     this.collection = p.collection || '';
     this.visibility = p.isVisible === false ? 'hidden' : 'visible';
+    this.featured = !!p.featured;
     this.shortDescription = String(p['shortDescription'] || p.description || '');
     this.longDescription = String(p['longDescription'] || '');
     this.brand = String(p['brand'] || '');

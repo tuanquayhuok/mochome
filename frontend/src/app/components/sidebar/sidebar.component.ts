@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -10,7 +10,10 @@ import { ADMIN_MENU_ITEMS } from '../../shared/admin-menu.config';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
   template: `
-    <aside class="sidebar">
+    @if (open()) {
+      <div class="sidebar-overlay" (click)="closeSidebar.emit()"></div>
+    }
+    <aside class="sidebar" [class.sidebar--open]="open()">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -32,6 +35,7 @@ import { ADMIN_MENU_ITEMS } from '../../shared/admin-menu.config';
               routerLinkActive="active"
               [routerLinkActiveOptions]="{ exact: item.route === '/admin/dashboard' }"
               class="nav-item"
+              (click)="closeSidebar.emit()"
             >
               <span class="nav-ico" [innerHTML]="safeIcon(item.label)"></span>
               <span class="nav-label">{{ item.label }}</span>
@@ -61,6 +65,7 @@ import { ADMIN_MENU_ITEMS } from '../../shared/admin-menu.config';
                       routerLinkActive="active"
                       [routerLinkActiveOptions]="{ exact: false }"
                       class="subnav-item"
+                      (click)="closeSidebar.emit()"
                     >
                       <span class="subnav-ico" [innerHTML]="safeIcon(child.label)"></span>
                       <span>{{ child.label }}</span>
@@ -263,22 +268,50 @@ import { ADMIN_MENU_ITEMS } from '../../shared/admin-menu.config';
 
       @media (max-width: 1024px) {
         .sidebar {
-          width: 100%;
-          min-height: auto;
-          border-right: none;
-          border-bottom: 1px solid var(--border);
+          position: fixed;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          width: 280px;
+          height: 100vh;
+          z-index: 1001;
+          transform: translateX(-100%);
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          border-right: 1px solid var(--border);
+          box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar.sidebar--open {
+          transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(15, 23, 42, 0.45);
+          backdrop-filter: blur(4px);
+          z-index: 1000;
+          animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
 
         .nav {
           display: flex;
-          flex-wrap: nowrap;
-          overflow-x: auto;
-          gap: 0.25rem;
+          flex-direction: column;
+          overflow-y: auto;
+          gap: 2px;
         }
 
-        .subnav,
+        .subnav {
+          display: block;
+        }
+
         .logout {
-          display: none;
+          display: flex;
         }
       }
     `
@@ -287,6 +320,10 @@ import { ADMIN_MENU_ITEMS } from '../../shared/admin-menu.config';
 export class SidebarComponent {
   private readonly auth = inject(AuthService);
   private readonly sanitizer = inject(DomSanitizer);
+
+  readonly open = input(false);
+  readonly closeSidebar = output<void>();
+
   /** Mặc định thu gọn — chỉ mở khi người dùng bấm vào nhóm menu */
   private openKeys = signal<Set<string>>(new Set());
 

@@ -13,6 +13,7 @@ import { CategoryRow } from '../../core/models/admin-list.models';
 import { slugify } from '../../core/utils/slugify';
 import { AdminCatalogPageComponent } from '../../shared/admin-catalog-page.component';
 import { productSectionCrumbs } from '../../shared/admin-product-section.config';
+import { compressImageFile } from '../../core/utils/compress-image';
 
 @Component({
   selector: 'app-categories',
@@ -211,16 +212,48 @@ import { productSectionCrumbs } from '../../shared/admin-product-section.config'
                   id="cat-image"
                   type="text"
                   formControlName="imageUrl"
-                  placeholder="https://images.unsplash.com/... hoặc /assets/..."
-                  maxlength="500"
+                  (input)="onImageUrlInput($event)"
+                  (blur)="onImageUrlBlur()"
+                  placeholder="Nhập URL ảnh hoặc dán ảnh Base64 vào đây..."
                 />
+                
+                <div class="file-upload-row" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="cat-image-file"
+                    (change)="onUploadFile($event)"
+                    style="display: none;"
+                  />
+                  <label for="cat-image-file" class="btn-action secondary" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.5rem 0.75rem; font-size: 0.8125rem; margin: 0;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                    </svg>
+                    Tải ảnh lên từ thiết bị
+                  </label>
+                  @if (uploadSizeText()) {
+                    <span class="file-size-badge" style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 500;">
+                      {{ uploadSizeText() }}
+                    </span>
+                  }
+                  @if (form.get('imageUrl')?.value) {
+                    <button type="button" class="btn-action secondary" (click)="clearImage()" style="margin: 0; padding: 0.5rem 0.75rem; font-size: 0.8125rem; color: #ef4444;">
+                      Xóa ảnh
+                    </button>
+                  }
+                </div>
+                
+                @if (uploadError()) {
+                  <p class="field-err" style="margin-top: 0.25rem;">{{ uploadError() }}</p>
+                }
+
                 @if (form.get('imageUrl')?.value) {
                   <div class="form-image-preview">
                     <img [src]="form.get('imageUrl')?.value" alt="Preview" />
                   </div>
                 }
               </div>
-              <p class="field-hint">Đường dẫn ảnh đại diện cho danh mục (tùy chọn)</p>
+              <p class="field-hint">Nhập link ảnh hoặc chọn tệp tải lên từ máy tính.</p>
             </div>
 
             <div class="form-section">
@@ -495,6 +528,8 @@ export class CategoriesComponent implements OnInit {
   readonly saving = signal(false);
   readonly formError = signal('');
   readonly search = signal('');
+  readonly uploadSizeText = signal('');
+  readonly uploadError = signal('');
   readonly currentPage = signal(1);
   readonly pageSize = signal(10);
   slugTouched = false;
@@ -519,7 +554,7 @@ export class CategoriesComponent implements OnInit {
         (c: AbstractControl) => this.duplicateSlug(c)
       ]
     ],
-    imageUrl: ['', Validators.maxLength(500)],
+    imageUrl: [''],
     description: ['', Validators.maxLength(500)]
   });
 
@@ -596,6 +631,8 @@ export class CategoriesComponent implements OnInit {
     this.slugTouched = false;
     this.form.reset({ name: '', slug: '', imageUrl: '', description: '' });
     this.formError.set('');
+    this.uploadSizeText.set('');
+    this.uploadError.set('');
     this.modalOpen.set(true);
   }
 
@@ -609,6 +646,8 @@ export class CategoriesComponent implements OnInit {
       description: item.description || ''
     });
     this.formError.set('');
+    this.uploadSizeText.set('');
+    this.uploadError.set('');
     this.modalOpen.set(true);
   }
 
@@ -616,6 +655,105 @@ export class CategoriesComponent implements OnInit {
     this.modalOpen.set(false);
     this.editingId.set(null);
     this.formError.set('');
+    this.uploadSizeText.set('');
+    this.uploadError.set('');
+  }
+
+  onUploadFile(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      this.uploadError.set('Chỉ chấp nhận tệp hình ảnh (jpg, png, gif, ...).');
+      return;
+    }
+    
+    if (file.size > 8 * 1024 * 1024) {
+      this.uploadError.set('Dung lượng ảnh tối đa là 8MB.');
+      return;
+    }
+    
+    this.uploadError.set('');
+    const sizeText = this.formatFileSize(file.size);
+    this.uploadSizeText.set(sizeText);
+    
+    compressImageFile(file, 640, 0.8).then(
+      (dataUrl) => {
+        this.form.get('imageUrl')?.setValue(dataUrl);
+      },
+      (err) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.form.get('imageUrl')?.setValue(String(reader.result || ''));
+        };
+        reader.readAsDataURL(file);
+      }
+    );
+  }
+
+  private formatFileSize(size: number): string {
+    if (size < 1024) return size + ' B';
+    if (size < 1024 * 1024) return (size / 1024).toFixed(2) + ' KB';
+    return (size / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+
+  clearImage(): void {
+    this.form.get('imageUrl')?.setValue('');
+    this.uploadSizeText.set('');
+    this.uploadError.set('');
+  }
+
+  cleanImageUrl(url: string): string {
+    url = url.trim();
+    if (!url) return '';
+
+    // 1. Check Google Search Image redirect (imgurl=...)
+    try {
+      if (url.includes('google.com') && url.includes('imgurl=')) {
+        const urlObj = new URL(url);
+        const imgUrl = urlObj.searchParams.get('imgurl');
+        if (imgUrl) {
+          url = imgUrl;
+        }
+      }
+    } catch (e) {}
+
+    // 2. Google Drive shared links
+    const gdRegex = /https?:\/\/(?:drive|docs)\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=|file\/d\/|uc\?export=download&id=)([a-zA-Z0-9_-]{25,50})/i;
+    const gdMatch = url.match(gdRegex);
+    if (gdMatch && gdMatch[1]) {
+      return `https://lh3.googleusercontent.com/d/${gdMatch[1]}`;
+    }
+
+    // 3. Dropbox links
+    if (url.includes('dropbox.com')) {
+      if (url.includes('?dl=0')) {
+        return url.replace('?dl=0', '?raw=1');
+      } else if (url.includes('&dl=0')) {
+        return url.replace('&dl=0', '&raw=1');
+      } else if (!url.includes('?')) {
+        return url + '?raw=1';
+      }
+    }
+
+    return url;
+  }
+
+  onImageUrlInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const cleaned = this.cleanImageUrl(input.value);
+    if (cleaned !== input.value) {
+      this.form.get('imageUrl')?.setValue(cleaned);
+      input.value = cleaned;
+    }
+  }
+
+  onImageUrlBlur(): void {
+    const current = String(this.form.get('imageUrl')?.value || '');
+    const cleaned = this.cleanImageUrl(current);
+    if (cleaned !== current) {
+      this.form.get('imageUrl')?.setValue(cleaned);
+    }
   }
 
   onNameInput(): void {

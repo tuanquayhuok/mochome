@@ -49,7 +49,7 @@ import { StorePickerVoucher } from '../../core/models/admin-list.models';
           @if (pickerLoading()) {
             <p class="picker-empty">Đang tải mã...</p>
           } @else if (!pickerList().length) {
-            <p class="picker-empty">Chưa có mã hiển thị. Admin bật "Hiển thị trên cửa hàng" cho voucher.</p>
+            <p class="picker-empty">Bạn không có mã giảm giá nào.</p>
           } @else {
             @for (v of pickerList(); track v.code) {
               <button type="button" class="picker-item" role="option" (click)="selectVoucher(v)">

@@ -140,4 +140,16 @@ export class ApiService {
       newPassword
     });
   }
+
+  apiCallFreeReverseGeocoding(lat: number, lon: number) {
+    return this.http.get(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&addressdetails=1`);
+  }
+
+  getProvinces() {
+    return this.http.get<any[]>('https://provinces.open-api.vn/api/p/');
+  }
+
+  getProvinceWards(code: number) {
+    return this.http.get<any>(`https://provinces.open-api.vn/api/p/${code}?depth=3`);
+  }
 }

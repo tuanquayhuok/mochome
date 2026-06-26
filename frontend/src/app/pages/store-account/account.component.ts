@@ -974,7 +974,7 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
         font-size: 0.9375rem;
         background-color: #ffffff;
         color: #2b1d14;
-        transition: all 0.25s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .input-wrap input::placeholder {
@@ -983,8 +983,8 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
 
       .input-wrap input:focus {
         outline: none;
-        border-color: #8c6239;
-        box-shadow: 0 0 0 4px rgba(140, 98, 57, 0.08);
+        border-color: #c29c68;
+        box-shadow: 0 0 0 4px rgba(194, 156, 104, 0.15);
       }
 
       .input-wrap:focus-within .field-ico {
@@ -1310,12 +1310,12 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
         outline: none;
         background: #ffffff;
         color: #2b1d14;
-        transition: all 0.25s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .forgot-input:focus {
-        border-color: #8c6239;
-        box-shadow: 0 0 0 3px rgba(140, 98, 57, 0.08);
+        border-color: #c29c68;
+        box-shadow: 0 0 0 4px rgba(194, 156, 104, 0.15);
       }
 
       .forgot-actions {

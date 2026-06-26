@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../components/header/header.component';
@@ -9,9 +9,9 @@ import { HeaderComponent } from '../components/header/header.component';
   imports: [RouterOutlet, SidebarComponent, HeaderComponent],
   template: `
     <div class="shell">
-      <app-sidebar></app-sidebar>
+      <app-sidebar [open]="sidebarOpen()" (closeSidebar)="sidebarOpen.set(false)"></app-sidebar>
       <div class="shell-main">
-        <app-header></app-header>
+        <app-header (toggleSidebar)="sidebarOpen.set(!sidebarOpen())"></app-header>
         <main class="shell-content">
           <router-outlet></router-outlet>
         </main>
@@ -51,4 +51,6 @@ import { HeaderComponent } from '../components/header/header.component';
     `
   ]
 })
-export class AdminLayoutComponent {}
+export class AdminLayoutComponent {
+  readonly sidebarOpen = signal(false);
+}

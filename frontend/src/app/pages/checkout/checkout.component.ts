@@ -8,6 +8,7 @@ import { StoreAuthService } from '../../core/services/store-auth.service';
 import { StoreOrderService, StoreOrderResult } from '../../core/services/store-order.service';
 import { ApiService } from '../../core/services/api.service';
 import { StoreVoucherInputComponent } from '../../shared/store-voucher-input/store-voucher-input.component';
+import { AdministrativeUnit, VIETNAM_DIVISIONS } from '../../core/config/vietnam-divisions';
 
 type PaymentMethod = 'cod' | 'vnpay' | 'momo';
 
@@ -59,59 +60,6 @@ type PaymentMethod = 'cod' | 'vnpay' | 'momo';
           <form class="checkout-layout" [formGroup]="form" (ngSubmit)="placeOrder()">
             <div class="checkout-main">
               <section class="store-card checkout-section">
-                <h2>Thông tin giao hàng</h2>
-                <div class="field-grid">
-                  <label class="store-field">
-                    <span>Họ tên người nhận <em>*</em></span>
-                    <input type="text" formControlName="receiverName" placeholder="Nguyễn Văn A" />
-                  </label>
-                  <label class="store-field">
-                    <span>Số điện thoại <em>*</em></span>
-                    <input type="tel" formControlName="receiverPhone" placeholder="09xxxxxxxx" />
-                  </label>
-                </div>
-                <label class="store-field">
-                  <span>Địa chỉ giao hàng <em>*</em></span>
-                  <textarea
-                    formControlName="shippingAddress"
-                    rows="3"
-                    placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
-                  ></textarea>
-                </label>
-                <label class="store-field">
-                  <span>Ghi chú đơn hàng</span>
-                  <textarea formControlName="note" rows="2" placeholder="Giao giờ hành chính, gọi trước khi giao..."></textarea>
-                </label>
-              </section>
-
-              <section class="store-card checkout-section">
-                <h2>Phương thức thanh toán</h2>
-                <div class="pay-options">
-                  <label class="pay-option" [class.selected]="payment() === 'cod'">
-                    <input type="radio" value="cod" formControlName="paymentMethod" />
-                    <div>
-                      <strong>Thanh toán khi nhận hàng (COD)</strong>
-                      <span>Thanh toán tiền mặt khi nhận hàng</span>
-                    </div>
-                  </label>
-                  <label class="pay-option" [class.selected]="payment() === 'vnpay'">
-                    <input type="radio" value="vnpay" formControlName="paymentMethod" />
-                    <div>
-                      <strong>VNPay</strong>
-                      <span>Chuyển hướng cổng thanh toán (demo)</span>
-                    </div>
-                  </label>
-                  <label class="pay-option" [class.selected]="payment() === 'momo'">
-                    <input type="radio" value="momo" formControlName="paymentMethod" />
-                    <div>
-                      <strong>Ví MoMo</strong>
-                      <span>Quét mã / ví điện tử (demo)</span>
-                    </div>
-                  </label>
-                </div>
-              </section>
-
-              <section class="store-card checkout-section">
                 <h2>Sản phẩm ({{ cart.cartItems().length }})</h2>
                 <ul class="checkout-lines">
                   @for (item of cart.cartItems(); track trackKey(item)) {
@@ -132,6 +80,108 @@ type PaymentMethod = 'cod' | 'vnpay' | 'momo';
                     </li>
                   }
                 </ul>
+              </section>
+
+              <section class="store-card checkout-section">
+                <h2>Thông tin giao hàng</h2>
+                <div class="field-grid">
+                  <label class="store-field">
+                    <span>Họ tên người nhận <em>*</em></span>
+                    <input type="text" formControlName="receiverName" placeholder="Nguyễn Văn A" />
+                  </label>
+                  <label class="store-field">
+                    <span>Số điện thoại <em>*</em></span>
+                    <input
+                      type="tel"
+                      formControlName="receiverPhone"
+                      placeholder="0"
+                      (input)="onPhoneInput($event)"
+                      [class.phone-error]="phoneLengthError()"
+                      [class.phone-shake]="phoneShakeActive()"
+                    />
+                    @if (phoneLengthError()) {
+                      <span style="display: block; color: #dc2626; font-size: 0.75rem; margin-top: 0.25rem;">
+                        Số điện thoại chỉ được phép có 10 số.
+                      </span>
+                    }
+                  </label>
+                </div>
+                <div class="field-grid" style="margin-bottom: 0.85rem;">
+                  <label class="store-field" style="margin-bottom: 0;">
+                    <span>Tỉnh / Thành phố <em>*</em></span>
+                    <select formControlName="province" (change)="onProvinceChange($event)">
+                      <option value="">-- Chọn Tỉnh / Thành --</option>
+                      @for (p of provincesList; track p.name) {
+                        <option [value]="p.name">{{ p.name }}</option>
+                      }
+                    </select>
+                  </label>
+                  
+                  <label class="store-field" style="margin-bottom: 0;">
+                    <span>Phường / Xã <em>*</em></span>
+                    <select formControlName="ward" [disabled]="!selectedProvinceObj()" (change)="syncShippingAddress()">
+                      <option value="">-- Chọn Phường / Xã --</option>
+                      @for (w of wardsList(); track w) {
+                        <option [value]="w">{{ w }}</option>
+                      }
+                    </select>
+                  </label>
+                </div>
+
+                <div style="margin-bottom: 0.85rem;">
+                  <button type="button" class="store-btn store-btn-outline" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.35rem; font-size: 0.8125rem; height: 38px;" (click)="getCurrentLocation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                      <circle cx="12" cy="12" r="10" />
+                      <circle cx="12" cy="12" r="3" />
+                      <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                    </svg>
+                    Lấy vị trí hiện tại
+                  </button>
+                </div>
+
+                <label class="store-field">
+                  <span>Địa chỉ chi tiết (Số nhà, tên đường...) <em>*</em></span>
+                  <input type="text" formControlName="addressDetail" (input)="syncShippingAddress()" placeholder="Ví dụ: 123 Đường Nguyễn Trãi" />
+                </label>
+                
+                <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                  <input type="checkbox" id="save-info-cb" [checked]="saveShippingInfo()" (change)="toggleSaveShipping($event)" />
+                  <label for="save-info-cb" style="font-size: 0.8125rem; font-weight: 500; color: #4b5563; cursor: pointer;">Lưu thông tin giao hàng cho lần mua tiếp theo</label>
+                </div>
+
+                <label class="store-field">
+                  <span>Ghi chú đơn hàng</span>
+                  <textarea formControlName="note" rows="2" placeholder="Giao giờ hành chính, gọi trước khi giao..."></textarea>
+                </label>
+              </section>
+
+              <section class="store-card checkout-section">
+                <h2>Phương thức thanh toán</h2>
+                <div class="pay-options">
+                  <label class="pay-option" [class.selected]="payment() === 'cod'">
+                    <input type="radio" value="cod" formControlName="paymentMethod" />
+                    <div>
+                      <strong>Thanh toán khi nhận hàng (COD)</strong>
+                      <span>Thanh toán tiền mặt khi nhận hàng</span>
+                    </div>
+                  </label>
+                  <label class="pay-option" [class.selected]="payment() === 'vnpay'">
+                    <input type="radio" value="vnpay" formControlName="paymentMethod" />
+                    <div class="pay-option-content">
+                      <img src="https://1889324617.cloud.edgevnpay.vn/assets/images/logo-icon/logo-primary.svg" alt="VNPay" class="pay-logo" />
+                      <div>
+                        <span>Thanh toán online qua cổng VNPay</span>
+                      </div>
+                    </div>
+                  </label>
+                  <label class="pay-option" [class.selected]="payment() === 'momo'">
+                    <input type="radio" value="momo" formControlName="paymentMethod" />
+                    <div>
+                      <strong>Ví MoMo</strong>
+                      <span>Quét mã / ví điện tử (demo)</span>
+                    </div>
+                  </label>
+                </div>
               </section>
             </div>
 
@@ -253,6 +303,7 @@ type PaymentMethod = 'cod' | 'vnpay' | 'momo';
       }
 
       .store-field input,
+      .store-field select,
       .store-field textarea {
         width: 100%;
         padding: 0.55rem 0.75rem;
@@ -260,6 +311,12 @@ type PaymentMethod = 'cod' | 'vnpay' | 'momo';
         border-radius: 6px;
         font-size: 0.875rem;
         box-sizing: border-box;
+        height: 38px;
+        background-color: #fff;
+      }
+
+      .store-field textarea {
+        height: auto;
       }
 
       .store-field input:focus,
@@ -267,6 +324,21 @@ type PaymentMethod = 'cod' | 'vnpay' | 'momo';
         outline: none;
         border-color: #9ca3af;
         box-shadow: 0 0 0 3px rgba(92, 64, 51, 0.1);
+      }
+
+      .store-field input.phone-error {
+        border-color: #dc2626 !important;
+        background-color: #fef2f2;
+      }
+
+      .store-field input.phone-shake {
+        animation: shakeInput 0.4s ease-in-out;
+      }
+
+      @keyframes shakeInput {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-6px); }
+        40%, 80% { transform: translateX(6px); }
       }
 
       .pay-options {
@@ -302,6 +374,20 @@ type PaymentMethod = 'cod' | 'vnpay' | 'momo';
       .pay-option span {
         font-size: 0.75rem;
         color: #6b7280;
+      }
+
+      .pay-option-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+      }
+
+      .pay-logo {
+        height: 24px;
+        width: auto;
+        object-fit: contain;
+        flex-shrink: 0;
       }
 
       .checkout-lines {
@@ -534,21 +620,158 @@ export class CheckoutComponent implements OnInit {
   readonly voucherApplying = signal(false);
   readonly voucherMsg = signal('');
   readonly voucherError = signal(false);
+  readonly saveShippingInfo = signal(true);
 
   voucherCode = '';
 
   readonly discount = computed(() => this.voucherCart.applied()?.discountAmount ?? 0);
   readonly grandTotal = computed(() => Math.max(0, this.cart.total() - this.discount()));
 
+  readonly provincesList = VIETNAM_DIVISIONS;
+  readonly selectedProvinceObj = signal<AdministrativeUnit | null>(null);
+  readonly wardsList = computed(() => {
+    const p = this.selectedProvinceObj();
+    return p ? p.wards : [];
+  });
+
   form = this.fb.group({
     receiverName: ['', Validators.required],
-    receiverPhone: ['', [Validators.required, Validators.pattern(/^0\d{8,10}$/)]],
-    shippingAddress: ['', Validators.required],
+    receiverPhone: ['', [Validators.required, Validators.pattern(/^0\d{9}$/)]],
+    province: ['', Validators.required],
+    ward: ['', Validators.required],
+    addressDetail: ['', Validators.required],
+    shippingAddress: [''],
     note: [''],
     paymentMethod: ['cod' as PaymentMethod, Validators.required]
   });
 
   payment = () => this.form.get('paymentMethod')?.value as PaymentMethod;
+
+  onProvinceChange(event: Event): void {
+    const provinceName = (event.target as HTMLSelectElement).value;
+    const found = this.provincesList.find(p => p.name === provinceName) || null;
+    this.selectedProvinceObj.set(found);
+    this.form.patchValue({ ward: '' });
+    this.syncShippingAddress();
+  }
+
+  getCurrentLocation(): void {
+    if (!navigator.geolocation) {
+      alert('Trình duyệt của bạn không hỗ trợ định vị GPS hiện tại.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        // Gọi OpenStreetMap Nominatim API để dịch tọa độ thành địa chỉ chi tiết (Tên đường, phường)
+        this.api.apiCallFreeReverseGeocoding(latitude, longitude).subscribe({
+          next: (res: any) => {
+            if (res && res.address) {
+              const addr = res.address;
+              
+              const provinceCandidate = addr.city || addr.province || addr.state || '';
+              const districtCandidate = addr.district || addr.subdistrict || addr.county || addr.city_district || '';
+              const wardCandidate = addr.suburb || addr.quarter || addr.village || addr.town || addr.ward || '';
+              const houseNumber = addr.house_number || '';
+              const road = addr.road || addr.street || '';
+              const streetDetail = [houseNumber, road].filter(Boolean).join(' ');
+
+              let matchedProvince: any = null;
+              if (provinceCandidate) {
+                const normProvince = provinceCandidate.toLowerCase().replace(/^(tỉnh|thành phố)\s+/i, '').trim();
+                matchedProvince = this.provincesList.find(p => {
+                  const pName = p.name.toLowerCase().replace(/^(tỉnh|thành phố)\s+/i, '').trim();
+                  return pName.includes(normProvince) || normProvince.includes(pName);
+                });
+              }
+
+              if (matchedProvince) {
+                this.selectedProvinceObj.set(matchedProvince);
+                this.form.patchValue({ province: matchedProvince.name, ward: '', addressDetail: streetDetail || 'Địa chỉ định vị' });
+
+                let matchedWard = '';
+                if (wardCandidate) {
+                  const normWard = wardCandidate.toLowerCase().replace(/^(phường|xã|thị trấn)\s+/i, '').trim();
+                  const foundWard = matchedProvince.wards.find((w: string) => {
+                    const wName = w.toLowerCase().replace(/^(phường|xã|thị trấn)\s+/i, '').trim();
+                    return wName.startsWith(normWard) || wName.includes(normWard);
+                  });
+                  if (foundWard) {
+                    matchedWard = foundWard;
+                  }
+                }
+                
+                if (matchedWard) {
+                  this.form.patchValue({ ward: matchedWard });
+                }
+
+                this.syncShippingAddress();
+              } else {
+                const fullText = [streetDetail, wardCandidate, districtCandidate, provinceCandidate].filter(Boolean).join(', ');
+                this.form.patchValue({
+                  addressDetail: fullText
+                });
+                this.syncShippingAddress();
+              }
+            } else {
+              this.form.patchValue({
+                addressDetail: `Tọa độ: ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`
+              });
+              this.syncShippingAddress();
+            }
+          },
+          error: () => {
+            this.form.patchValue({
+              addressDetail: `Tọa độ: ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`
+            });
+            this.syncShippingAddress();
+          }
+        });
+      },
+      (error) => {
+        console.warn('Geolocation error:', error);
+        alert(`Không thể truy cập vị trí GPS: ${error.message || 'Thiết bị không khả dụng hoặc bị từ chối'}`);
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+    );
+  }
+
+  syncShippingAddress(): void {
+    const f = this.form.value;
+    const parts = [
+      f.addressDetail,
+      f.ward,
+      f.province
+    ].filter(Boolean);
+    this.form.get('shippingAddress')?.setValue(parts.join(', '), { emitEvent: false });
+  }
+
+  readonly phoneLengthError = signal(false);
+  readonly phoneShakeActive = signal(false);
+
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/\D/g, ''); // Chỉ cho phép số
+
+    if (value.length > 0 && value[0] !== '0') {
+      value = '0' + value.slice(1);
+    }
+
+    if (value.length > 10) {
+      this.phoneLengthError.set(true);
+      value = value.slice(0, 10);
+      
+      this.phoneShakeActive.set(true);
+      setTimeout(() => this.phoneShakeActive.set(false), 400);
+    } else {
+      this.phoneLengthError.set(false);
+    }
+
+    input.value = value;
+    this.form.get('receiverPhone')?.setValue(value, { emitEvent: false });
+  }
 
   ngOnInit(): void {
     if (!this.cart.cartItems().length) {
@@ -556,18 +779,77 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
-    const user = this.storeAuth.getUser();
-    if (user) {
-      this.form.patchValue({
-        receiverName: user.fullName,
-        receiverPhone: user.phone || ''
-      });
-    }
+    this.restoreSavedAddress();
 
     const applied = this.voucherCart.applied();
     if (applied) {
       this.voucherCode = applied.code;
       this.revalidateVoucher();
+    }
+  }
+
+  restoreSavedAddress(): void {
+    const savedName = localStorage.getItem('checkout_saved_name');
+    const savedPhone = localStorage.getItem('checkout_saved_phone');
+    const savedAddress = localStorage.getItem('checkout_saved_address');
+    const savedPref = localStorage.getItem('checkout_save_pref');
+    
+    if (savedPref !== null) {
+      this.saveShippingInfo.set(savedPref === 'true');
+    }
+
+    const user = this.storeAuth.getUser();
+    
+    if (savedAddress) {
+      const parts = savedAddress.split(',').map(s => s.trim());
+      if (parts.length >= 3) {
+        const province = parts[parts.length - 1];
+        const ward = parts[parts.length - 2];
+        const detail = parts.slice(0, parts.length - 2).join(', ');
+
+        const pFound = this.provincesList.find(p => p.name === province);
+        if (pFound) {
+          this.selectedProvinceObj.set(pFound);
+          this.form.patchValue({
+            receiverName: savedName || user?.fullName || '',
+            receiverPhone: savedPhone || user?.phone || '',
+            province,
+            ward,
+            addressDetail: detail,
+            shippingAddress: savedAddress
+          });
+        } else {
+          this.form.patchValue({
+            receiverName: savedName || user?.fullName || '',
+            receiverPhone: savedPhone || user?.phone || '',
+            addressDetail: savedAddress,
+            shippingAddress: savedAddress
+          });
+        }
+      } else {
+        this.form.patchValue({
+          receiverName: savedName || user?.fullName || '',
+          receiverPhone: savedPhone || user?.phone || '',
+          addressDetail: savedAddress,
+          shippingAddress: savedAddress
+        });
+      }
+    } else {
+      this.form.patchValue({
+        receiverName: savedName || user?.fullName || '',
+        receiverPhone: savedPhone || user?.phone || ''
+      });
+    }
+  }
+
+  toggleSaveShipping(event: Event): void {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.saveShippingInfo.set(isChecked);
+    localStorage.setItem('checkout_save_pref', String(isChecked));
+    if (!isChecked) {
+      localStorage.removeItem('checkout_saved_name');
+      localStorage.removeItem('checkout_saved_phone');
+      localStorage.removeItem('checkout_saved_address');
     }
   }
 
@@ -633,6 +915,7 @@ export class CheckoutComponent implements OnInit {
   }
 
   placeOrder(): void {
+    this.syncShippingAddress();
     this.form.markAllAsTouched();
     if (this.form.invalid) {
       this.submitError.set('Vui lòng điền đầy đủ thông tin giao hàng hợp lệ.');
@@ -660,6 +943,13 @@ export class CheckoutComponent implements OnInit {
       })
       .subscribe({
         next: (res) => {
+          // Lưu thông tin giao hàng nếu checkbox được check
+          if (this.saveShippingInfo()) {
+            localStorage.setItem('checkout_saved_name', v.receiverName || '');
+            localStorage.setItem('checkout_saved_phone', v.receiverPhone || '');
+            localStorage.setItem('checkout_saved_address', v.shippingAddress || '');
+          }
+
           this.cart.clear();
           this.voucherCart.clear();
           this.successOrder.set(res.order);

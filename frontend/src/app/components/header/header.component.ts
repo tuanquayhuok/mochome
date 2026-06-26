@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -46,7 +46,7 @@ const SECTION_TITLES: Record<string, string> = {
   template: `
     <header class="topbar">
       <div class="topbar-left">
-        <button type="button" class="icon-btn" aria-label="Menu">
+        <button type="button" class="icon-btn" aria-label="Menu" (click)="toggleSidebar.emit()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="6" x2="21" y2="6" />
             <line x1="3" y1="12" x2="21" y2="12" />
@@ -193,6 +193,8 @@ const SECTION_TITLES: Record<string, string> = {
 export class HeaderComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
+
+  readonly toggleSidebar = output<void>();
 
   pageTitle = signal('Dashboard');
   notifyCount = signal(1);

@@ -1473,8 +1473,7 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
         }
 
         .auth-aside {
-          border-right: none;
-          border-bottom: 1px solid rgba(229, 192, 123, 0.1);
+          display: none;
         }
 
         .auth-aside-inner {

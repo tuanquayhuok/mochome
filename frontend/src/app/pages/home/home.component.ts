@@ -1092,10 +1092,33 @@ const PLACEHOLDER_POSTS = [
           font-size: 0.625rem;
         }
 
-        /* Inherited horizontal flex scroll from 900px media query */
+        .news-row {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.75rem;
+        }
 
         .news-link {
           grid-template-columns: 1fr;
+          padding: 0.75rem;
+          height: 100%;
+        }
+
+        .news-thumb {
+          aspect-ratio: 16 / 10;
+        }
+
+        .news-body h3 {
+          font-size: 0.8125rem;
+          margin-bottom: 0.25rem;
+        }
+
+        .news-body p {
+          font-size: 0.75rem;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
 
         .product-row {

@@ -104,7 +104,22 @@ import { RouterLink } from '@angular/router';
 
       @media (max-width: 640px) {
         .news-grid {
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.75rem;
+        }
+        .news-body {
+          padding: 0.75rem;
+        }
+        .news-body h3 {
+          font-size: 0.875rem;
+          margin-bottom: 0.35rem;
+        }
+        .news-body p {
+          font-size: 0.75rem;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
       }
     `

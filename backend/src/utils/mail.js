@@ -36,12 +36,21 @@ const sendViaSmtp = async ({ to, subject, html }) => {
   const user = process.env.SMTP_USER || 'trongtuan206z@gmail.com';
   const pass = process.env.SMTP_PASS || 'ercu fsbe jzgb jbog';
 
-  const transporter = nodemailer.createTransport({
+  const transportConfig = {
     host,
     port: Number(process.env.SMTP_PORT || 587),
-    secure: process.env.SMTP_SECURE === 'true', // Defaults to false
+    secure: process.env.SMTP_SECURE === 'true',
     auth: { user, pass }
-  });
+  };
+
+  if (host.includes('gmail.com')) {
+    delete transportConfig.host;
+    delete transportConfig.port;
+    delete transportConfig.secure;
+    transportConfig.service = 'gmail';
+  }
+
+  const transporter = nodemailer.createTransport(transportConfig);
 
   try {
     await transporter.sendMail({

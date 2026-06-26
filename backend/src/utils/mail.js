@@ -32,17 +32,14 @@ const sendViaSmtp = async ({ to, subject, html }) => {
     return { sent: false, reason: 'nodemailer_not_installed' };
   }
 
-  const host = process.env.SMTP_HOST;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  if (!host || !user || !pass) {
-    return { sent: false, reason: 'smtp_not_configured' };
-  }
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const user = process.env.SMTP_USER || 'trongtuan206z@gmail.com';
+  const pass = process.env.SMTP_PASS || 'fcrr sxlc fnkm nsna';
 
   const transporter = nodemailer.createTransport({
     host,
     port: Number(process.env.SMTP_PORT || 587),
-    secure: process.env.SMTP_SECURE === 'true',
+    secure: process.env.SMTP_SECURE === 'true', // Defaults to false
     auth: { user, pass }
   });
 
@@ -68,18 +65,18 @@ const getSmtpDebugInfo = () => {
     nodemailerInstalled = false;
   }
 
-  const host = process.env.SMTP_HOST || '';
-  const user = process.env.SMTP_USER || '';
-  const pass = process.env.SMTP_PASS || '';
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const user = process.env.SMTP_USER || 'trongtuan206z@gmail.com';
+  const pass = process.env.SMTP_PASS || 'fcrr sxlc fnkm nsna';
 
   return {
     nodemailerInstalled,
-    smtpConfigured: Boolean(host && user && pass),
-    host: host || null,
+    smtpConfigured: true,
+    host,
     port: Number(process.env.SMTP_PORT || 587),
     secure: process.env.SMTP_SECURE === 'true',
-    user: user || null,
-    from: process.env.MAIL_FROM || null
+    user,
+    from: process.env.MAIL_FROM || `"MỘC HOME" <${user}>`
   };
 };
 

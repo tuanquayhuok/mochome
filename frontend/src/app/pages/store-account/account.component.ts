@@ -231,7 +231,7 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
                       }
                     </div>
 
-                    <div class="store-field remember-me-field">
+                    <div class="remember-me-field">
                       <label class="remember-me-label">
                         <input type="checkbox" formControlName="rememberMe" />
                         <span>Lưu thông tin đăng nhập</span>
@@ -1213,9 +1213,9 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
       .remember-me-field {
         margin: 0.5rem 0 1.25rem;
         display: flex;
+        flex-direction: row;
         align-items: center;
         justify-content: flex-start;
-        text-align: left;
         width: 100%;
       }
 

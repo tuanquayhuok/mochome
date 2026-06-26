@@ -1,2 +1,1 @@
-/** Dùng proxy dev (`proxy.conf.json`) hoặc backend cùng origin khi deploy. */
-export const API_URL = '/api';
+export const API_URL = 'https://mochome-d8jk-heklksxoj-tuanquayhuoks-projects.vercel.app/api';

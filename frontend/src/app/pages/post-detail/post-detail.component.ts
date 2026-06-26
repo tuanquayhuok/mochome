@@ -192,6 +192,32 @@ import { PostRow } from '../../core/models/admin-list.models';
         }
       </div>
     </section>
+
+    <!-- CUSTOM MODAL POPUP -->
+    @if (showLoginModal()) {
+      <div class="custom-modal-overlay" (click)="closeLoginModal()">
+        <div class="custom-modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <span class="modal-title">Thông báo</span>
+            <button class="close-modal-btn" (click)="closeLoginModal()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="modal-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <p>{{ loginModalMessage() }}</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="closeLoginModal()">Đóng</button>
+            <a routerLink="/tai-khoan" class="btn-login">Đăng nhập ngay</a>
+          </div>
+        </div>
+      </div>
+    }
   `,
   styles: [
     `
@@ -560,6 +586,133 @@ import { PostRow } from '../../core/models/admin-list.models';
           padding-left: 0.75rem;
         }
       }
+
+      /* Custom Modal Styles */
+      .custom-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.2s ease-out;
+      }
+
+      .custom-modal-content {
+        background: #fff;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 380px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        animation: slideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes slideUp {
+        from { transform: translateY(15px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #f3f4f6;
+        padding-bottom: 0.75rem;
+      }
+
+      .modal-title {
+        font-weight: 700;
+        color: #1a1d21;
+        font-size: 1.1rem;
+      }
+
+      .close-modal-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #9ca3af;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0;
+      }
+
+      .close-modal-btn:hover {
+        color: #4b5563;
+      }
+
+      .modal-body {
+        text-align: center;
+        padding: 0.5rem 0;
+        color: #4b5563;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .modal-icon {
+        color: #d97706;
+        margin-bottom: 0.75rem;
+      }
+
+      .modal-icon svg {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto;
+      }
+
+      .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        border-top: 1px solid #f3f4f6;
+        padding-top: 0.75rem;
+      }
+
+      .btn-cancel {
+        padding: 0.5rem 1.25rem;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        color: #4b5563;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.875rem;
+      }
+
+      .btn-cancel:hover {
+        background: #f9fafb;
+        color: #1a1d21;
+      }
+
+      .btn-login {
+        padding: 0.5rem 1.25rem;
+        background: #8c6239;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: all 0.2s;
+        font-size: 0.875rem;
+        text-align: center;
+      }
+
+      .btn-login:hover {
+        background: #704e2d;
+      }
     `
   ]
 })
@@ -576,6 +729,8 @@ export class PostDetailComponent implements OnInit {
   newCommentText = signal('');
   replyText = signal('');
   replyingToId = signal<string | null>(null);
+  showLoginModal = signal(false);
+  loginModalMessage = signal('');
 
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug') || '';
@@ -619,7 +774,8 @@ export class PostDetailComponent implements OnInit {
     if (!p) return;
 
     if (!this.storeAuth.isLoggedIn()) {
-      alert('Vui lòng đăng nhập để thích bài viết này!');
+      this.loginModalMessage.set('Bạn cần đăng nhập để có thể thích bài viết này.');
+      this.showLoginModal.set(true);
       return;
     }
 
@@ -663,7 +819,8 @@ export class PostDetailComponent implements OnInit {
 
   toggleLikeComment(commentId: string): void {
     if (!this.storeAuth.isLoggedIn()) {
-      alert('Vui lòng đăng nhập để thích bình luận!');
+      this.loginModalMessage.set('Bạn cần đăng nhập để có thể thích bình luận.');
+      this.showLoginModal.set(true);
       return;
     }
 
@@ -732,5 +889,9 @@ export class PostDetailComponent implements OnInit {
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
     return name.slice(0, 2).toUpperCase();
+  }
+
+  closeLoginModal(): void {
+    this.showLoginModal.set(false);
   }
 }

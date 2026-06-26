@@ -231,6 +231,13 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
                       }
                     </div>
 
+                    <div class="store-field remember-me-field">
+                      <label class="remember-me-label">
+                        <input type="checkbox" formControlName="rememberMe" />
+                        <span>Lưu thông tin đăng nhập</span>
+                      </label>
+                    </div>
+
                     <!-- Captcha Verification -->
                     <div class="store-field captcha-field">
                       <div class="captcha-box" [class.captcha-checked]="loginCaptchaState() === 'checked'" [class.captcha-invalid]="loginForm.controls.captcha.touched && loginForm.controls.captcha.invalid">
@@ -263,12 +270,7 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
                       }
                     </div>
 
-                    <div class="store-field remember-me-field">
-                      <label class="remember-me-label">
-                        <input type="checkbox" formControlName="rememberMe" />
-                        <span>Lưu thông tin đăng nhập</span>
-                      </label>
-                    </div>
+
 
                     @if (error()) {
                       <div class="store-alert-error" role="alert">
@@ -1209,9 +1211,12 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
       }
 
       .remember-me-field {
-        margin: 1rem 0;
+        margin: 0.5rem 0 1.25rem;
         display: flex;
         align-items: center;
+        justify-content: flex-start;
+        text-align: left;
+        width: 100%;
       }
 
       .remember-me-label {

@@ -34,7 +34,7 @@ const sendViaSmtp = async ({ to, subject, html }) => {
 
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
   const user = process.env.SMTP_USER || 'trongtuan206z@gmail.com';
-  const pass = process.env.SMTP_PASS || 'fcrr sxlc fnkm nsna';
+  const pass = process.env.SMTP_PASS || 'ercu fsbe jzgb jbog';
 
   const transporter = nodemailer.createTransport({
     host,
@@ -67,7 +67,7 @@ const getSmtpDebugInfo = () => {
 
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
   const user = process.env.SMTP_USER || 'trongtuan206z@gmail.com';
-  const pass = process.env.SMTP_PASS || 'fcrr sxlc fnkm nsna';
+  const pass = process.env.SMTP_PASS || 'ercu fsbe jzgb jbog';
 
   return {
     nodemailerInstalled,

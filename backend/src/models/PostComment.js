@@ -6,7 +6,8 @@ const postCommentSchema = new mongoose.Schema(
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     content: { type: String, required: true, trim: true },
     parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'PostComment', default: null },
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    isHidden: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

@@ -149,7 +149,7 @@ const likePost = async (req, res) => {
 };
 
 const getPostComments = async (req, res) => {
-  const comments = await PostComment.find({ post: req.params.id })
+  const comments = await PostComment.find({ post: req.params.id, isHidden: { $ne: true } })
     .populate('user', 'fullName email')
     .sort({ createdAt: 1 });
 

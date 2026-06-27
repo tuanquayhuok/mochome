@@ -175,6 +175,11 @@ export const appRoutes: Routes = [
           import('./pages/posts/post-interactions.component').then((m) => m.PostInteractionsComponent)
       },
       {
+        path: 'posts/comments',
+        loadComponent: () =>
+          import('./pages/posts/post-comments.component').then((m) => m.PostCommentsComponent)
+      },
+      {
         path: 'posts/:id/edit',
         loadComponent: () => import('./pages/posts/post-form.component').then((m) => m.PostFormComponent)
       },
@@ -201,3 +206,4 @@ export const appRoutes: Routes = [
   },
   { path: '**', redirectTo: '' }
 ];
+// rebuild trigger

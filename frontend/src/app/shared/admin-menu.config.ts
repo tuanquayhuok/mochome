@@ -53,7 +53,8 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
     label: 'Quản lý bài viết',
     children: [
       { label: 'Tất cả bài viết', route: '/admin/posts' },
-      { label: 'Lượt tương tác', route: '/admin/posts/interactions' }
+      { label: 'Lượt tương tác', route: '/admin/posts/interactions' },
+      { label: 'Quản lý bình luận', route: '/admin/posts/comments' }
     ]
   },
   { label: 'Quản lý banner', route: '/admin/banners' },

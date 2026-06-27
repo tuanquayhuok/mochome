@@ -8,6 +8,7 @@ const CatalogCollection = require('../models/CatalogCollection');
 const Attribute = require('../models/Attribute');
 const ProductVariant = require('../models/ProductVariant');
 const Banner = require('../models/Banner');
+const PostComment = require('../models/PostComment');
 const dashboardRoutes = require('./dashboardRoutes');
 const orderRoutes = require('./orderRoutes');
 const userRoutes = require('./userRoutes');
@@ -29,6 +30,7 @@ router.use('/orders', orderRoutes);
 router.use('/reviews', createCrudRouter(Review, { populate: 'user product' }));
 router.use('/contacts', createCrudRouter(Contact));
 router.use('/posts', postRoutes);
+router.use('/comments', createCrudRouter(PostComment, { populate: 'post user' }));
 router.use('/vouchers', voucherRoutes);
 router.use('/banners', createCrudRouter(Banner));
 

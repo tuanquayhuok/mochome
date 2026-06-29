@@ -2,7 +2,7 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   CancellationReasonCode,
   StoreOrderDetail,
@@ -61,7 +61,9 @@ const CANCEL_REASONS: { code: CancellationReasonCode; label: string }[] = [
                 <td class="cell-muted">{{ formatDate(o.createdAt) }}</td>
                 <td>{{ o.totalAmount | number }} đ</td>
                 <td>
-                  <span class="order-status" [class]="o.status">{{ orderStatusLabel(o.status) }}</span>
+                  <span class="order-status" [class]="o.status" [class.unpaid]="o.status === 'pending' && o.paymentMethod === 'vnpay'">
+                    {{ o.status === 'pending' && o.paymentMethod === 'vnpay' ? 'Chưa thanh toán' : orderStatusLabel(o.status) }}
+                  </span>
                 </td>
                 <td>
                   <button type="button" class="store-btn store-btn-outline btn-sm" (click)="openDetail(o)">
@@ -107,7 +109,9 @@ const CANCEL_REASONS: { code: CancellationReasonCode; label: string }[] = [
                 <span>{{ formatDate(order.createdAt) }}</span>
                 <span>·</span>
                 <span>{{ paymentLabel(order.paymentMethod) }}</span>
-                <span class="order-status" [class]="order.status">{{ orderStatusLabel(order.status) }}</span>
+                <span class="order-status" [class]="order.status" [class.unpaid]="order.status === 'pending' && order.paymentMethod === 'vnpay'">
+                  {{ order.status === 'pending' && order.paymentMethod === 'vnpay' ? 'Chưa thanh toán' : orderStatusLabel(order.status) }}
+                </span>
               </div>
 
               <section class="detail-section">
@@ -218,13 +222,18 @@ const CANCEL_REASONS: { code: CancellationReasonCode; label: string }[] = [
               }
             </div>
 
-            <footer class="modal-foot">
-              @if (order.canCancel) {
+            <footer class="modal-foot" style="display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap;">
+              @if (order.status === 'pending' && order.paymentMethod === 'vnpay') {
+                <button type="button" class="store-btn store-btn-primary" style="background: #2563eb; border-color: #2563eb;" (click)="payAgain(order)">
+                  Thanh toán lại
+                </button>
+              }
+              @if (order.canCancel && !(order.status === 'pending' && order.paymentMethod === 'vnpay')) {
                 <button type="button" class="store-btn store-btn-outline danger-btn" (click)="openCancel(order)">
                   Hủy đơn hàng
                 </button>
               }
-              <button type="button" class="store-btn store-btn-primary" (click)="closeDetail()">Đóng</button>
+              <button type="button" class="store-btn store-btn-outline" (click)="closeDetail()">Đóng</button>
             </footer>
           }
         </div>
@@ -371,6 +380,12 @@ const CANCEL_REASONS: { code: CancellationReasonCode; label: string }[] = [
         background: #eff6ff;
         color: #1e40af;
         border-color: #bfdbfe;
+      }
+
+      .order-status.unpaid {
+        background: #fffbeb;
+        color: #b45309;
+        border-color: #fde68a;
       }
 
       .btn-sm {
@@ -726,6 +741,7 @@ const CANCEL_REASONS: { code: CancellationReasonCode; label: string }[] = [
 export class StoreAccountOrdersComponent implements OnInit {
   private readonly ordersApi = inject(StoreOrderService);
   private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
 
   readonly STATUS_FLOW_LABELS = STATUS_FLOW_LABELS;
   readonly statusPipeline = ORDER_STATUS_PIPELINE;
@@ -941,6 +957,23 @@ export class StoreAccountOrdersComponent implements OnInit {
 
   isOrderInPipeline(status: string): boolean {
     return isPipelineStatus(status as OrderStatus);
+  }
+
+  payAgain(order: StoreOrderDetail): void {
+    // Lưu đơn hàng vào localStorage giống như vừa đặt xong để trang checkout phục hồi
+    localStorage.setItem('pending_qr_order', JSON.stringify({
+      id: order.id,
+      orderCode: order.orderCode.replace('#', ''), // Bỏ ký tự # để giống định dạng trả về từ API lúc đặt hàng
+      totalAmount: order.totalAmount,
+      paymentMethod: order.paymentMethod,
+      status: order.status,
+      createdAt: order.createdAt
+    }));
+    localStorage.setItem('pending_qr_order_time', '600');
+    localStorage.setItem('pending_qr_order_timestamp', Date.now().toString());
+
+    this.closeDetail();
+    this.router.navigate(['/thanh-toan']);
   }
 
   private errMsg(err: unknown, fallback: string): string {

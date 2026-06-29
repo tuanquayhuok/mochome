@@ -5,7 +5,10 @@ import { catchError, throwError } from 'rxjs';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
-  const token = localStorage.getItem('admin_token') || localStorage.getItem('store_token');
+  const onAdminArea = router.url.startsWith('/admin') || router.url.startsWith('/login');
+  const token = onAdminArea 
+    ? localStorage.getItem('admin_token') 
+    : localStorage.getItem('store_token');
 
   if (token) {
     req = req.clone({

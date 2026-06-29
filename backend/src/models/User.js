@@ -22,7 +22,9 @@ const userSchema = new mongoose.Schema(
     emailVerifiedAt: { type: Date, default: null },
     activationTokenHash: { type: String, default: '' },
     activationTokenExpiresAt: { type: Date, default: null },
-    isVip: { type: Boolean, default: false }
+    isVip: { type: Boolean, default: false },
+    loginAttempts: { type: Number, required: true, default: 0 },
+    lockUntil: { type: Date }
   },
   { timestamps: true }
 );

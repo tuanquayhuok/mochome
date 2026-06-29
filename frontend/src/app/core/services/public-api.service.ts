@@ -65,4 +65,22 @@ export class PublicApiService {
   likeComment(commentId: string) {
     return this.http.post<PostCommentRow>(`${API_URL}/public/comments/${commentId}/like`, {});
   }
+
+  getCollections() {
+    return this.http.get<CollectionRow[]>(`${API_URL}/public/collections`);
+  }
+
+  getCollectionBySlug(slug: string) {
+    return this.http.get<{ collection: CollectionRow; products: ProductRow[] }>(`${API_URL}/public/collections/${slug}`);
+  }
+}
+
+export interface CollectionRow {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }

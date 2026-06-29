@@ -1,10 +1,11 @@
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 import { PublicApiService } from '../../core/services/public-api.service';
+import { SettingsService } from '../../core/services/settings.service';
 
 const SUBJECT_OPTIONS = [
   { value: '', label: 'Chọn chủ đề' },
@@ -21,29 +22,12 @@ const SUBJECT_OPTIONS = [
   template: `
     <div class="contact-page">
       <section class="hero" aria-labelledby="contact-hero-title">
-        <div class="container hero-grid">
-          <div class="hero-art" aria-hidden="true">
-            <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M28 115V72c0-10 8-18 18-18h10c10 0 18 8 18 18v43" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/>
-              <ellipse cx="46" cy="64" rx="22" ry="12" stroke="#9ca3af" stroke-width="1.5"/>
-              <path d="M36 115h20" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/>
-              <rect x="78" y="82" width="72" height="24" rx="3" stroke="#6b7280" stroke-width="1.5"/>
-              <path d="M78 98h72M114 82v24" stroke="#6b7280" stroke-width="1.5"/>
-              <path d="M88 106h52" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="168" y1="32" x2="168" y2="115" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M154 32h28a8 8 0 010 16h-28" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <ellipse cx="168" cy="115" rx="16" ry="4" stroke="#d1d5db" stroke-width="1"/>
-            </svg>
-          </div>
-
-          <div class="hero-center">
-            <h1 id="contact-hero-title">LIÊN HỆ VỚI CHÚNG TÔI</h1>
-            <p class="hero-sub">Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn.</p>
-          </div>
-
+        <div class="container hero-container">
+          <h1 id="contact-hero-title">LIÊN HỆ VỚI CHÚNG TÔI</h1>
+          <p class="hero-sub">Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn.</p>
           <nav class="breadcrumb" aria-label="Breadcrumb">
             <a routerLink="/">Trang chủ</a>
-            <span aria-hidden="true">&gt;</span>
+            <span aria-hidden="true">/</span>
             <span class="current">Liên hệ</span>
           </nav>
         </div>
@@ -142,7 +126,7 @@ const SUBJECT_OPTIONS = [
                   </span>
                   <div>
                     <strong>Địa chỉ</strong>
-                    <p>123 Đường ABC, Phường XYZ,<br />Quận 1, TP. Hồ Chí Minh</p>
+                    <p style="white-space: pre-line;">{{ contact().address }}</p>
                   </div>
                 </li>
                 <li>
@@ -153,7 +137,7 @@ const SUBJECT_OPTIONS = [
                   </span>
                   <div>
                     <strong>Số điện thoại</strong>
-                    <p><a href="tel:0901234567">0901 234 567</a></p>
+                    <p><a [href]="'tel:' + contact().phone">{{ contact().phone }}</a></p>
                   </div>
                 </li>
                 <li>
@@ -164,7 +148,7 @@ const SUBJECT_OPTIONS = [
                   </span>
                   <div>
                     <strong>Email</strong>
-                    <p><a href="mailto:support@mochome.vn">support@mochome.vn</a></p>
+                    <p><a [href]="'mailto:' + contact().email">{{ contact().email }}</a></p>
                   </div>
                 </li>
                 <li>
@@ -175,8 +159,8 @@ const SUBJECT_OPTIONS = [
                   </span>
                   <div>
                     <strong>Giờ làm việc</strong>
-                    <p>Thứ 2 - Thứ 7: 8:00 - 17:30</p>
-                    <p>Chủ nhật: 8:30 - 12:00</p>
+                    <p>{{ contact().workingHoursWeekdays }}</p>
+                    <p>{{ contact().workingHoursSunday }}</p>
                   </div>
                 </li>
               </ul>
@@ -190,7 +174,7 @@ const SUBJECT_OPTIONS = [
                     referrerpolicy="no-referrer-when-downgrade"
                   ></iframe>
                 </div>
-                <a class="btn-directions" [href]="mapLink" target="_blank" rel="noopener noreferrer">
+                <a class="btn-directions" [href]="contact().mapLink" target="_blank" rel="noopener noreferrer">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                     <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
                     <path d="M15 3h6v6M10 14L21 3"/>
@@ -232,65 +216,55 @@ const SUBJECT_OPTIONS = [
 
       /* Hero */
       .hero {
-        background: #e8e8e8;
-        border-bottom: 1px solid #ddd;
-        padding: 2rem 0 2.25rem;
-      }
-
-      .hero-grid {
-        display: grid;
-        grid-template-columns: 180px 1fr auto;
-        align-items: center;
-        gap: 1rem 1.5rem;
-        min-height: 140px;
-      }
-
-      .hero-art {
-        display: flex;
-        align-items: flex-end;
-        justify-content: flex-start;
-      }
-
-      .hero-art svg {
-        width: 160px;
-        height: auto;
-      }
-
-      .hero-center {
+        background: linear-gradient(180deg, #faf6f3 0%, #ffffff 100%);
+        border-bottom: 1px solid #eae6e2;
+        padding: 3rem 0;
         text-align: center;
       }
 
-      .hero-center h1 {
+      .hero-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .hero h1 {
         margin: 0;
-        font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+        font-size: clamp(1.5rem, 3vw, 2rem);
         font-weight: 700;
-        letter-spacing: 0.06em;
-        color: #1a1d21;
+        letter-spacing: 0.08em;
+        color: #2c2520;
       }
 
       .hero-sub {
-        margin: 0.5rem 0 0;
-        font-size: 0.875rem;
-        color: #6b7280;
+        margin: 0;
+        font-size: 0.9375rem;
+        color: #7a6e67;
       }
 
       .breadcrumb {
         display: flex;
         align-items: center;
-        justify-content: flex-end;
-        gap: 0.35rem;
-        font-size: 0.75rem;
-        color: #9ca3af;
-        align-self: start;
-        padding-top: 0.25rem;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.8125rem;
+        color: #a3978e;
+        margin-top: 0.5rem;
+      }
+
+      .breadcrumb a {
+        color: #8c7e74;
+        text-decoration: none;
+        transition: color 0.2s;
       }
 
       .breadcrumb a:hover {
-        color: #1a1d21;
+        color: #2c2520;
       }
 
       .breadcrumb .current {
-        color: #6b7280;
+        color: #a3978e;
       }
 
       /* Main */
@@ -337,29 +311,32 @@ const SUBJECT_OPTIONS = [
       .field select,
       .field textarea {
         width: 100%;
-        padding: 0.6rem 0.7rem;
-        border: 1px solid #d1d5db;
-        border-radius: 2px;
-        font-size: 0.875rem;
-        color: #1a1d21;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2dbd5;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        color: #2c2520;
         background: #fff;
+        transition: border-color 0.2s, box-shadow 0.2s;
       }
 
       .field input::placeholder,
       .field textarea::placeholder {
-        color: #9ca3af;
+        color: #a89f97;
       }
 
       .field input:focus,
       .field select:focus,
       .field textarea:focus {
         outline: none;
-        border-color: #6b7280;
+        border-color: #a39185;
+        box-shadow: 0 0 0 3px rgba(163, 145, 133, 0.12);
       }
 
       .field input.invalid,
       .field textarea.invalid {
         border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
       }
 
       .field--full {
@@ -617,6 +594,7 @@ export class ContactComponent {
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly settingsService = inject(SettingsService);
 
   readonly subjectOptions = SUBJECT_OPTIONS;
   readonly sending = signal(false);
@@ -654,10 +632,8 @@ export class ContactComponent {
     message: ['', [Validators.required, Validators.minLength(10)]]
   });
 
-  mapUrl =
-    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.954!2d106.701!3d10.7769!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752a4139c8d0b1%3A0x9b8f3c8e8e8e8e8e!2zSOG7jWMgQ2jDrSBNaW5o!5e0!3m2!1svi!2s!4v1';
-  mapUrlSafe = this.sanitizer.bypassSecurityTrustResourceUrl(this.mapUrl);
-  mapLink = 'https://www.google.com/maps/search/?api=1&query=123+Duong+ABC+Quan+1+Ho+Chi+Minh';
+  readonly contact = this.settingsService.contactSettings;
+  readonly mapUrlSafe = computed(() => this.sanitizer.bypassSecurityTrustResourceUrl(this.contact().mapUrl));
 
   get fullName() {
     return this.form.controls.fullName;

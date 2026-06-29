@@ -96,7 +96,7 @@ export class StoreAuthService {
       const path = paths[index];
       return this.http.post<T>(`${API_URL}${path}`, body).pipe(
         catchError((err: HttpErrorResponse) => {
-          const canRetry = index < paths.length - 1 && (err.status === 404 || err.status === 401);
+          const canRetry = index < paths.length - 1 && err.status === 404;
           if (canRetry) {
             return tryPath(index + 1);
           }

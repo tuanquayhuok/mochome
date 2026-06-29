@@ -1127,6 +1127,7 @@ const PLACEHOLDER_POSTS = [
         }
       }
 
+
       @keyframes marqueeScroll {
         0% {
           transform: translateX(0);

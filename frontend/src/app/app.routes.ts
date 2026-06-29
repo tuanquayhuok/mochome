@@ -36,6 +36,10 @@ export const appRoutes: Routes = [
         loadComponent: () => import('./pages/posts-list/posts-list.component').then((m) => m.PostsListComponent)
       },
       {
+        path: 'bo-suu-tap',
+        loadComponent: () => import('./pages/collections-list/collections-list.component').then((m) => m.CollectionsListComponent)
+      },
+      {
         path: 'bo-suu-tap/:slug',
         loadComponent: () => import('./pages/collection/collection.component').then((m) => m.CollectionComponent)
       },
@@ -199,6 +203,16 @@ export const appRoutes: Routes = [
         path: 'account/password',
         loadComponent: () =>
           import('./pages/account/account-password.component').then((m) => m.AccountPasswordComponent)
+      },
+      {
+        path: 'system-settings',
+        loadComponent: () =>
+          import('./pages/admin/system-settings.component').then((m) => m.SystemSettingsComponent)
+      },
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import('./pages/admin/notifications.component').then((m) => m.AdminNotificationsComponent)
       },
       ...ADMIN_EXTENDED_ROUTES,
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' }

@@ -1,5 +1,15 @@
 const express = require('express');
-const { getCatalog, getProductBySlug, getPostBySlug, likePost, getPostComments, createPostComment, likePostComment } = require('../controllers/publicController');
+const {
+  getCatalog,
+  getProductBySlug,
+  getPostBySlug,
+  likePost,
+  getPostComments,
+  createPostComment,
+  likePostComment,
+  getCollections,
+  getCollectionBySlug
+} = require('../controllers/publicController');
 const { storeChat } = require('../controllers/chatController');
 const { storeLogin, storeRegister, activateStoreAccount, mailDebug, googleLogin } = require('../controllers/authController');
 const { validateVoucherPublic, listPickerVouchers } = require('../controllers/voucherController');
@@ -15,6 +25,8 @@ router.post('/sepay/webhook', asyncHandler(sepayWebhook));
 router.get('/catalog', getCatalog);
 router.get('/products/:slug', getProductBySlug);
 router.post('/chat', asyncHandler(storeChat));
+router.get('/collections', asyncHandler(getCollections));
+router.get('/collections/:slug', asyncHandler(getCollectionBySlug));
 router.post('/store/login', asyncHandler(storeLogin));
 router.post('/store/register', asyncHandler(storeRegister));
 router.post('/store/google-login', asyncHandler(googleLogin));

@@ -1,5 +1,5 @@
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
@@ -20,24 +20,107 @@ type PaymentMethod = 'cod' | 'vnpay' | 'momo';
     <div class="store-page checkout-page">
       <div class="store-container">
         @if (successOrder(); as order) {
-          <div class="store-card checkout-success">
-            <div class="success-icon" aria-hidden="true">✓</div>
-            <h1>Đặt hàng thành công</h1>
-            <p>
-              Mã đơn hàng: <strong>{{ order.orderCode }}</strong>
-            </p>
-            <p class="success-meta">
-              Tổng thanh toán: <strong>{{ order.totalAmount | number }} đ</strong>
-              · {{ paymentLabel(order.paymentMethod) }}
-            </p>
-            <p class="success-hint">
-              Chúng tôi sẽ liên hệ qua số điện thoại để xác nhận đơn. Cảm ơn bạn đã mua tại MỘC HOME.
-            </p>
-            <div class="success-actions">
-              <a routerLink="/" class="store-btn store-btn-primary">Về trang chủ</a>
-              <a routerLink="/tai-khoan" class="store-btn store-btn-outline">Tài khoản</a>
+          <!-- Trường hợp 1: Chọn Chuyển khoản QR và CHƯA THANH TOÁN (hoặc đang đếm ngược) -->
+          @if (order.paymentMethod === 'vnpay' && orderPaidStatus() === 'pending') {
+            <div class="store-card checkout-success" style="max-width: 680px;">
+              <h1>Cổng thanh toán QR Code</h1>
+              <p style="margin-bottom: 0.5rem;">Vui lòng chuyển khoản đúng thông tin bên dưới để hoàn tất đơn hàng.</p>
+              
+              <!-- Đếm ngược thời gian -->
+              <div class="countdown-badge" style="display: inline-block; padding: 0.35rem 0.85rem; background: #fff1f2; color: #e11d48; font-weight: bold; border-radius: 20px; font-size: 0.85rem; margin-bottom: 1.5rem; border: 1px solid #fecdd3;">
+                Đơn hàng sẽ tự động hủy sau: <strong style="font-size: 0.95rem;">{{ displayTime() }}</strong>
+              </div>
+
+              <!-- Khu vực hiển thị chuyển khoản qua mã QR VietQR -->
+              <div class="bank-transfer-box" style="padding: 1.5rem; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; text-align: left;">
+                <h3 style="margin-top: 0; color: #1e293b; font-size: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="color: #2563eb;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect><rect x="7" y="14" width="3" height="3"></rect><rect x="14" y="14" width="3" height="3"></rect></svg>
+                  Thông tin Chuyển khoản QR Code
+                </h3>
+                
+                <div class="transfer-layout" style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; margin-top: 1rem;">
+                  <div style="flex-shrink: 0; margin: 0 auto; text-align: center; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
+                    <!-- API VietQR tạo ảnh QR Napas chứa số tiền và nội dung tự động -->
+                    <img 
+                      [src]="'https://img.vietqr.io/image/MB-20080699998386-qr_only.png?amount=' + order.totalAmount + '&addInfo=DH' + order.orderCode.slice(-6) + '&accountName=QUANG%20TRONG%20TUAN'" 
+                      alt="VietQR code" 
+                      style="width: 200px; height: 200px; display: block;" 
+                    />
+                    <small style="color: #64748b; font-size: 11px; font-weight: 500; display: block; margin-top: 5px;">Quét để thanh toán</small>
+                  </div>
+
+                  <!-- Thông tin tài khoản chi tiết -->
+                  <div style="flex: 1; min-width: 250px;">
+                    <p style="margin: 0 0 0.5rem; font-size: 0.875rem;">Ngân hàng: <strong>MBBank (Ngân hàng Quân đội)</strong></p>
+                    <p style="margin: 0 0 0.5rem; font-size: 0.875rem;">Số tài khoản: <strong style="color: #2563eb; font-size: 1rem;">20080699998386</strong></p>
+                    <p style="margin: 0 0 0.5rem; font-size: 0.875rem;">Chủ tài khoản: <strong>QUANG TRONG TUAN</strong></p>
+                    <p style="margin: 0 0 0.5rem; font-size: 0.875rem;">Số tiền: <strong style="color: #ef4444; font-size: 1.1rem;">{{ order.totalAmount | number }} đ</strong></p>
+                    <p style="margin: 0 0 1rem; font-size: 0.875rem; padding: 0.4rem; background: #fef2f2; border: 1px solid #fca5a5; border-radius: 4px; display: inline-block;">
+                      Nội dung CK bắt buộc: <strong style="color: #dc2626; font-size: 1.05rem;">DH{{ order.orderCode.slice(-6) }}</strong>
+                    </p>
+
+                    <div style="font-size: 0.775rem; color: #475569; line-height: 1.4;">
+                      <p style="margin: 0; display: flex; align-items: center; gap: 0.25rem;">
+                        <span style="color: #059669; font-weight: bold;">●</span>
+                        Hệ thống tự động duyệt đơn ngay khi nhận được tiền.
+                      </p>
+                      <p style="margin: 0.25rem 0 0; display: flex; align-items: center; gap: 0.25rem;">
+                        <span style="color: #059669; font-weight: bold;">●</span>
+                        Vui lòng giữ nguyên nội dung chuyển khoản ở trên.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Trạng thái thanh toán thời gian thực qua polling -->
+              <div class="realtime-payment-status" style="margin: 1.25rem 0; padding: 1rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 0.75rem; font-weight: 600; font-size: 0.9rem; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;">
+                <!-- SVG Loading Spinner -->
+                <svg class="spinning" viewBox="0 0 24 24" width="20" height="20" fill="none" style="display: inline-block;">
+                  <circle cx="12" cy="12" r="10" stroke="#bfdbfe" stroke-width="3" style="opacity: 0.25;"></circle>
+                  <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style="color: #2563eb;"></path>
+                </svg>
+                <span>Hệ thống đang chờ bạn chuyển khoản chuyển khoản online...</span>
+              </div>
             </div>
-          </div>
+          } @else if (orderPaidStatus() === 'cancelled') {
+            <!-- Trường hợp thanh toán hết hạn / tự hủy -->
+            <div class="store-card checkout-success" style="max-width: 520px;">
+              <div class="success-icon" style="background: #fef2f2; color: #dc2626;" aria-hidden="true">✕</div>
+              <h1 style="color: #dc2626;">Thanh toán hết hạn</h1>
+              <p>Thời gian thanh toán cho đơn hàng <strong>{{ order.orderCode }}</strong> đã kết thúc.</p>
+              <p class="success-hint">Đơn hàng này đã bị hệ thống tự động hủy bỏ do quá giờ giao dịch.</p>
+              <div class="success-actions">
+                <a routerLink="/" class="store-btn store-btn-primary">Về trang chủ</a>
+                <a routerLink="/tai-khoan" class="store-btn store-btn-outline">Tài khoản của tôi</a>
+              </div>
+            </div>
+          } @else {
+            <!-- Trường hợp 2: COD, Momo, hoặc ĐÃ THANH TOÁN (paid) -->
+            <div class="store-card checkout-success" style="max-width: 520px;">
+              <div class="success-icon" aria-hidden="true">✓</div>
+              <h1>Đặt hàng thành công</h1>
+              <p>
+                Mã đơn hàng: <strong>{{ order.orderCode }}</strong>
+              </p>
+              <p class="success-meta">
+                Tổng thanh toán: <strong>{{ order.totalAmount | number }} đ</strong>
+                · {{ paymentLabel(order.paymentMethod) }}
+              </p>
+              @if (order.paymentMethod === 'vnpay') {
+                <div style="margin: 1rem 0; padding: 0.85rem; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; color: #047857; font-weight: 600; font-size: 0.9rem;">
+                  Đã thanh toán thành công! Hệ thống đã duyệt đơn của bạn.
+                </div>
+              }
+              <p class="success-hint">
+                Chúng tôi sẽ liên hệ qua số điện thoại để xác nhận đơn. Cảm ơn bạn đã mua tại MỘC HOME.
+              </p>
+              <div class="success-actions">
+                <a routerLink="/" class="store-btn store-btn-primary">Về trang chủ</a>
+                <a routerLink="/tai-khoan" class="store-btn store-btn-outline">Tài khoản</a>
+              </div>
+            </div>
+          }
         } @else {
           <header class="store-page-head">
             <div>
@@ -165,15 +248,18 @@ type PaymentMethod = 'cod' | 'vnpay' | 'momo';
                       <span>Thanh toán tiền mặt khi nhận hàng</span>
                     </div>
                   </label>
-                  <label class="pay-option" [class.selected]="payment() === 'vnpay'">
-                    <input type="radio" value="vnpay" formControlName="paymentMethod" />
-                    <div class="pay-option-content">
-                      <img src="https://1889324617.cloud.edgevnpay.vn/assets/images/logo-icon/logo-primary.svg" alt="VNPay" class="pay-logo" />
-                      <div>
-                        <span>Thanh toán online qua cổng VNPay</span>
-                      </div>
-                    </div>
-                  </label>
+                   <label class="pay-option" [class.selected]="payment() === 'vnpay'">
+                     <input type="radio" value="vnpay" formControlName="paymentMethod" />
+                     <div class="pay-option-content" style="display: flex; align-items: center; gap: 0.75rem;">
+                       <span class="pay-qr-icon" style="font-size: 1.5rem; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; background: #eff6ff; color: #2563eb;">
+                         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect><rect x="7" y="14" width="3" height="3"></rect><rect x="14" y="14" width="3" height="3"></rect></svg>
+                       </span>
+                       <div>
+                         <strong>Chuyển khoản Ngân hàng (QR Code)</strong>
+                         <span>Quét mã QR qua ứng dụng Ngân hàng để thanh toán tự động</span>
+                       </div>
+                     </div>
+                   </label>
                   <label class="pay-option" [class.selected]="payment() === 'momo'">
                     <input type="radio" value="momo" formControlName="paymentMethod" />
                     <div>
@@ -596,6 +682,21 @@ type PaymentMethod = 'cod' | 'vnpay' | 'momo';
         color: #6b7280;
       }
 
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      @-webkit-keyframes spin {
+        from { -webkit-transform: rotate(0deg); }
+        to { -webkit-transform: rotate(360deg); }
+      }
+
+      .spinning {
+        animation: spin 1s linear infinite;
+        -webkit-animation: spin 1s linear infinite;
+      }
+
       .success-actions {
         display: flex;
         gap: 0.5rem;
@@ -605,7 +706,7 @@ type PaymentMethod = 'cod' | 'vnpay' | 'momo';
     `
   ]
 })
-export class CheckoutComponent implements OnInit {
+export class CheckoutComponent implements OnInit, OnDestroy {
   readonly cart = inject(CartService);
   readonly voucherCart = inject(VoucherCartService);
   readonly storeAuth = inject(StoreAuthService);
@@ -613,10 +714,19 @@ export class CheckoutComponent implements OnInit {
   readonly api = inject(ApiService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
+  private pollingIntervalId: any;
 
   readonly submitting = signal(false);
   readonly submitError = signal('');
   readonly successOrder = signal<StoreOrderResult | null>(null);
+  readonly orderPaidStatus = signal<string>('pending'); // 'pending' | 'paid' | 'failed' | 'cancelled'
+  readonly countdownSeconds = signal<number>(600); // 10 minutes = 600s
+  readonly displayTime = computed(() => {
+    const mins = Math.floor(this.countdownSeconds() / 60);
+    const secs = this.countdownSeconds() % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  });
+  private countdownIntervalId: any;
   readonly voucherApplying = signal(false);
   readonly voucherMsg = signal('');
   readonly voucherError = signal(false);
@@ -774,6 +884,34 @@ export class CheckoutComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Nếu trong giỏ hàng có sản phẩm, người dùng muốn đặt đơn hàng mới -> Xóa phiên thanh toán của đơn hàng cũ trước đó
+    if (this.cart.cartItems().length > 0) {
+      this.clearPendingOrderSession();
+    } else {
+      // Nếu giỏ hàng trống, thử phục hồi đơn hàng đang chờ thanh toán chuyển khoản từ localStorage để không bị mất khi F5
+      const savedOrderJson = localStorage.getItem('pending_qr_order');
+      if (savedOrderJson) {
+        try {
+          const order = JSON.parse(savedOrderJson);
+          const savedTimeStr = localStorage.getItem('pending_qr_order_time') || '600';
+          const startTimestamp = Number(localStorage.getItem('pending_qr_order_timestamp') || Date.now());
+          const elapsed = Math.floor((Date.now() - startTimestamp) / 1000);
+          const remaining = Math.max(0, Number(savedTimeStr) - elapsed);
+
+          if (remaining > 0) {
+            this.successOrder.set(order);
+            this.countdownSeconds.set(remaining);
+            this.startPaymentPolling(order.id, remaining);
+            return;
+          } else {
+            this.clearPendingOrderSession();
+          }
+        } catch (e) {
+          this.clearPendingOrderSession();
+        }
+      }
+    }
+
     if (!this.cart.cartItems().length) {
       this.router.navigate(['/gio-hang']);
       return;
@@ -786,6 +924,12 @@ export class CheckoutComponent implements OnInit {
       this.voucherCode = applied.code;
       this.revalidateVoucher();
     }
+  }
+
+  private clearPendingOrderSession(): void {
+    localStorage.removeItem('pending_qr_order');
+    localStorage.removeItem('pending_qr_order_time');
+    localStorage.removeItem('pending_qr_order_timestamp');
   }
 
   restoreSavedAddress(): void {
@@ -955,6 +1099,14 @@ export class CheckoutComponent implements OnInit {
           this.successOrder.set(res.order);
           this.submitting.set(false);
           window.scrollTo({ top: 0, behavior: 'smooth' });
+
+          // Nếu là thanh toán chuyển khoản, tiến hành kiểm tra trạng thái đơn hàng định kỳ
+          if (res.order.paymentMethod === 'vnpay') {
+            localStorage.setItem('pending_qr_order', JSON.stringify(res.order));
+            localStorage.setItem('pending_qr_order_time', '600');
+            localStorage.setItem('pending_qr_order_timestamp', Date.now().toString());
+            this.startPaymentPolling(res.order.id);
+          }
         },
         error: (err) => {
           this.submitting.set(false);
@@ -965,8 +1117,72 @@ export class CheckoutComponent implements OnInit {
 
   paymentLabel(method: string): string {
     const m = String(method || '').toLowerCase();
-    if (m === 'vnpay') return 'VNPay';
+    if (m === 'vnpay') return 'Chuyển khoản Ngân hàng (QR)';
     if (m === 'momo') return 'MoMo';
     return 'Thanh toán khi nhận hàng';
+  }
+
+  startPaymentPolling(orderId: string, remainingSecs: number = 600): void {
+    if (this.pollingIntervalId) {
+      clearInterval(this.pollingIntervalId);
+    }
+    if (this.countdownIntervalId) {
+      clearInterval(this.countdownIntervalId);
+    }
+
+    this.countdownSeconds.set(remainingSecs);
+
+    // Thiết lập đếm ngược thời gian
+    this.countdownIntervalId = setInterval(() => {
+      const current = this.countdownSeconds();
+      if (current <= 1) {
+        clearInterval(this.countdownIntervalId);
+        clearInterval(this.pollingIntervalId);
+        this.orderPaidStatus.set('cancelled');
+
+        // Tự động gửi API hủy đơn hàng do quá giờ thanh toán
+        this.orders.cancelOrder(orderId, { reason: 'other', reasonOther: 'Hết hạn thời gian thanh toán (10 phút)' }).subscribe({
+          next: () => console.log('Đơn hàng đã tự động hủy do hết hạn thanh toán.'),
+          error: (err) => console.error('Lỗi khi tự động hủy đơn hàng:', err)
+        });
+      } else {
+        this.countdownSeconds.set(current - 1);
+      }
+    }, 1000);
+
+    // Gửi request kiểm tra trạng thái đơn hàng mỗi 4 giây
+    this.pollingIntervalId = setInterval(() => {
+      this.orders.getOrder(orderId).subscribe({
+        next: (orderDetail) => {
+          if (orderDetail.paymentStatus === 'paid') {
+            this.orderPaidStatus.set('paid');
+            this.clearPendingOrderSession();
+            clearInterval(this.pollingIntervalId);
+            if (this.countdownIntervalId) {
+              clearInterval(this.countdownIntervalId);
+            }
+          } else if (orderDetail.paymentStatus === 'failed') {
+            this.orderPaidStatus.set('failed');
+            this.clearPendingOrderSession();
+            clearInterval(this.pollingIntervalId);
+            if (this.countdownIntervalId) {
+              clearInterval(this.countdownIntervalId);
+            }
+          }
+        },
+        error: (err) => {
+          console.error('Lỗi khi kiểm tra trạng thái thanh toán đơn hàng:', err);
+        }
+      });
+    }, 4000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollingIntervalId) {
+      clearInterval(this.pollingIntervalId);
+    }
+    if (this.countdownIntervalId) {
+      clearInterval(this.countdownIntervalId);
+    }
   }
 }

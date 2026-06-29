@@ -6,6 +6,7 @@ import { CartService } from '../core/services/cart.service';
 import { FavoritesService } from '../core/services/favorites.service';
 import { StoreAuthService } from '../core/services/store-auth.service';
 import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.component';
+import { SettingsService } from '../core/services/settings.service';
 
 @Component({
   selector: 'app-store-layout',
@@ -45,13 +46,22 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
               >
                 Trang chủ
               </a>
-              <a routerLink="/san-pham" routerLinkActive="active" class="nav-item has-chevron">
-                Sản phẩm
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </a>
-              <a routerLink="/san-pham" routerLinkActive="active" class="nav-item">Bộ sưu tập</a>
+              <div class="nav-item-wrapper">
+                <a routerLink="/san-pham" routerLinkActive="active" class="nav-item has-chevron">
+                  Sản phẩm
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </a>
+                <div class="nav-dropdown">
+                  <a routerLink="/san-pham" [queryParams]="{ category: 'sofa' }" class="dropdown-link">Sofa</a>
+                  <a routerLink="/san-pham" [queryParams]="{ category: 'ban-an' }" class="dropdown-link">Bàn ăn</a>
+                  <a routerLink="/san-pham" [queryParams]="{ category: 'giuong-ngu' }" class="dropdown-link">Giường ngủ</a>
+                  <a routerLink="/san-pham" [queryParams]="{ category: 'tu-quan-ao' }" class="dropdown-link">Tủ quần áo</a>
+                  <a routerLink="/san-pham" [queryParams]="{ category: 'ke-tivi' }" class="dropdown-link">Kệ tivi</a>
+                </div>
+              </div>
+              <a routerLink="/bo-suu-tap" routerLinkActive="active" class="nav-item">Bộ sưu tập</a>
               <a routerLink="/tin-tuc" routerLinkActive="active" class="nav-item">Bài viết</a>
               <a routerLink="/gioi-thieu" routerLinkActive="active" class="nav-item">Giới thiệu</a>
               <a routerLink="/lien-he" routerLinkActive="active" class="nav-item">Liên hệ</a>
@@ -103,6 +113,40 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
                     <hr class="dropdown-divider" />
                     <a routerLink="/tai-khoan" class="dropdown-item">Trang tài khoản</a>
                     <button type="button" class="dropdown-item logout-item" (click)="storeAuth.logout()">Đăng xuất</button>
+                  </div>
+                }
+              </div>
+              <div class="notification-dropdown-container">
+                <button type="button" class="icon-btn" title="Thông báo" (click)="toggleNotifications()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
+                  </svg>
+                  @if (notificationCount() > 0) {
+                    <em class="notification-badge">{{ notificationCount() }}</em>
+                  }
+                </button>
+                @if (showNotifications()) {
+                  <div class="notification-dropdown">
+                    <div class="dropdown-header">
+                      <h3>Thông báo</h3>
+                      @if (notificationCount() > 0) {
+                        <button type="button" class="mark-read-btn" (click)="markAllRead()">Đọc tất cả</button>
+                      }
+                    </div>
+                    <div class="dropdown-body">
+                      @for (n of notifications(); track n.id) {
+                        <div class="notification-item" [class.unread]="!n.read">
+                          <div class="notification-item-content">
+                            <h4 class="item-title">{{ n.title }}</h4>
+                            <p class="item-desc">{{ n.content }}</p>
+                            <span class="item-time">{{ n.time }}</span>
+                          </div>
+                          <button type="button" class="btn-clear-notif" (click)="clearNotification($event, n.id)" title="Xóa thông báo">×</button>
+                        </div>
+                      } @empty {
+                        <div class="empty-notifications">Không có thông báo mới</div>
+                      }
+                    </div>
                   </div>
                 }
               </div>
@@ -174,6 +218,41 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
                     </div>
                   }
                 </div>
+                <div class="notification-dropdown-container">
+                  <button type="button" class="action-link" (click)="toggleNotifications()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                      <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
+                    </svg>
+                    <span>Thông báo</span>
+                    @if (notificationCount() > 0) {
+                      <em class="notification-badge">{{ notificationCount() }}</em>
+                    }
+                  </button>
+                  @if (showNotifications()) {
+                    <div class="notification-dropdown">
+                      <div class="dropdown-header">
+                        <h3>Thông báo</h3>
+                        @if (notificationCount() > 0) {
+                          <button type="button" class="mark-read-btn" (click)="markAllRead()">Đọc tất cả</button>
+                        }
+                      </div>
+                      <div class="dropdown-body">
+                        @for (n of notifications(); track n.id) {
+                          <div class="notification-item" [class.unread]="!n.read">
+                            <div class="notification-item-content">
+                              <h4 class="item-title">{{ n.title }}</h4>
+                              <p class="item-desc">{{ n.content }}</p>
+                              <span class="item-time">{{ n.time }}</span>
+                            </div>
+                            <button type="button" class="btn-clear-notif" (click)="clearNotification($event, n.id)" title="Xóa thông báo">×</button>
+                          </div>
+                        } @empty {
+                          <div class="empty-notifications">Không có thông báo mới</div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
                 <a routerLink="/yeu-thich" class="action-link">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
                     <path
@@ -207,13 +286,22 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
               >
                 TRANG CHỦ
               </a>
-              <a routerLink="/san-pham" routerLinkActive="active" class="nav-link has-chevron">
-                SẢN PHẨM
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </a>
-              <a routerLink="/san-pham" routerLinkActive="active" class="nav-link">BỘ SƯU TẬP</a>
+              <div class="nav-item-wrapper">
+                <a routerLink="/san-pham" routerLinkActive="active" class="nav-link has-chevron">
+                  SẢN PHẨM
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </a>
+                <div class="nav-dropdown">
+                  <a routerLink="/san-pham" [queryParams]="{ category: 'sofa' }" class="dropdown-link">Sofa</a>
+                  <a routerLink="/san-pham" [queryParams]="{ category: 'ban-an' }" class="dropdown-link">Bàn ăn</a>
+                  <a routerLink="/san-pham" [queryParams]="{ category: 'giuong-ngu' }" class="dropdown-link">Giường ngủ</a>
+                  <a routerLink="/san-pham" [queryParams]="{ category: 'tu-quan-ao' }" class="dropdown-link">Tủ quần áo</a>
+                  <a routerLink="/san-pham" [queryParams]="{ category: 'ke-tivi' }" class="dropdown-link">Kệ tivi</a>
+                </div>
+              </div>
+              <a routerLink="/bo-suu-tap" routerLinkActive="active" class="nav-link">BỘ SƯU TẬP</a>
               <a routerLink="/tin-tuc" routerLinkActive="active" class="nav-link">BÀI VIẾT</a>
               <a routerLink="/gioi-thieu" routerLinkActive="active" class="nav-link">GIỚI THIỆU</a>
               <a routerLink="/lien-he" routerLinkActive="active" class="nav-link">LIÊN HỆ</a>
@@ -237,7 +325,7 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
               </form>
               <a routerLink="/" (click)="closeMobileNav()" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Trang chủ</a>
               <a routerLink="/san-pham" (click)="closeMobileNav()" routerLinkActive="active">Sản phẩm</a>
-              <a routerLink="/san-pham" (click)="closeMobileNav()" routerLinkActive="active">Bộ sưu tập</a>
+              <a routerLink="/bo-suu-tap" (click)="closeMobileNav()" routerLinkActive="active">Bộ sưu tập</a>
               <a routerLink="/tin-tuc" (click)="closeMobileNav()" routerLinkActive="active">Bài viết</a>
               <a routerLink="/gioi-thieu" (click)="closeMobileNav()" routerLinkActive="active">Giới thiệu</a>
               <a routerLink="/lien-he" (click)="closeMobileNav()" routerLinkActive="active">Liên hệ</a>
@@ -292,7 +380,7 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
               <h4>VỀ CHÚNG TÔI</h4>
               <ul>
                 <li><a routerLink="/gioi-thieu">Giới thiệu</a></li>
-                <li><a routerLink="/san-pham">Bộ sưu tập</a></li>
+                <li><a routerLink="/bo-suu-tap">Bộ sưu tập</a></li>
                 <li><a routerLink="/tin-tuc">Tin tức</a></li>
                 <li><a routerLink="/lien-he">Liên hệ</a></li>
               </ul>
@@ -625,6 +713,170 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
         color: #dc2626;
       }
 
+      /* Notification Popover Dropdown Styles */
+      .notification-dropdown-container {
+        position: relative;
+        display: inline-block;
+      }
+
+      .notification-badge {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        background: #e11d48;
+        color: #ffffff;
+        font-size: 0.625rem;
+        font-weight: 700;
+        font-style: normal;
+        min-width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 1px;
+        box-sizing: border-box;
+      }
+
+      .notification-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 0.5rem;
+        background: #ffffff;
+        border: 1px solid #ebdcd0;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(62, 42, 30, 0.12);
+        width: 320px;
+        max-height: 400px;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: slideDownNotification 0.2s ease-out;
+      }
+
+      @keyframes slideDownNotification {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .notification-dropdown .dropdown-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #ebdcd0;
+        background: #faf6f2;
+      }
+
+      .notification-dropdown .dropdown-header h3 {
+        margin: 0;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #3e2a1e;
+      }
+
+      .mark-read-btn {
+        background: none;
+        border: none;
+        color: #8c6239;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      .mark-read-btn:hover {
+        text-decoration: underline;
+      }
+
+      .notification-dropdown .dropdown-body {
+        overflow-y: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .notification-item {
+        position: relative;
+        padding: 0.75rem 2.25rem 0.75rem 1rem;
+        border-bottom: 1px solid #f3ebe4;
+        transition: background 0.15s ease;
+        display: flex;
+        align-items: flex-start;
+      }
+
+      .notification-item:last-child {
+        border-bottom: none;
+      }
+
+      .notification-item:hover {
+        background: #fafafa;
+      }
+
+      .notification-item.unread {
+        background: #fdfaf7;
+      }
+
+      .notification-item-content {
+        flex: 1;
+      }
+
+      .notification-item .item-title {
+        margin: 0 0 0.15rem;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        color: #3e2a1e;
+        text-align: left;
+      }
+
+      .notification-item .item-desc {
+        margin: 0 0 0.25rem;
+        font-size: 0.75rem;
+        color: #5c524a;
+        line-height: 1.4;
+        text-align: left;
+      }
+
+      .notification-item .item-time {
+        font-size: 0.625rem;
+        color: #8c8175;
+        display: block;
+        text-align: left;
+      }
+
+      .btn-clear-notif {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: none;
+        border: none;
+        color: #9ca3af;
+        font-size: 1.1rem;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0.25rem;
+        border-radius: 40%;
+        display: grid;
+        place-items: center;
+        width: 20px;
+        height: 20px;
+        transition: background 0.2s, color 0.2s;
+      }
+
+      .btn-clear-notif:hover {
+        background: #fee2e2;
+        color: #ef4444;
+      }
+
+      .empty-notifications {
+        padding: 2rem 1rem;
+        text-align: center;
+        color: #8c8175;
+        font-size: 0.8125rem;
+      }
+
       /* —— Default header (Trang chủ) —— */
       .topbar {
         border-bottom: 1px solid #f0f2f5;
@@ -725,6 +977,16 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
         font-weight: 500;
         color: #4b5563;
         position: relative;
+        text-decoration: none;
+      }
+
+      button.action-link {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        font-family: inherit;
+        line-height: inherit;
       }
 
       .action-link svg {
@@ -1192,6 +1454,60 @@ import { StoreChatbotComponent } from '../shared/store-chatbot/store-chatbot.com
           justify-content: center;
         }
       }
+
+      /* Hover Dropdown Header */
+      .nav-item-wrapper {
+        position: relative;
+        display: inline-block;
+      }
+
+      .nav-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        background: #ffffff;
+        border: 1px solid #eae6e2;
+        box-shadow: 0 10px 30px rgba(44, 37, 32, 0.1);
+        border-radius: 8px;
+        padding: 0.5rem 0;
+        min-width: 170px;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+        z-index: 999;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .nav-item-wrapper:hover .nav-dropdown {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .dropdown-link {
+        padding: 0.65rem 1.25rem;
+        color: #4a3e35;
+        text-decoration: none;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        transition: background 0.2s, color 0.2s;
+        text-align: left;
+        display: block;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        border-bottom: 1px solid #fdfbfa;
+      }
+
+      .dropdown-link:last-child {
+        border-bottom: none;
+      }
+
+      .dropdown-link:hover {
+        background: #fcf9f6;
+        color: #8c7161;
+      }
     `
   ]
 })
@@ -1200,6 +1516,7 @@ export class StoreLayoutComponent {
   readonly cart = inject(CartService);
   readonly favorites = inject(FavoritesService);
   readonly storeAuth = inject(StoreAuthService);
+  private readonly settingsService = inject(SettingsService);
 
   cartCount = () => this.cart.cartItems().reduce((s, i) => s + i.quantity, 0);
 
@@ -1210,6 +1527,25 @@ export class StoreLayoutComponent {
   readonly compactLayout = signal(this.isContactRoute(this.router.url));
   readonly isHomePage = signal(this.isHomeRoute(this.router.url));
 
+  // Notification States
+  readonly showNotifications = signal(false);
+  readonly notifications = this.settingsService.notifications;
+
+  notificationCount = () => this.notifications().filter(n => !n.read).length;
+
+  toggleNotifications(): void {
+    this.showNotifications.update(v => !v);
+  }
+
+  markAllRead(): void {
+    this.settingsService.markAllRead();
+  }
+
+  clearNotification(event: Event, id: number): void {
+    event.stopPropagation();
+    this.settingsService.clearNotification(id);
+  }
+
   searchQueryModel = '';
   newsletterEmail = '';
 
@@ -1219,6 +1555,7 @@ export class StoreLayoutComponent {
       this.isHomePage.set(this.isHomeRoute(this.router.url));
       this.searchOpen.set(false);
       this.mobileNavOpen.set(false);
+      this.showNotifications.set(false);
     });
   }
 
@@ -1236,7 +1573,7 @@ export class StoreLayoutComponent {
   }
 
   private isContactRoute(url: string): boolean {
-    return url === '/lien-he' || url.startsWith('/lien-he?');
+    return false;
   }
 
   toggleSearch(): void {

@@ -30,6 +30,7 @@ const mapStoreOrder = (order) => {
     voucherCode: order.voucherCode || '',
     totalAmount: order.totalAmount,
     paymentMethod: order.paymentMethod,
+    paymentStatus: order.paymentStatus || 'pending',
     status: order.status,
     receiverName: order.receiverName,
     receiverPhone: order.receiverPhone,

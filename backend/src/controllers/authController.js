@@ -21,9 +21,25 @@ const login = async (req, res) => {
     return res.status(401).json({ message: 'Invalid credentials' });
   }
 
+  if (user.lockUntil && user.lockUntil > Date.now()) {
+    const remainingMins = Math.ceil((user.lockUntil - Date.now()) / (60 * 1000));
+    return res.status(403).json({
+      message: `Tài khoản đã bị tạm khóa do nhập sai mật khẩu quá nhiều lần. Vui lòng thử lại sau ${remainingMins} phút.`
+    });
+  }
+
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    return res.status(401).json({ message: 'Invalid credentials' });
+    user.loginAttempts = (user.loginAttempts || 0) + 1;
+    let message = 'Invalid credentials';
+    if (user.loginAttempts >= 5) {
+      user.lockUntil = new Date(Date.now() + 30 * 60 * 1000);
+      message = 'Tài khoản của bạn đã bị khóa 30 phút do đăng nhập sai 5 lần liên tiếp.';
+    } else {
+      message += `. Bạn còn ${5 - user.loginAttempts} lần thử.`;
+    }
+    await user.save();
+    return res.status(401).json({ message });
   }
 
   if (user.role !== 'admin') {
@@ -32,6 +48,12 @@ const login = async (req, res) => {
 
   if (user.isActive === false) {
     return res.status(403).json({ message: 'Tài khoản đã bị vô hiệu hóa' });
+  }
+
+  if (user.loginAttempts > 0 || user.lockUntil) {
+    user.loginAttempts = 0;
+    user.lockUntil = null;
+    await user.save();
   }
 
   const token = signToken(user._id, user.role);
@@ -94,9 +116,25 @@ const storeLogin = async (req, res) => {
     return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
   }
 
+  if (user.lockUntil && user.lockUntil > Date.now()) {
+    const remainingMins = Math.ceil((user.lockUntil - Date.now()) / (60 * 1000));
+    return res.status(403).json({
+      message: `Tài khoản đã bị tạm khóa do nhập sai mật khẩu quá nhiều lần. Vui lòng thử lại sau ${remainingMins} phút.`
+    });
+  }
+
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
+    user.loginAttempts = (user.loginAttempts || 0) + 1;
+    let message = 'Email hoặc mật khẩu không đúng';
+    if (user.loginAttempts >= 5) {
+      user.lockUntil = new Date(Date.now() + 30 * 60 * 1000);
+      message = 'Tài khoản của bạn đã bị khóa 30 phút do đăng nhập sai 5 lần liên tiếp.';
+    } else {
+      message += `. Bạn còn ${5 - user.loginAttempts} lần thử.`;
+    }
+    await user.save();
+    return res.status(401).json({ message });
   }
 
   if (user.role === 'admin') {
@@ -105,6 +143,12 @@ const storeLogin = async (req, res) => {
 
   if (user.isActive === false) {
     return res.status(403).json({ message: 'Tài khoản đã bị vô hiệu hóa' });
+  }
+
+  if (user.loginAttempts > 0 || user.lockUntil) {
+    user.loginAttempts = 0;
+    user.lockUntil = null;
+    await user.save();
   }
 
   const token = signToken(user._id, user.role);

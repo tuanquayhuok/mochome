@@ -196,6 +196,25 @@ const likePostComment = async (req, res) => {
   return res.json(comment);
 };
 
+const getCollections = async (req, res) => {
+  const CatalogCollection = require('../models/CatalogCollection');
+  const collections = await CatalogCollection.find({ isActive: true }).sort('name');
+  return res.json(collections);
+};
+
+const getCollectionBySlug = async (req, res) => {
+  const CatalogCollection = require('../models/CatalogCollection');
+  const collection = await CatalogCollection.findOne({ slug: req.params.slug, isActive: true });
+  if (!collection) {
+    return res.status(404).json({ message: 'Không tìm thấy bộ sưu tập' });
+  }
+  const products = await Product.find({ collection: collection.name, isVisible: { $ne: false } }).populate('category', 'name slug');
+  return res.json({
+    collection,
+    products: products.map(mapPublicProduct)
+  });
+};
+
 module.exports = {
   getCatalog,
   getProductBySlug,
@@ -203,5 +222,7 @@ module.exports = {
   likePost,
   getPostComments,
   createPostComment,
-  likePostComment
+  likePostComment,
+  getCollections,
+  getCollectionBySlug
 };

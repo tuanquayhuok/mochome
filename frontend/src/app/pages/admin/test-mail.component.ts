@@ -125,12 +125,16 @@ interface MailDebugResponse {
       .test-mail-grid {
         display: grid;
         grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
-        gap: 1rem;
+        gap: 1.5rem;
       }
 
       .mail-panel,
       .config-panel {
-        padding: 1.25rem;
+        padding: 2rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
       }
 
       .panel-head {
@@ -138,13 +142,28 @@ interface MailDebugResponse {
         align-items: flex-start;
         justify-content: space-between;
         gap: 1rem;
-        margin-bottom: 1.25rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--border-light);
+        padding-bottom: 1.25rem;
       }
 
       .panel-head h2,
       .config-panel h3,
       .tip-box h4 {
         margin: 0 0 0.35rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .panel-head h2 {
+        font-size: 1.25rem;
+      }
+
+      .config-panel h3 {
+        font-size: 1.15rem;
+        margin-bottom: 1.25rem;
+        border-bottom: 1px solid var(--border-light);
+        padding-bottom: 0.75rem;
       }
 
       .panel-head p,
@@ -158,29 +177,41 @@ interface MailDebugResponse {
       .mail-form {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.25rem;
       }
 
       .field {
         display: flex;
         flex-direction: column;
-        gap: 0.4rem;
+        gap: 0.5rem;
       }
 
       .field span {
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
         font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
       .field input,
       .field textarea {
         width: 100%;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 0.8rem 0.9rem;
-        background: var(--bg);
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        background: #ffffff;
         color: var(--text);
-        font: inherit;
+        font-family: inherit;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+      }
+
+      .field input:focus,
+      .field textarea:focus {
+        outline: none;
+        border-color: var(--text);
+        box-shadow: 0 0 0 3px rgba(26, 29, 33, 0.08);
       }
 
       .field textarea {
@@ -189,8 +220,9 @@ interface MailDebugResponse {
       }
 
       .field-error {
-        color: #dc2626;
-        font-size: 0.8125rem;
+        color: #ef4444;
+        font-size: 0.75rem;
+        font-weight: 500;
       }
 
       .actions {

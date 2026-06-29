@@ -44,6 +44,7 @@ export interface StoreOrderResult {
   voucherCode: string;
   totalAmount: number;
   paymentMethod: string;
+  paymentStatus?: string;
   status: string;
   receiverName?: string;
   receiverPhone?: string;

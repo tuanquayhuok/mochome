@@ -1713,8 +1713,7 @@ export class StoreLayoutComponent {
     // Khôi phục theme từ localstorage
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('store_theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const startDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+      const startDark = savedTheme === 'dark';
       this.isDarkMode.set(startDark);
       this.applyTheme(startDark);
     }

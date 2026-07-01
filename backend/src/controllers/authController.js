@@ -384,8 +384,11 @@ const googleLogin = async (req, res) => {
       user: mapStoreUser(user, loyalty)
     });
   } catch (err) {
-    console.error('Lỗi đăng nhập Google:', err);
-    return res.status(401).json({ message: 'Xác thực tài khoản Google không hợp lệ hoặc đã hết hạn.' });
+    console.error('Google Auth Error:', err);
+    return res.status(401).json({
+      message: 'Xác thực tài khoản Google không hợp lệ hoặc đã hết hạn.',
+      errorDetails: err.message
+    });
   }
 };
 

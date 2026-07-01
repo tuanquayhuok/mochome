@@ -30,6 +30,27 @@
   --badge-critical: #fee2e2;
 }
 
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --text: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --muted: #64748b;
+  --border: #334155;
+  --border-light: #1e293b;
+  --active-bg: #334155;
+  --badge-pending: #451a03;
+  --badge-pending-text: #fef3c7;
+  --badge-processing: #172554;
+  --badge-processing-text: #dbeafe;
+  --badge-shipping: #1e1b4b;
+  --badge-shipping-text: #e0e7ff;
+  --badge-completed: #064e3b;
+  --badge-completed-text: #dcfce7;
+  --badge-cancelled: #450a0a;
+  --badge-cancelled-text: #fee2e2;
+}
+
 *,
 *::before,
 *::after {
@@ -41,8 +62,8 @@ body {
   font-family: var(--font);
   font-size: 14px;
   line-height: 1.5;
-  color: var(--text);
-  background: var(--bg);
+  color: var(--text) !important;
+  background: var(--bg) !important;
   -webkit-font-smoothing: antialiased;
 }
 

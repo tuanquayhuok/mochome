@@ -44,11 +44,12 @@ type RoleFilter = 'all' | 'admin' | 'user';
           <table class="data-table">
             <thead>
               <tr>
+                <th class="avatar-cell"></th>
                 <th>Họ tên</th>
                 <th>Email</th>
-                <th>Số điện thoại</th>
                 <th>Vai trò</th>
                 <th>Trạng thái</th>
+                <th>Kích hoạt</th>
                 <th>Ngày tạo</th>
                 <th class="col-actions">Thao tác</th>
               </tr>
@@ -56,9 +57,15 @@ type RoleFilter = 'all' | 'admin' | 'user';
             <tbody>
               @for (item of filteredRows(); track item._id) {
                 <tr>
+                  <td class="avatar-cell">
+                    @if (item.avatarUrl) {
+                      <img [src]="item.avatarUrl" alt="" class="table-avatar" />
+                    } @else {
+                      <span class="table-avatar-fallback">{{ item.fullName[0] || '?' }}</span>
+                    }
+                  </td>
                   <td class="cell-strong">{{ item.fullName }}</td>
                   <td class="cell-muted">{{ item.email }}</td>
-                  <td>{{ item.phone || '—' }}</td>
                   <td>
                     <span class="role-badge" [class.admin]="item.role === 'admin'">
                       {{ roleLabel(item.role) }}
@@ -71,6 +78,15 @@ type RoleFilter = 'all' | 'admin' | 'user';
                       [class.cancelled]="!item.isActive"
                     >
                       {{ item.isActive ? 'Hoạt động' : 'Vô hiệu' }}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      class="status-badge"
+                      [class.completed]="item.emailVerifiedAt"
+                      [class.cancelled]="!item.emailVerifiedAt"
+                    >
+                      {{ item.emailVerifiedAt ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}
                     </span>
                   </td>
                   <td class="cell-muted">{{ formatDate(item.createdAt) }}</td>
@@ -137,6 +153,12 @@ type RoleFilter = 'all' | 'admin' | 'user';
               <select formControlName="isActive">
                 <option [ngValue]="true">Hoạt động</option>
                 <option [ngValue]="false">Vô hiệu</option>
+              </select>
+
+              <label>Kích hoạt tài khoản</label>
+              <select formControlName="isVerified">
+                <option [ngValue]="true">Đã kích hoạt</option>
+                <option [ngValue]="false">Chưa kích hoạt</option>
               </select>
 
               <label>
@@ -385,6 +407,34 @@ type RoleFilter = 'all' | 'admin' | 'user';
         color: #3730a3;
       }
 
+      .table-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid var(--border);
+        display: block;
+      }
+
+      .table-avatar-fallback {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #a07246, #8c6239);
+        color: #fff;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8125rem;
+        text-transform: uppercase;
+      }
+
+      .avatar-cell {
+        width: 48px;
+        padding-right: 0 !important;
+      }
+
       .table-meta {
         margin: 0.75rem 0 0;
         font-size: 0.75rem;
@@ -590,6 +640,7 @@ export class AccountComponent implements OnInit {
     phone: [''],
     role: ['user' as 'admin' | 'user', Validators.required],
     isActive: [true],
+    isVerified: [true],
     password: ['']
   });
 
@@ -619,6 +670,7 @@ export class AccountComponent implements OnInit {
       phone: '',
       role: 'user',
       isActive: true,
+      isVerified: true,
       password: ''
     });
     this.form.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
@@ -635,6 +687,7 @@ export class AccountComponent implements OnInit {
       phone: user.phone || '',
       role: user.role === 'admin' ? 'admin' : 'user',
       isActive: user.isActive !== false,
+      isVerified: !!user.emailVerifiedAt,
       password: ''
     });
     this.form.get('password')?.clearValidators();
@@ -672,7 +725,8 @@ export class AccountComponent implements OnInit {
       email: raw.email,
       phone: raw.phone,
       role: raw.role,
-      isActive: raw.isActive === true || String(raw.isActive) === 'true'
+      isActive: raw.isActive === true || String(raw.isActive) === 'true',
+      isVerified: raw.isVerified === true || String(raw.isVerified) === 'true'
     };
 
     if (raw.password) {

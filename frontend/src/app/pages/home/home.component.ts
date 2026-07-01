@@ -1136,6 +1136,76 @@ const PLACEHOLDER_POSTS = [
           transform: translateX(-50%);
         }
       }
+
+      /* Dark Mode Specific Overrides for Home Page */
+      :host-context([data-theme="dark"]) {
+        .home-page {
+          background: #0f172a !important;
+        }
+
+        .block-white {
+          background: #0f172a !important;
+        }
+
+        .block-head h2,
+        .sec-head h2,
+        .sec-head a,
+        .see-all,
+        .cat-name,
+        .product-item h3,
+        .trust-item strong,
+        .trust-item-duplicate strong,
+        .news-body h3,
+        .news-head h2,
+        .fallback-slide-info h2 {
+          color: #f8fafc !important;
+        }
+
+        .trust-item,
+        .trust-item-duplicate,
+        .product-item {
+          background: #1e293b !important;
+          border-color: #334155 !important;
+        }
+
+        .product-item {
+          border: 1px solid #334155 !important;
+          border-radius: 8px;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          padding-bottom: 0.5rem;
+        }
+
+        .product-item h3 {
+          padding: 0 0.5rem;
+        }
+        
+        .product-price {
+          padding: 0 0.5rem;
+        }
+
+        .trust-item span,
+        .trust-item-duplicate span,
+        .news-body p,
+        .fallback-slide-info p {
+          color: #cbd5e1 !important;
+        }
+
+        .news-link {
+          background: #1e293b !important;
+          border-color: #334155 !important;
+        }
+
+        .news-link:hover {
+          border-color: #475569 !important;
+        }
+
+        .sec-head,
+        .block-head {
+          border-bottom-color: #334155 !important;
+        }
+      }
     `
   ]
 })

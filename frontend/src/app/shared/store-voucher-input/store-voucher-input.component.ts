@@ -250,11 +250,51 @@ export class StoreVoucherInputComponent implements OnInit {
     this.pickerLoading.set(true);
     this.api.getStorePickerVouchers().subscribe({
       next: (list) => {
-        this.pickerList.set(list);
+        // Merge saved vouchers from localStorage (e.g. WC2026SOFA, WC2026DECOR)
+        const savedVoucherCodes: string[] = JSON.parse(localStorage.getItem('saved_blog_vouchers') || '[]');
+        
+        let mergedList = [...list];
+        savedVoucherCodes.forEach((code) => {
+          if (!mergedList.some((v) => v.code === code)) {
+            // Append saved code as an option if not already in system list
+            let label = 'Mã giảm giá đã lưu từ bài viết World Cup';
+            if (code === 'WC2026SOFA') {
+              label = 'Giảm ngay 500.000đ · Đơn từ 5.000.000đ';
+            } else if (code === 'WC2026DECOR') {
+              label = 'Giảm 10% (tối đa 200.000đ) · Đơn từ 1.000.000đ';
+            }
+            mergedList.push({
+              code,
+              name: `Mã World Cup 2026: ${code}`,
+              description: 'Voucher lưu từ bài đọc tin tức World Cup 2026',
+              discountLabel: label,
+              firstOrderOnly: false
+            });
+          }
+        });
+
+        this.pickerList.set(mergedList);
         this.pickerLoading.set(false);
       },
       error: () => {
-        this.pickerList.set([]);
+        // Fallback to local saved vouchers list on error
+        const savedVoucherCodes: string[] = JSON.parse(localStorage.getItem('saved_blog_vouchers') || '[]');
+        const localList = savedVoucherCodes.map((code) => {
+          let label = 'Mã giảm giá đã lưu từ bài viết World Cup';
+          if (code === 'WC2026SOFA') {
+            label = 'Giảm ngay 500.000đ · Đơn từ 5.000.000đ';
+          } else if (code === 'WC2026DECOR') {
+            label = 'Giảm 10% (tối đa 200.000đ) · Đơn từ 1.000.000đ';
+          }
+          return {
+            code,
+            name: `Mã World Cup 2026: ${code}`,
+            description: 'Voucher lưu từ bài đọc tin tức World Cup 2026',
+            discountLabel: label,
+            firstOrderOnly: false
+          };
+        });
+        this.pickerList.set(localList);
         this.pickerLoading.set(false);
       }
     });

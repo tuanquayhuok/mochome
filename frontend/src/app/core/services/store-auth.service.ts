@@ -53,6 +53,14 @@ export class StoreAuthService {
     return this.postWithFallback<AuthResponse>(REGISTER_PATHS, { fullName, email, password });
   }
 
+  resetPassword(email: string, token: string, newPassword: string) {
+    return this.http.post<{ message: string }>(`${API_URL}/public/store/reset-password`, {
+      email,
+      token,
+      newPassword
+    });
+  }
+
   clearSession(): void {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);

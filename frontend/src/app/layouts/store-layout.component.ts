@@ -99,10 +99,14 @@ import { SettingsService } from '../core/services/settings.service';
               </button>
               <div class="account-dropdown-container">
                 <a routerLink="/tai-khoan" class="icon-btn" title="Tài khoản">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
+                  @if (storeAuth.isLoggedIn() && storeAuth.getUser()?.avatarUrl; as avatar) {
+                    <img [src]="avatar" alt="Avatar" class="header-avatar" />
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  }
                 </a>
                 @if (storeAuth.isLoggedIn() && storeAuth.getUser(); as u) {
                   <div class="account-dropdown">
@@ -200,10 +204,14 @@ import { SettingsService } from '../core/services/settings.service';
               <div class="topbar-actions">
                 <div class="account-dropdown-container">
                   <a routerLink="/tai-khoan" class="action-link">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-                      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
+                    @if (storeAuth.isLoggedIn() && storeAuth.getUser()?.avatarUrl; as avatar) {
+                      <img [src]="avatar" alt="Avatar" class="header-avatar" />
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                    }
                     <span>Tài khoản</span>
                   </a>
                   @if (storeAuth.isLoggedIn() && storeAuth.getUser(); as u) {
@@ -618,6 +626,19 @@ import { SettingsService } from '../core/services/settings.service';
         height: 22px;
       }
 
+      .header-avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #e4e7ec;
+      }
+
+      .icon-btn .header-avatar {
+        width: 30px;
+        height: 30px;
+      }
+
       .icon-btn:hover {
         background: #f3f4f6;
       }
@@ -721,8 +742,8 @@ import { SettingsService } from '../core/services/settings.service';
 
       .notification-badge {
         position: absolute;
-        top: 2px;
-        right: 2px;
+        top: -4px;
+        right: -4px;
         background: #e11d48;
         color: #ffffff;
         font-size: 0.625rem;
@@ -736,6 +757,8 @@ import { SettingsService } from '../core/services/settings.service';
         justify-content: center;
         padding: 0 1px;
         box-sizing: border-box;
+        border: 1.5px solid #ffffff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       }
 
       .notification-dropdown {
@@ -1455,6 +1478,120 @@ import { SettingsService } from '../core/services/settings.service';
         }
       }
 
+      /* Dark Mode Store Layout Overrides */
+      :host-context([data-theme="dark"]) {
+        .site-header, 
+        .topbar, 
+        .main-nav {
+          background: #1e293b !important;
+          border-color: #334155 !important;
+        }
+
+        .logo-img {
+          filter: brightness(0.9) invert(1) contrast(1);
+        }
+
+        .search-form input,
+        .mobile-search-form input {
+          background: #0f172a !important;
+          border-color: #334155 !important;
+          color: #f8fafc !important;
+        }
+
+        .action-link, 
+        .icon-btn,
+        .nav-link {
+          color: #cbd5e1 !important;
+        }
+
+        .action-link:hover, 
+        .icon-btn:hover,
+        .nav-link:hover,
+        .nav-link.active {
+          color: #ffffff !important;
+          background: #334155 !important;
+        }
+
+        .account-dropdown,
+        .notification-dropdown,
+        .nav-dropdown {
+          background: #1e293b !important;
+          border-color: #334155 !important;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        .dropdown-item, 
+        .dropdown-link {
+          color: #cbd5e1 !important;
+          border-bottom-color: #334155 !important;
+        }
+
+        .dropdown-item:hover, 
+        .dropdown-link:hover {
+          background: #334155 !important;
+          color: #ffffff !important;
+        }
+
+        .dropdown-divider {
+          border-top-color: #334155 !important;
+        }
+
+        .notification-dropdown .dropdown-header {
+          background: #1e293b !important;
+          border-bottom-color: #334155 !important;
+        }
+
+        .notification-dropdown .dropdown-header h3 {
+          color: #f8fafc !important;
+        }
+
+        .notification-item {
+          border-bottom-color: #334155 !important;
+        }
+
+        .notification-item.unread {
+          background: #0f172a !important;
+        }
+
+        .notification-item .item-title {
+          color: #f8fafc !important;
+        }
+
+        .notification-item .item-desc {
+          color: #cbd5e1 !important;
+        }
+
+        .mobile-drawer {
+          background: #1e293b !important;
+          border-left-color: #334155 !important;
+        }
+
+        .mobile-drawer a {
+          color: #cbd5e1 !important;
+          border-bottom-color: #334155 !important;
+        }
+
+        .mobile-drawer a:hover,
+        .mobile-drawer a.active {
+          background: #334155 !important;
+          color: #ffffff !important;
+        }
+
+        .store-footer {
+          background: #0f172a !important;
+          border-top-color: #334155 !important;
+          color: #cbd5e1 !important;
+        }
+
+        .store-footer a {
+          color: #cbd5e1 !important;
+        }
+
+        .store-footer a:hover {
+          color: #ffffff !important;
+        }
+      }
+
       /* Hover Dropdown Header */
       .nav-item-wrapper {
         position: relative;
@@ -1549,7 +1686,39 @@ export class StoreLayoutComponent {
   searchQueryModel = '';
   newsletterEmail = '';
 
+  // Dark Mode States
+  readonly isDarkMode = signal(false);
+
+  toggleDarkMode(): void {
+    const nextVal = !this.isDarkMode();
+    this.isDarkMode.set(nextVal);
+    this.applyTheme(nextVal);
+  }
+
+  private applyTheme(dark: boolean): void {
+    if (typeof document !== 'undefined') {
+      if (dark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('store_theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('store_theme', 'light');
+      }
+    }
+  }
+
   constructor() {
+    // Khôi phục theme từ localstorage
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('store_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const startDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+      this.isDarkMode.set(startDark);
+      this.applyTheme(startDark);
+    }
+
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => {
       this.compactLayout.set(this.isContactRoute(this.router.url));
       this.isHomePage.set(this.isHomeRoute(this.router.url));

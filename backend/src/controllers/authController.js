@@ -145,6 +145,10 @@ const storeLogin = async (req, res) => {
     return res.status(403).json({ message: 'Tài khoản đã bị vô hiệu hóa' });
   }
 
+  if (!user.emailVerifiedAt) {
+    return res.status(403).json({ message: 'Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email để kích hoạt.' });
+  }
+
   if (user.loginAttempts > 0 || user.lockUntil) {
     user.loginAttempts = 0;
     user.lockUntil = null;
@@ -190,26 +194,25 @@ const storeRegister = async (req, res) => {
     phone: phone || '',
     role: 'user',
     isActive: true,
-    emailVerifiedAt: new Date(),
-    activationTokenHash: '',
-    activationTokenExpiresAt: null
+    emailVerifiedAt: null,
+    activationTokenHash,
+    activationTokenExpiresAt
   });
 
-  const { sendWelcomeEmail } = require('../utils/mail');
-  const mailResult = await sendWelcomeEmail(user);
+  const backendUrl = (process.env.BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '');
+  const activationUrl = `${backendUrl}/api/public/store/activate?email=${encodeURIComponent(user.email)}&token=${activationToken}`;
 
-  const token = signToken(user._id, user.role);
-  const { getLoyaltySnapshot } = require('../utils/loyalty');
-  const { mapStoreUser } = require('./storeProfileController');
-  const loyalty = await getLoyaltySnapshot(user);
+  const { sendActivationEmail } = require('../utils/mail');
+  const mailResult = await sendActivationEmail(user, activationUrl);
 
   return res.status(201).json({
-    token,
-    user: mapStoreUser(user, loyalty),
     emailSent: mailResult.sent,
     emailMessage: mailResult.sent
-      ? 'Đăng ký thành công! Email chào mừng đã được gửi đến hộp thư của bạn.'
-      : 'Đăng ký thành công! (Không thể gửi email chào mừng).'
+      ? 'Đăng ký thành công! Vui lòng kiểm tra hộp thư email của bạn để kích hoạt tài khoản.'
+      : 'Đăng ký thành công! (Không thể gửi email kích hoạt).',
+    message: mailResult.sent
+      ? 'Đăng ký thành công! Vui lòng kiểm tra hộp thư email của bạn để kích hoạt tài khoản.'
+      : 'Đăng ký thành công! (Không thể gửi email kích hoạt).'
   });
 };
 

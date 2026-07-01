@@ -98,10 +98,10 @@ const updateStoreAvatar = async (req, res) => {
   if (!avatarUrl || typeof avatarUrl !== 'string') {
     return res.status(400).json({ message: 'Thiếu ảnh đại diện' });
   }
-  if (avatarUrl.length > 600_000) {
+  if (avatarUrl.startsWith('data:image/') && avatarUrl.length > 600_000) {
     return res.status(400).json({ message: 'Ảnh quá lớn (tối đa ~500KB)' });
   }
-  if (!avatarUrl.startsWith('data:image/')) {
+  if (!avatarUrl.startsWith('data:image/') && !avatarUrl.startsWith('http://') && !avatarUrl.startsWith('https://')) {
     return res.status(400).json({ message: 'Định dạng ảnh không hợp lệ' });
   }
 
@@ -175,11 +175,19 @@ const forgotStorePassword = async (req, res) => {
     return res.status(400).json({ message: 'Tài khoản chưa có email — liên hệ hotline 1900 1234' });
   }
 
-  const tempPassword = generateTempPassword();
-  user.password = await bcrypt.hash(tempPassword, 10);
+  const crypto = require('crypto');
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+  const resetTokenExpiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
+
+  user.resetPasswordTokenHash = resetTokenHash;
+  user.resetPasswordExpiresAt = resetTokenExpiresAt;
   await user.save();
 
-  const mailResult = await sendPasswordResetEmail(user, tempPassword);
+  const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:4200').replace(/\/$/, '');
+  const resetUrl = `${frontendUrl}/tai-khoan?tab=reset-password&email=${encodeURIComponent(user.email)}&token=${resetToken}`;
+
+  const mailResult = await sendPasswordResetEmail(user, resetUrl);
 
   if (!mailResult.sent) {
     return res.status(500).json({
@@ -190,7 +198,7 @@ const forgotStorePassword = async (req, res) => {
   }
 
   return res.json({
-    message: `Đã gửi mật khẩu khôi phục tới ${user.email}. Vui lòng kiểm tra hòm thư của bạn (và cả mục thư rác/spam).`
+    message: `Yêu cầu đặt lại mật khẩu đã được gửi tới ${user.email}. Vui lòng kiểm tra hòm thư của bạn (và cả mục thư rác/spam).`
   });
 };
 
@@ -231,6 +239,40 @@ const claimMilestone = async (req, res) => {
   });
 };
 
+const resetStorePassword = async (req, res) => {
+  const { email, token, newPassword } = req.body;
+
+  if (!email || !token || !newPassword) {
+    return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin' });
+  }
+
+  if (String(newPassword).length < 6) {
+    return res.status(400).json({ message: 'Mật khẩu tối thiểu 6 ký tự' });
+  }
+
+  const user = await User.findOne({ email: String(email).trim().toLowerCase() });
+  if (!user) {
+    return res.status(404).json({ message: 'Không tìm thấy tài khoản' });
+  }
+
+  if (!user.resetPasswordTokenHash || !user.resetPasswordExpiresAt || user.resetPasswordExpiresAt < new Date()) {
+    return res.status(400).json({ message: 'Liên kết đặt lại mật khẩu đã hết hạn hoặc không hợp lệ. Vui lòng gửi lại yêu cầu.' });
+  }
+
+  const crypto = require('crypto');
+  const tokenHash = crypto.createHash('sha256').update(String(token).trim()).digest('hex');
+  if (tokenHash !== user.resetPasswordTokenHash) {
+    return res.status(400).json({ message: 'Liên kết đặt lại mật khẩu không hợp lệ.' });
+  }
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  user.resetPasswordTokenHash = '';
+  user.resetPasswordExpiresAt = null;
+  await user.save();
+
+  return res.json({ message: 'Đổi mật khẩu thành công. Bạn có thể đăng nhập ngay bằng mật khẩu mới.' });
+};
+
 module.exports = {
   getStoreProfile,
   getStoreLoyalty,
@@ -238,6 +280,7 @@ module.exports = {
   updateStoreAvatar,
   changeStorePassword,
   forgotStorePassword,
+  resetStorePassword,
   claimMilestone,
   mapStoreUser
 };

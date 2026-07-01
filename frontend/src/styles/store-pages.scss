@@ -87,15 +87,19 @@
   color: #374151;
 }
 
-.store-field input {
+.store-field input,
+.store-field select {
   width: 100%;
   padding: 0.6rem 0.75rem;
   border: 1px solid #e4e7ec;
   border-radius: 6px;
   font-size: 0.875rem;
+  background-color: #fff;
+  height: 38px;
 }
 
-.store-field input:focus {
+.store-field input:focus,
+.store-field select:focus {
   outline: none;
   border-color: #9ca3af;
   box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.12);
@@ -146,3 +150,54 @@
     grid-template-columns: 1fr !important;
   }
 }
+
+/* —— Dark Mode Client Colors Overrides —— */
+[data-theme="dark"] {
+  .store-page {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+  }
+
+  .store-card {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+  }
+
+  .store-page .page-head h1 {
+    color: #f8fafc !important;
+  }
+
+  .store-page .page-head p {
+    color: #94a3b8 !important;
+  }
+
+  .store-field label {
+    color: #cbd5e1 !important;
+  }
+
+  .store-field input, 
+  .store-field textarea,
+  .store-field select {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+  }
+
+  .store-btn-outline {
+    background: #1e293b !important;
+    color: #ffedd5 !important;
+    border-color: #ffedd5 !important;
+  }
+
+  .store-btn-outline:hover {
+    background: #334155 !important;
+  }
+
+  .store-alert-error {
+    background: #450a0a !important;
+    border-color: #991b1b !important;
+    color: #fee2e2 !important;
+  }
+}
+

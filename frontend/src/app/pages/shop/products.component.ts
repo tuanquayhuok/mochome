@@ -646,6 +646,52 @@ import { CartService } from '../../core/services/cart.service';
           grid-template-columns: repeat(2, 1fr);
         }
       }
+
+      /* Dark Mode Specific Overrides for Shop/Products Page */
+      :host-context([data-theme="dark"]) {
+        .store-section {
+          background: #0f172a !important;
+        }
+
+        .store-block-head h2,
+        .see-all,
+        .filter-group h3,
+        .filter-item span,
+        .results-count,
+        .sort-wrap label,
+        .product-info h3 a {
+          color: #f8fafc !important;
+        }
+
+        .filter-group input[type="text"],
+        .price-inputs input,
+        .sort-wrap select {
+          background: #1e293b !important;
+          border-color: #334155 !important;
+          color: #f8fafc !important;
+        }
+
+        .product-card {
+          background: #1e293b !important;
+          border-color: #334155 !important;
+        }
+
+        .product-price {
+          color: #fb923c !important;
+        }
+
+        .btn-apply-price,
+        .btn-reset-filters {
+          background: #3e2a1e !important;
+          color: #ffffff !important;
+          border: 1px solid #4a3e35 !important;
+        }
+
+        .btn-apply-price:hover,
+        .btn-reset-filters:hover {
+          background: #5c4033 !important;
+        }
+      }
     `
   ]
 })

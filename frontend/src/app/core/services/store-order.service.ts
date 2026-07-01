@@ -39,9 +39,9 @@ export interface StoreOrderStatusHistory {
 export interface StoreOrderResult {
   id: string;
   orderCode: string;
-  subtotal: number;
-  discountAmount: number;
-  voucherCode: string;
+  subtotal?: number;
+  discountAmount?: number;
+  voucherCode?: string;
   totalAmount: number;
   paymentMethod: string;
   paymentStatus?: string;

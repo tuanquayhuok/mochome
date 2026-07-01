@@ -14,7 +14,7 @@ import { StoreProfileService } from '../../core/services/store-profile.service';
         <div class="forgot-card">
           <header class="forgot-head">
             <h1>Khôi phục mật khẩu</h1>
-            <p>Vui lòng nhập email đăng ký của bạn. Hệ thống sẽ tạo mật khẩu ngẫu nhiên và gửi tới Gmail của bạn để đăng nhập.</p>
+            <p>Vui lòng nhập email đăng ký của bạn. Hệ thống sẽ gửi email chứa liên kết để bạn tự đặt lại mật khẩu mới.</p>
           </header>
 
           <form [formGroup]="forgotForm" (ngSubmit)="onSubmit()" class="forgot-form" novalidate>
@@ -106,7 +106,7 @@ import { StoreProfileService } from '../../core/services/store-profile.service';
                 <span class="spinner" aria-hidden="true"></span>
                 <span>Đang xử lý...</span>
               } @else {
-                <span>Gửi mật khẩu khôi phục</span>
+                <span>Gửi liên kết đặt lại mật khẩu</span>
               }
             </button>
           </form>

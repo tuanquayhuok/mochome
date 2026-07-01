@@ -163,7 +163,7 @@ const CANCEL_REASONS: { code: CancellationReasonCode; label: string }[] = [
                   }
                 </ul>
                 <div class="order-total">
-                  @if (order.discountAmount > 0) {
+                  @if ((order.discountAmount ?? 0) > 0) {
                     <span class="order-discount">Giảm −{{ order.discountAmount | number }} đ</span>
                   }
                   <strong>Tổng: {{ order.totalAmount | number }} đ</strong>

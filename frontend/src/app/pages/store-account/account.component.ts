@@ -15,7 +15,7 @@ import { StoreAccountDashboardComponent } from './store-account-dashboard.compon
 
 declare const google: any;
 
-type AuthTab = 'login' | 'register';
+type AuthTab = 'login' | 'register' | 'reset-password';
 
 function passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
@@ -70,91 +70,44 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
               </p>
             </div>
           }
+          @if (activationError()) {
+            <div class="return-banner-wrap">
+              <p class="return-banner return-banner--error">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-ico">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>{{ activationError() }}</span>
+              </p>
+            </div>
+          }
 
           <div class="auth-shell">
-            <aside class="auth-aside">
-              <div class="auth-aside-inner">
-                <a routerLink="/" class="auth-brand">
-                  <span class="auth-brand-mark" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <path d="M4 19V9l8-5 8 5v10" />
-                      <path d="M9 19v-6h6v6" />
-                    </svg>
-                  </span>
-                  <span class="auth-brand-text">
-                    <span class="auth-brand-name">MỘC HOME</span>
-                    <span class="auth-brand-tag">Nội thất hiện đại</span>
-                  </span>
-                </a>
-
-                <div class="auth-aside-content">
-                  <h2 class="auth-aside-title">Không gian sống đẳng cấp bắt đầu từ đây</h2>
-                  <p class="auth-aside-lead">
-                    Đăng nhập hoặc tạo tài khoản để theo dõi đơn hàng, lưu yêu thích và tích điểm thành viên.
-                  </p>
-                </div>
-
-                <ul class="auth-perks">
-                  <li>
-                    <span class="perk-ico">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-                        <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
-                        <path d="M3.3 7.7L12 12l8.7-4.3M12 22V12"/>
-                      </svg>
-                    </span>
-                    <div class="perk-text">
-                      <strong>Theo dõi đơn hàng</strong>
-                      <span>Cập nhật trạng thái giao hàng theo thời gian thực</span>
-                    </div>
-                  </li>
-                  <li>
-                    <span class="perk-ico">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                      </svg>
-                    </span>
-                    <div class="perk-text">
-                      <strong>Tích điểm thành viên</strong>
-                      <span>Nhận ưu đãi độc quyền cho khách hàng thân thiết</span>
-                    </div>
-                  </li>
-                  <li>
-                    <span class="perk-ico">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-                        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
-                      </svg>
-                    </span>
-                    <div class="perk-text">
-                      <strong>Danh sách yêu thích</strong>
-                      <span>Lưu sản phẩm bạn thích để mua sau</span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </aside>
-
             <div class="auth-main">
               <div class="auth-card">
-                <div class="auth-tabs-container">
-                  <div class="auth-tabs">
-                    <button
-                      type="button"
-                      class="auth-tab"
-                      [class.active]="authTab() === 'login'"
-                      (click)="setTab('login')"
-                    >
-                      Đăng nhập
-                    </button>
-                    <button
-                      type="button"
-                      class="auth-tab"
-                      [class.active]="authTab() === 'register'"
-                      (click)="setTab('register')"
-                    >
-                      Đăng ký
-                    </button>
+                @if (authTab() !== 'reset-password') {
+                  <div class="auth-tabs-container">
+                    <div class="auth-tabs">
+                      <button
+                        type="button"
+                        class="auth-tab"
+                        [class.active]="authTab() === 'login'"
+                        (click)="setTab('login')"
+                      >
+                        Đăng nhập
+                      </button>
+                      <button
+                        type="button"
+                        class="auth-tab"
+                        [class.active]="authTab() === 'register'"
+                        (click)="setTab('register')"
+                      >
+                        Đăng ký
+                      </button>
+                    </div>
                   </div>
-                </div>
+                }
 
                 @if (authTab() === 'login') {
                   <form [formGroup]="loginForm" (ngSubmit)="submitLogin()" class="auth-form" novalidate>
@@ -322,7 +275,7 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
                       <button type="button" class="link-btn" (click)="setTab('register')">Đăng ký ngay</button>
                     </div>
                   </form>
-                } @else {
+                } @else if (authTab() === 'register') {
                   <form [formGroup]="registerForm" (ngSubmit)="submitRegister()" class="auth-form" novalidate>
                     <header class="auth-form-head">
                       <h1>Tạo tài khoản mới</h1>
@@ -524,6 +477,117 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
                       <button type="button" class="link-btn" (click)="setTab('login')">Đăng nhập ngay</button>
                     </p>
                   </form>
+                } @else if (authTab() === 'reset-password') {
+                  <form [formGroup]="resetForm" (ngSubmit)="submitResetPassword()" class="auth-form" novalidate>
+                    <header class="auth-form-head">
+                      <h1>Đặt lại mật khẩu</h1>
+                      <p>Nhập mật khẩu mới cho tài khoản của bạn</p>
+                    </header>
+
+                    <div class="store-field">
+                      <label for="reset-password">Mật khẩu mới</label>
+                      <div class="input-wrap password-input-wrap">
+                        <span class="field-ico" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                          </svg>
+                        </span>
+                        <input
+                          id="reset-password"
+                          [type]="showRegisterPassword() ? 'text' : 'password'"
+                          formControlName="newPassword"
+                          placeholder="Tối thiểu 6 ký tự"
+                          [class.input-invalid]="resetForm.get('newPassword')?.touched && resetForm.get('newPassword')?.invalid"
+                        />
+                        <button
+                          type="button"
+                          class="pw-toggle"
+                          (click)="showRegisterPassword.set(!showRegisterPassword())"
+                          [attr.aria-label]="showRegisterPassword() ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+                        >
+                          @if (showRegisterPassword()) {
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                              <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
+                              <path d="M1 1l22 22" />
+                            </svg>
+                          } @else {
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                              <circle cx="12" cy="12" r="3" />
+                            </svg>
+                          }
+                        </button>
+                      </div>
+                      @if (resetForm.get('newPassword')?.touched && resetForm.get('newPassword')?.invalid) {
+                        <span class="field-error">Mật khẩu mới tối thiểu 6 ký tự.</span>
+                      }
+                    </div>
+
+                    <div class="store-field">
+                      <label for="reset-confirm-password">Nhập lại mật khẩu mới</label>
+                      <div class="input-wrap password-input-wrap">
+                        <span class="field-ico" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                          </svg>
+                        </span>
+                        <input
+                          id="reset-confirm-password"
+                          [type]="showConfirmPassword() ? 'text' : 'password'"
+                          formControlName="confirmPassword"
+                          placeholder="Xác nhận mật khẩu mới"
+                          [class.input-invalid]="resetForm.get('confirmPassword')?.touched && (resetForm.get('confirmPassword')?.invalid || resetForm.hasError('passwordMismatch'))"
+                        />
+                        <button
+                          type="button"
+                          class="pw-toggle"
+                          (click)="showConfirmPassword.set(!showConfirmPassword())"
+                          [attr.aria-label]="showConfirmPassword() ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+                        >
+                          @if (showConfirmPassword()) {
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                              <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
+                              <path d="M1 1l22 22" />
+                            </svg>
+                          } @else {
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                              <circle cx="12" cy="12" r="3" />
+                            </svg>
+                          }
+                        </button>
+                      </div>
+                      @if (resetForm.get('confirmPassword')?.touched && resetForm.hasError('passwordMismatch')) {
+                        <span class="field-error">Mật khẩu xác nhận không khớp.</span>
+                      }
+                    </div>
+
+                    @if (error()) {
+                      <div class="store-alert-error" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; flex-shrink: 0;">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="12" y1="8" x2="12" y2="12" />
+                          <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        <span>{{ error() }}</span>
+                      </div>
+                    }
+
+                    <button type="submit" class="store-btn store-btn-primary auth-submit" [disabled]="loading()">
+                      @if (loading()) {
+                        <span class="spinner" aria-hidden="true"></span>
+                        <span>Đang cập nhật...</span>
+                      } @else {
+                        <span>Cập nhật mật khẩu</span>
+                      }
+                    </button>
+
+                    <p class="auth-foot">
+                      Quay lại <button type="button" class="link-btn" (click)="setTab('login')">Đăng nhập</button>
+                    </p>
+                  </form>
                 }
               </div>
             </div>
@@ -548,6 +612,26 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
               Email xác nhận đã gửi tới <strong>{{ registerSuccessEmail() }}</strong>
             </p>
             <button type="button" class="store-btn store-btn-primary success-btn" (click)="closeRegisterSuccess()">
+              Đăng nhập ngay
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (activationSuccessOpen()) {
+      <div class="modal-backdrop" (click)="activationSuccessOpen.set(false)">
+        <div class="modal-panel modal-panel--sm" role="dialog" aria-labelledby="act-success-title" (click)="$event.stopPropagation()">
+          <div class="success-modal-body">
+            <div class="success-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M8 12l3 3 5-6" />
+              </svg>
+            </div>
+            <h2 id="act-success-title">Thành công</h2>
+            <p class="success-msg">{{ activationNotice() }}</p>
+            <button type="button" class="store-btn store-btn-primary success-btn" (click)="activationSuccessOpen.set(false)">
               Đăng nhập ngay
             </button>
           </div>
@@ -634,12 +718,19 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
         box-shadow: 0 4px 15px rgba(21, 128, 61, 0.05);
       }
 
+      .return-banner--error {
+        background: #fef2f2;
+        border-color: #fca5a5;
+        color: #b91c1c;
+        box-shadow: 0 4px 15px rgba(185, 28, 28, 0.05);
+      }
+
       .auth-shell {
-        display: grid;
-        grid-template-columns: minmax(320px, 440px) 1fr;
-        min-height: 640px;
+        display: block;
+        max-width: 580px;
+        margin: 0 auto;
+        min-height: auto;
         border-radius: 24px;
-        overflow: hidden;
         box-shadow: 
           0 25px 60px -15px rgba(62, 42, 30, 0.12), 
           0 15px 30px -10px rgba(62, 42, 30, 0.06),
@@ -1470,38 +1561,8 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
 
       @media (max-width: 992px) {
         .auth-shell {
-          grid-template-columns: 1fr;
-          min-height: auto;
           border-radius: 20px;
         }
-
-        .auth-aside {
-          display: none;
-        }
-
-        .auth-aside-inner {
-          padding: 2.5rem 2rem;
-          gap: 2rem;
-        }
-
-        .auth-aside-title {
-          font-size: 1.5rem;
-        }
-
-        .auth-perks {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-          gap: 1rem;
-        }
-
-        .auth-perks li {
-          padding: 0.5rem;
-        }
-
-        .auth-perks li:hover {
-          transform: translateY(-2px);
-        }
-
         .auth-card {
           padding: 2.5rem 2rem;
         }
@@ -1511,19 +1572,9 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
         .store-page.account-page {
           padding: 1.5rem 0;
         }
-
-        .auth-aside-inner {
-          padding: 2rem 1.5rem;
-        }
-
-        .auth-perks {
-          grid-template-columns: 1fr;
-        }
-
         .auth-card {
           padding: 2rem 1.5rem;
         }
-
         .forgot-input-group {
           grid-template-columns: 1fr;
         }
@@ -1638,6 +1689,10 @@ export class StoreAccountComponent implements OnInit {
   readonly registerSuccessMsg = signal('');
   readonly registerSuccessEmail = signal('');
   readonly activationNotice = signal('');
+  readonly activationError = signal('');
+  readonly activationSuccessOpen = signal(false);
+  readonly resetEmail = signal('');
+  readonly resetToken = signal('');
 
   // Captcha signals for interactive verification UX
   readonly loginCaptchaState = signal<'unchecked' | 'checking' | 'checked'>('unchecked');
@@ -1659,6 +1714,21 @@ export class StoreAccountComponent implements OnInit {
       captcha: [false, Validators.requiredTrue]
     },
     { validators: passwordMatchValidator }
+  );
+
+  resetForm = this.fb.group(
+    {
+      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', Validators.required]
+    },
+    {
+      validators: (group: AbstractControl): ValidationErrors | null => {
+        const pass = group.get('newPassword')?.value;
+        const confirm = group.get('confirmPassword')?.value;
+        if (!confirm) return null;
+        return pass === confirm ? null : { passwordMismatch: true };
+      }
+    }
   );
 
   ngOnInit(): void {
@@ -1689,11 +1759,20 @@ export class StoreAccountComponent implements OnInit {
       const tab = params.get('tab');
       if (tab === 'register' || tab === 'dang-ky') {
         this.authTab.set('register');
+      } else if (tab === 'reset-password') {
+        this.authTab.set('reset-password');
+        this.resetEmail.set(params.get('email') || '');
+        this.resetToken.set(params.get('token') || '');
       }
       const activated = params.get('activated');
       const message = params.get('message');
       if (activated === '1') {
         this.activationNotice.set(message || 'Tài khoản đã được kích hoạt. Bạn có thể đăng nhập ngay.');
+        this.activationSuccessOpen.set(true);
+        this.activationError.set('');
+      } else if (activated === '0') {
+        this.activationError.set(message || 'Kích hoạt tài khoản thất bại.');
+        this.activationNotice.set('');
       }
       const returnUrl = params.get('returnUrl') || '';
       this.checkoutReturn.set(returnUrl.includes('thanh-toan'));
@@ -1791,6 +1870,30 @@ export class StoreAccountComponent implements OnInit {
     if (email) {
       this.loginForm.patchValue({ email });
     }
+  }
+
+  submitResetPassword(): void {
+    this.resetForm.markAllAsTouched();
+    if (this.resetForm.invalid || this.resetForm.hasError('passwordMismatch')) {
+      this.error.set('Vui lòng kiểm tra mật khẩu và xác nhận mật khẩu.');
+      return;
+    }
+    this.loading.set(true);
+    this.error.set('');
+
+    this.storeAuth.resetPassword(this.resetEmail(), this.resetToken(), this.resetForm.value.newPassword!).subscribe({
+      next: (res) => {
+        this.loading.set(false);
+        this.resetForm.reset();
+        this.activationNotice.set(res.message || 'Đặt lại mật khẩu thành công. Bạn có thể đăng nhập ngay.');
+        this.activationSuccessOpen.set(true);
+        this.authTab.set('login');
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set(this.authErrorMessage(err, 'Đặt lại mật khẩu thất bại.'));
+      }
+    });
   }
 
   private navigateAfterAuth(): void {

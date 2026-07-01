@@ -12,6 +12,7 @@ const {
 } = require('../controllers/publicController');
 const { storeChat } = require('../controllers/chatController');
 const { storeLogin, storeRegister, activateStoreAccount, mailDebug, googleLogin } = require('../controllers/authController');
+const { resetStorePassword } = require('../controllers/storeProfileController');
 const { validateVoucherPublic, listPickerVouchers } = require('../controllers/voucherController');
 const { sepayWebhook } = require('../controllers/sepayController');
 const { protect } = require('../middleware/auth');
@@ -31,6 +32,7 @@ router.post('/store/login', asyncHandler(storeLogin));
 router.post('/store/register', asyncHandler(storeRegister));
 router.post('/store/google-login', asyncHandler(googleLogin));
 router.get('/store/activate', asyncHandler(activateStoreAccount));
+router.post('/store/reset-password', asyncHandler(resetStorePassword));
 router.post('/mail/debug', asyncHandler(mailDebug));
 router.get('/vouchers/picker', asyncHandler(listPickerVouchers));
 router.post('/vouchers/validate', asyncHandler(validateVoucherPublic));

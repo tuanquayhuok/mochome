@@ -95,31 +95,6 @@ type PaymentMethod = 'cod' | 'vnpay' | 'momo';
                 <a routerLink="/tai-khoan" class="store-btn store-btn-outline">Tài khoản của tôi</a>
               </div>
             </div>
-          } @else {
-            <!-- Trường hợp 2: COD, Momo, hoặc ĐÃ THANH TOÁN (paid) -->
-            <div class="store-card checkout-success" style="max-width: 520px;">
-              <div class="success-icon" aria-hidden="true">✓</div>
-              <h1>Đặt hàng thành công</h1>
-              <p>
-                Mã đơn hàng: <strong>{{ order.orderCode }}</strong>
-              </p>
-              <p class="success-meta">
-                Tổng thanh toán: <strong>{{ order.totalAmount | number }} đ</strong>
-                · {{ paymentLabel(order.paymentMethod) }}
-              </p>
-              @if (order.paymentMethod === 'vnpay') {
-                <div style="margin: 1rem 0; padding: 0.85rem; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; color: #047857; font-weight: 600; font-size: 0.9rem;">
-                  Đã thanh toán thành công! Hệ thống đã duyệt đơn của bạn.
-                </div>
-              }
-              <p class="success-hint">
-                Chúng tôi sẽ liên hệ qua số điện thoại để xác nhận đơn. Cảm ơn bạn đã mua tại MỘC HOME.
-              </p>
-              <div class="success-actions">
-                <a routerLink="/" class="store-btn store-btn-primary">Về trang chủ</a>
-                <a routerLink="/tai-khoan" class="store-btn store-btn-outline">Tài khoản</a>
-              </div>
-            </div>
           }
         } @else {
           <header class="store-page-head">
@@ -654,16 +629,33 @@ type PaymentMethod = 'cod' | 'vnpay' | 'momo';
         text-align: center;
       }
 
-      .success-icon {
-        width: 56px;
-        height: 56px;
-        margin: 0 auto 1rem;
+      .checkmark-svg {
+        width: 80px;
+        height: 80px;
         border-radius: 50%;
-        background: #ecfdf5;
-        color: #047857;
-        font-size: 1.75rem;
-        line-height: 56px;
-        font-weight: 700;
+        display: block;
+        stroke-width: 2.5;
+        stroke: #10b981;
+        stroke-miterlimit: 10;
+        box-shadow: inset 0px 0px 0px #10b981;
+        animation: fillCheckmark .4s ease-in-out .4s forwards, scaleCheckmark .3s ease-in-out .9s both;
+      }
+
+      .checkmark-circle {
+        stroke-dasharray: 166;
+        stroke-dashoffset: 166;
+        stroke-width: 2.5;
+        stroke: #10b981;
+        fill: none;
+        animation: strokeCircle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+      }
+
+      .checkmark-check {
+        transform-origin: 50% 50%;
+        stroke-linecap: round;
+        stroke-dasharray: 48;
+        stroke-dashoffset: 48;
+        animation: strokeCheck 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
       }
 
       .checkout-success h1 {
@@ -695,6 +687,51 @@ type PaymentMethod = 'cod' | 'vnpay' | 'momo';
       .spinning {
         animation: spin 1s linear infinite;
         -webkit-animation: spin 1s linear infinite;
+      }
+
+      /* Animating the checkmark circle stroke drawing */
+      @keyframes strokeCircle {
+        100% { stroke-dashoffset: 0; }
+      }
+      
+      /* Animating the checkmark check path drawing */
+      @keyframes strokeCheck {
+        100% { stroke-dashoffset: 0; }
+      }
+      
+      /* Filling background color inside circle */
+      @keyframes fillCheckmark {
+        100% { box-shadow: inset 0px 0px 0px 40px #ecfdf5; }
+      }
+      
+      /* Scaling/popping effect on final check mark check */
+      @keyframes scaleCheckmark {
+        0%, 100% { transform: none; }
+        50% { transform: scale3d(1.1, 1.1, 1); }
+      }
+
+      /* Slide and fade transition for success card body */
+      @keyframes slideUpFade {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Pulsing alert background effect */
+      @keyframes pulseAlert {
+        0%, 100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.2);
+        }
+        50% {
+          transform: scale(1.01);
+          box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+        }
       }
 
       .success-actions {
@@ -1096,16 +1133,27 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
           this.cart.clear();
           this.voucherCart.clear();
-          this.successOrder.set(res.order);
           this.submitting.set(false);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
 
-          // Nếu là thanh toán chuyển khoản, tiến hành kiểm tra trạng thái đơn hàng định kỳ
+          // Nếu là thanh toán chuyển khoản QR, chuyển sang giao diện quét mã QR riêng (vẫn nằm ở trang checkout)
           if (res.order.paymentMethod === 'vnpay') {
+            this.successOrder.set(res.order);
             localStorage.setItem('pending_qr_order', JSON.stringify(res.order));
             localStorage.setItem('pending_qr_order_time', '600');
             localStorage.setItem('pending_qr_order_timestamp', Date.now().toString());
             this.startPaymentPolling(res.order.id);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            // Đối với COD, MoMo... Chuyển hướng ngay sang trang đặt hàng thành công riêng
+            sessionStorage.setItem('last_placed_order', JSON.stringify(res.order));
+            this.router.navigate(['/dat-hang-thanh-cong'], {
+              queryParams: {
+                orderId: res.order.id,
+                orderCode: res.order.orderCode,
+                totalAmount: res.order.totalAmount,
+                paymentMethod: res.order.paymentMethod
+              }
+            });
           }
         },
         error: (err) => {
@@ -1161,6 +1209,25 @@ export class CheckoutComponent implements OnInit, OnDestroy {
             if (this.countdownIntervalId) {
               clearInterval(this.countdownIntervalId);
             }
+
+            // Chuyển hướng sang trang đặt hàng thành công riêng biệt
+            const orderResult: StoreOrderResult = {
+              id: orderDetail.id,
+              orderCode: orderDetail.orderCode.replace('#', ''),
+              totalAmount: orderDetail.totalAmount,
+              paymentMethod: orderDetail.paymentMethod,
+              status: orderDetail.status,
+              createdAt: orderDetail.createdAt
+            };
+            sessionStorage.setItem('last_placed_order', JSON.stringify(orderResult));
+            this.router.navigate(['/dat-hang-thanh-cong'], {
+              queryParams: {
+                orderId: orderResult.id,
+                orderCode: orderResult.orderCode,
+                totalAmount: orderResult.totalAmount,
+                paymentMethod: orderResult.paymentMethod
+              }
+            });
           } else if (orderDetail.paymentStatus === 'failed') {
             this.orderPaidStatus.set('failed');
             this.clearPendingOrderSession();

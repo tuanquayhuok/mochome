@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Component, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PublicApiService, PostCommentRow } from '../../core/services/public-api.service';
 import { StoreAuthService } from '../../core/services/store-auth.service';
@@ -10,6 +10,7 @@ import { PostRow } from '../../core/models/admin-list.models';
   selector: 'app-post-detail',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule],
+  encapsulation: ViewEncapsulation.None,
   template: `
     <section class="store-section store-section--white">
       <div class="store-container post-wrap">
@@ -217,6 +218,10 @@ import { PostRow } from '../../core/models/admin-list.models';
           </div>
         </div>
       </div>
+    }
+
+    @if (toastText()) {
+      <div class="toast-notification">{{ toastText() }}</div>
     }
   `,
   styles: [
@@ -713,11 +718,131 @@ import { PostRow } from '../../core/models/admin-list.models';
       .btn-login:hover {
         background: #704e2d;
       }
+
+      /* —— WORLD CUP 2026 INLINE VOUCHERS —— */
+      .blog-voucher-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border: 2px dashed #d97706;
+        border-radius: 14px;
+        padding: 1.5rem 1.75rem;
+        margin: 2rem 0;
+        box-shadow: 0 10px 25px rgba(217, 119, 6, 0.12);
+        position: relative;
+        overflow: hidden;
+        border-left: 6px solid #d97706;
+        animation: pulseBorder 3s infinite alternate;
+      }
+
+      @keyframes pulseBorder {
+        0% {
+          box-shadow: 0 5px 15px rgba(217, 119, 6, 0.08);
+          border-color: #d97706;
+        }
+        100% {
+          box-shadow: 0 10px 25px rgba(217, 119, 6, 0.25);
+          border-color: #b45309;
+        }
+      }
+
+      .voucher-left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        flex: 1;
+        padding-right: 1.5rem;
+      }
+
+      .v-tag {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #b45309;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .v-tag::before {
+        content: '⚽';
+      }
+
+      .v-code-title {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: #78350f;
+        letter-spacing: 0.08em;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+
+      .v-desc-lbl {
+        margin: 0;
+        font-size: 0.875rem;
+        color: #92400e;
+        line-height: 1.5;
+        font-weight: 500;
+      }
+
+      .voucher-right {
+        display: flex;
+        align-items: center;
+      }
+
+      .btn-save-blog-voucher {
+        padding: 0.8rem 1.5rem;
+        background: #d97706;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.8125rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+        white-space: nowrap;
+        text-transform: uppercase;
+      }
+
+      .btn-save-blog-voucher:hover {
+        background: #b45309;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(217, 119, 6, 0.45);
+      }
+
+      .btn-save-blog-voucher.saved {
+        background: #10b981 !important;
+        color: #fff !important;
+        cursor: pointer;
+        box-shadow: none !important;
+        transform: none !important;
+      }
+
+      @media (max-width: 576px) {
+        .blog-voucher-card {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 1rem;
+          padding: 1rem;
+        }
+        .voucher-left {
+          padding-right: 0;
+        }
+        .btn-save-blog-voucher {
+          width: 100%;
+          text-align: center;
+        }
+      }
     `
   ]
 })
 export class PostDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   readonly publicApi = inject(PublicApiService);
   readonly storeAuth = inject(StoreAuthService);
 
@@ -731,6 +856,8 @@ export class PostDetailComponent implements OnInit {
   replyingToId = signal<string | null>(null);
   showLoginModal = signal(false);
   loginModalMessage = signal('');
+  readonly toastText = signal('');
+  private toastTimeout?: ReturnType<typeof setTimeout>;
 
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug') || '';
@@ -740,12 +867,70 @@ export class PostDetailComponent implements OnInit {
       next: (postData) => {
         this.post.set(postData);
         this.fetchComments(postData._id);
+        // Setup voucher dynamic action event listeners after DOM render ticks
+        setTimeout(() => this.setupVoucherListeners(), 300);
       },
       error: (err) => {
         console.error('Error fetching post detail:', err);
         this.loading.set(false);
       }
     });
+  }
+
+  // Setup voucher dynamic button event click listeners inside the blog post body content
+  setupVoucherListeners(): void {
+    if (typeof document === 'undefined') return;
+    
+    // Restore button saved state for saved vouchers
+    const savedVouchers = JSON.parse(localStorage.getItem('saved_blog_vouchers') || '[]');
+
+    const buttons = document.querySelectorAll('.btn-save-blog-voucher');
+    buttons.forEach((btn) => {
+      const code = btn.getAttribute('data-code');
+      if (code) {
+        // If already saved, update button label/state
+        if (savedVouchers.includes(code)) {
+          btn.textContent = 'ĐÃ LƯU ✓';
+          btn.classList.add('saved');
+        }
+
+        // Bind click handler
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.saveVoucher(code, btn as HTMLButtonElement);
+        });
+      }
+    });
+  }
+
+  saveVoucher(code: string, btn: HTMLButtonElement): void {
+    if (btn.classList.contains('saved')) {
+      // Redirect to shop / checkout directly if user wants to use it
+      this.showToast('Bạn đã lưu mã này rồi! Đang dẫn bạn tới cửa hàng mua sắm...');
+      setTimeout(() => this.router.navigate(['/san-pham']), 1500);
+      return;
+    }
+
+    const savedVouchers = JSON.parse(localStorage.getItem('saved_blog_vouchers') || '[]');
+    if (!savedVouchers.includes(code)) {
+      savedVouchers.push(code);
+      localStorage.setItem('saved_blog_vouchers', JSON.stringify(savedVouchers));
+    }
+
+    // Set saved state visually
+    btn.textContent = 'ĐÃ LƯU ✓';
+    btn.classList.add('saved');
+    this.showToast(`Đã lưu mã "${code}" thành công! Có thể dùng khi thanh toán.`);
+  }
+
+  showToast(msg: string): void {
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
+    this.toastText.set(msg);
+    this.toastTimeout = setTimeout(() => {
+      this.toastText.set('');
+    }, 3000);
   }
 
   fetchComments(postId: string): void {

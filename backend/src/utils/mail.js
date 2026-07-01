@@ -10,16 +10,87 @@ const generateTempPassword = () => {
   return out;
 };
 
-const buildResetHtml = (fullName, tempPassword) => `
+const buildResetHtml = (fullName, resetUrl) => `
 <!DOCTYPE html>
 <html>
-<body style="font-family:Arial,sans-serif;line-height:1.5;color:#1a1d21">
-  <h2>MỘC HOME — Khôi phục mật khẩu</h2>
-  <p>Xin chào ${fullName || 'bạn'},</p>
-  <p>Mật khẩu tạm thời của bạn là:</p>
-  <p style="font-size:18px;font-weight:bold;letter-spacing:1px">${tempPassword}</p>
-  <p>Vui lòng đăng nhập và đổi mật khẩu mới tại mục <strong>Bảo mật</strong> trong tài khoản.</p>
-  <p style="color:#6b7280;font-size:13px">Nếu bạn không yêu cầu khôi phục, hãy liên hệ hotline 1900 1234.</p>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khôi phục mật khẩu Mộc Home</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f9fafb;padding:32px 16px">
+    <tr>
+      <td align="center">
+        <!-- Main Card -->
+        <table width="100%" maxWidth="600" style="max-width:600px;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.03);border-collapse:separate" cellpadding="0" cellspacing="0">
+          
+          <!-- Brand Header -->
+          <tr>
+            <td align="center" style="padding:40px 40px 24px;background-color:#ffffff">
+              <span style="font-size:24px;font-weight:800;letter-spacing:4px;color:#5c4033;font-family:'Outfit','Inter',sans-serif;margin:0;display:block">MỘC HOME</span>
+              <span style="font-size:11px;letter-spacing:3px;color:#9ca3af;text-transform:uppercase;margin-top:6px;display:block">Nội Thất Hiện Đại</span>
+            </td>
+          </tr>
+
+          <!-- Hero Greeting Image / Visual Border -->
+          <tr>
+            <td style="padding:0 40px">
+              <div style="height:3px;background:linear-gradient(90deg, #d4b896, #5c4033, #d4b896);border-radius:2px"></div>
+            </td>
+          </tr>
+
+          <!-- Content Body -->
+          <tr>
+            <td style="padding:40px 40px 32px;color:#1f2937">
+              <h1 style="font-size:20px;font-weight:700;line-height:1.4;margin:0 0 16px;color:#111827">Yêu cầu khôi phục mật khẩu</h1>
+              
+              <p style="font-size:15px;line-height:1.6;margin:0 0 24px;color:#4b5563">
+                Xin chào <strong>${fullName || 'Quý khách'}</strong>,<br><br>
+                Chúng tôi nhận được yêu cầu thiết lập lại mật khẩu cho tài khoản của bạn tại <strong>Mộc Home</strong>.<br>
+                Vui lòng bấm vào nút dưới đây để tiến hành đổi mật khẩu mới:
+              </p>
+
+              <!-- CTA Button -->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:32px">
+                <tr>
+                  <td align="center">
+                    <a href="${resetUrl}" target="_blank" style="background-color:#5c4033;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:6px;display:inline-block;letter-spacing:1px;box-shadow:0 4px 6px rgba(92,64,51,0.2)">ĐẶT LẠI MẬT KHẨU</a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="font-size:12px;color:#9ca3af;margin-top:16px">
+                * Liên kết đặt lại mật khẩu này chỉ có giá trị sử dụng trong vòng 1 giờ kể từ khi yêu cầu được tạo.<br>
+                Nếu bạn không gửi yêu cầu này, vui lòng bỏ qua email này, mật khẩu của bạn sẽ được giữ nguyên.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer Section -->
+          <tr>
+            <td style="padding:32px 40px;background-color:#f9fafb;border-top:1px solid #e5e7eb;color:#6b7280;font-size:12px;line-height:1.6">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding-bottom:12px">
+                    <strong>MỘC HOME — NÂNG TẦM KHÔNG GIAN SỐNG</strong><br>
+                    📞 Hotline: 1900 1234 (Hỗ trợ 24/7)<br>
+                    ✉️ Email: support@mochome.com<br>
+                    📍 Showroom: Hà Nội & TP. Hồ Chí Minh
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border-top:1px solid #e5e7eb;padding-top:12px;font-size:11px;color:#9ca3af">
+                    Đây là email tự động gửi từ hệ thống Mộc Home.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
 `;
@@ -208,14 +279,82 @@ const buildWelcomeHtml = (fullName) => `
 const buildActivationHtml = (fullName, activationUrl) => `
 <!DOCTYPE html>
 <html>
-<body style="font-family:Arial,sans-serif;line-height:1.5;color:#1a1d21">
-  <h2>MỘC HOME — Kích hoạt tài khoản</h2>
-  <p>Xin chào ${fullName || 'bạn'},</p>
-  <p>Bạn vừa tạo tài khoản tại <strong>MỘC HOME</strong>. Vui lòng bấm vào liên kết bên dưới để kích hoạt tài khoản:</p>
-  <p><a href="${activationUrl}" style="color:#2563eb">Kích hoạt tài khoản</a></p>
-  <p>Nếu nút không hoạt động, sao chép đường dẫn này vào trình duyệt:</p>
-  <p style="word-break:break-all;color:#4b5563">${activationUrl}</p>
-  <p style="color:#6b7280;font-size:13px">Liên kết chỉ có hiệu lực trong 24 giờ.</p>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kích hoạt tài khoản Mộc Home</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f9fafb;padding:32px 16px">
+    <tr>
+      <td align="center">
+        <!-- Main Card -->
+        <table width="100%" maxWidth="600" style="max-width:600px;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.03);border-collapse:separate" cellpadding="0" cellspacing="0">
+          
+          <!-- Brand Header -->
+          <tr>
+            <td align="center" style="padding:40px 40px 24px;background-color:#ffffff">
+              <span style="font-size:24px;font-weight:800;letter-spacing:4px;color:#5c4033;font-family:'Outfit','Inter',sans-serif;margin:0;display:block">MỘC HOME</span>
+              <span style="font-size:11px;letter-spacing:3px;color:#9ca3af;text-transform:uppercase;margin-top:6px;display:block">Nội Thất Hiện Đại</span>
+            </td>
+          </tr>
+
+          <!-- Hero Greeting Image / Visual Border -->
+          <tr>
+            <td style="padding:0 40px">
+              <div style="height:3px;background:linear-gradient(90deg, #d4b896, #5c4033, #d4b896);border-radius:2px"></div>
+            </td>
+          </tr>
+
+          <!-- Content Body -->
+          <tr>
+            <td style="padding:40px 40px 32px;color:#1f2937">
+              <h1 style="font-size:20px;font-weight:700;line-height:1.4;margin:0 0 16px;color:#111827">Chào mừng bạn gia nhập gia đình Mộc Home!</h1>
+              
+              <p style="font-size:15px;line-height:1.6;margin:0 0 24px;color:#4b5563">
+                Xin chào <strong>${fullName || 'Quý khách'}</strong>,<br><br>
+                Cảm ơn bạn đã tin tưởng và đăng ký tài khoản tại <strong>Mộc Home</strong> — nơi kiến tạo những không gian sống ấm cúng, tinh tế và ngập tràn cảm hứng.<br>
+                Để hoàn tất thủ tục đăng ký và có thể đăng nhập vào hệ thống, bạn vui lòng bấm vào nút kích hoạt tài khoản ở bên dưới:
+              </p>
+
+              <!-- CTA Button -->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:32px">
+                <tr>
+                  <td align="center">
+                    <a href="${activationUrl}" target="_blank" style="background-color:#5c4033;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:6px;display:inline-block;letter-spacing:1px;box-shadow:0 4px 6px rgba(92,64,51,0.2)">KÍCH HOẠT TÀI KHOẢN CỦA BẠN</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="font-size:12px;color:#9ca3af;margin-top:16px">
+                * Liên kết kích hoạt này chỉ có giá trị sử dụng trong vòng 24 giờ kể từ lúc đăng ký.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer Section -->
+          <tr>
+            <td style="padding:32px 40px;background-color:#f9fafb;border-top:1px solid #e5e7eb;color:#6b7280;font-size:12px;line-height:1.6">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding-bottom:12px">
+                    <strong>MỘC HOME — NÂNG TẦM KHÔNG GIAN SỐNG</strong><br>
+                    📞 Hotline: 1900 1234 (Hỗ trợ 24/7)<br>
+                    ✉️ Email: support@mochome.com<br>
+                    📍 Showroom: Hà Nội & TP. Hồ Chí Minh
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border-top:1px solid #e5e7eb;padding-top:12px;font-size:11px;color:#9ca3af">
+                    Đây là email tự động gửi từ hệ thống Mộc Home. Nếu bạn không tạo tài khoản này, vui lòng bỏ qua hoặc liên hệ bộ phận hỗ trợ khách hàng.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
 `;
@@ -258,10 +397,10 @@ const sendActivationEmail = async (user, activationUrl) => {
   return { sent: false, reason: result.reason, logged: true };
 };
 
-const sendPasswordResetEmail = async (user, tempPassword) => {
+const sendPasswordResetEmail = async (user, resetUrl) => {
   const to = user.email;
-  const subject = 'MỘC HOME — Mật khẩu khôi phục';
-  const html = buildResetHtml(user.fullName, tempPassword);
+  const subject = 'MỘC HOME — Yêu cầu đặt lại mật khẩu';
+  const html = buildResetHtml(user.fullName, resetUrl);
 
   const result = await sendViaSmtp({ to, subject, html });
   if (result.sent) {
@@ -270,7 +409,7 @@ const sendPasswordResetEmail = async (user, tempPassword) => {
 
   console.log('\n========== KHÔI PHỤC MẬT KHẨU (SMTP chưa cấu hình) ==========');
   console.log(`Gửi tới: ${to}`);
-  console.log(`Mật khẩu tạm: ${tempPassword}`);
+  console.log(`Liên kết đặt lại: ${resetUrl}`);
   console.log('Cấu hình SMTP_HOST, SMTP_USER, SMTP_PASS trong backend/.env để gửi email thật.');
   console.log('============================================================\n');
 

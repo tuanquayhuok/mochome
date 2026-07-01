@@ -82,19 +82,42 @@ const TIER_BADGE: Record<string, string> = {
           }
 
           <div class="avatar-edit">
-            @if (user().avatarUrl) {
-              <img [src]="user().avatarUrl" alt="" class="avatar-lg" />
-            } @else {
-              <span class="avatar avatar-lg">{{ initials(user().fullName) }}</span>
-            }
+            <div class="avatar-container" (click)="showAvatarPicker.set(!showAvatarPicker())">
+              @if (user().avatarUrl) {
+                <img [src]="user().avatarUrl" alt="" class="avatar-lg" />
+              } @else {
+                <span class="avatar avatar-lg">{{ initials(user().fullName) }}</span>
+              }
+              <div class="avatar-overlay">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+              </div>
+            </div>
             <div>
-              <label class="store-btn store-btn-outline avatar-btn">
+              <button type="button" class="store-btn store-btn-outline avatar-btn" (click)="showAvatarPicker.set(!showAvatarPicker())">
                 Đổi ảnh đại diện
-                <input type="file" accept="image/*" hidden (change)="onAvatarPick($event)" />
-              </label>
-              <p class="hint">JPG/PNG, tối đa ~500KB</p>
+              </button>
             </div>
           </div>
+
+          @if (showAvatarPicker()) {
+            <div class="avatar-picker-panel">
+              <h4>Chọn ảnh đại diện mẫu hoặc tải lên</h4>
+              <div class="avatar-options-grid">
+                @for (avt of sampleAvatars; track avt) {
+                  <button type="button" class="avatar-option-btn" (click)="selectSampleAvatar(avt); showAvatarPicker.set(false)" [class.active]="user().avatarUrl === avt">
+                    <img [src]="avt" alt="Avatar option" />
+                  </button>
+                }
+                <label class="avatar-option-btn avatar-upload-btn">
+                  <span class="plus-icon">+</span>
+                  <input type="file" accept="image/*" hidden (change)="onAvatarPick($event); showAvatarPicker.set(false)" />
+                </label>
+              </div>
+            </div>
+          }
 
           <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
             <div class="form-row">
@@ -883,6 +906,117 @@ const TIER_BADGE: Record<string, string> = {
         cursor: pointer;
       }
 
+      .avatar-container {
+        position: relative;
+        cursor: pointer;
+        border-radius: 50%;
+        overflow: hidden;
+        width: 80px;
+        height: 80px;
+        flex-shrink: 0;
+      }
+
+      .avatar-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+      }
+
+      .avatar-container:hover .avatar-overlay {
+        opacity: 1;
+      }
+
+      .avatar-overlay svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      .avatar-picker-panel {
+        background: #fdfcfb;
+        padding: 1.25rem;
+        border-radius: 8px;
+        border: 1px dashed #e4e7ec;
+        margin-bottom: 1.5rem;
+      }
+
+      .avatar-picker-panel h4 {
+        margin: 0 0 0.85rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #4b5563;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .avatar-options-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .avatar-option-btn {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        padding: 0;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .avatar-option-btn img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .avatar-option-btn:hover {
+        transform: scale(1.05);
+        border-color: #d1d5db;
+      }
+
+      .avatar-option-btn.active {
+        border-color: #5c4033;
+        box-shadow: 0 0 0 2px rgba(92, 64, 51, 0.2);
+      }
+
+      .avatar-upload-btn {
+        border: 2px dashed #d1d5db;
+        color: #9ca3af;
+        font-size: 1.5rem;
+        font-weight: 300;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+      }
+
+      .avatar-upload-btn:hover {
+        border-color: #5c4033;
+        color: #5c4033;
+        background: rgba(92, 64, 51, 0.04);
+      }
+
+      .plus-icon {
+        line-height: 1;
+        margin-top: -2px;
+      }
+
       .form-row {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -989,6 +1123,14 @@ export class StoreAccountDashboardComponent implements OnInit {
   readonly forgotMsg = signal('');
   readonly forgotDevHint = signal('');
   readonly forgotLoading = signal(false);
+  readonly showAvatarPicker = signal(false);
+  readonly sampleAvatars = [
+    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQy9opUH_ckOjcS5dhsUWrCGcqFxKcZQCTblidTImHHYg&s=10',
+    'https://images2.thanhnien.vn/thumb_w/686/528068263637045248/2026/6/3/18h-1779976634076924307678-377-1118-1185-1724-crop-1780466151086903252230.jpg',
+    'https://media.vneconomy.vn/images/upload/2022/12/19/221208164147-argentina-lionel-messi.jpg',
+    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRe8c4LA6_mdodv7GoSSJwlSk0CWWyj_QQBST0RHpOGqw&s=10',
+    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUV4pC0wyj8nseU_weWJwregL_i6lvLmwC15AgTsuUpQ&s=10'
+  ];
 
   profileForm = this.fb.group({
     fullName: ['', Validators.required],
@@ -1115,6 +1257,18 @@ export class StoreAccountDashboardComponent implements OnInit {
         this.claiming.set(false);
         this.claimMsg.set(this.errMsg(err, 'Không nhận được voucher.'));
       }
+    });
+  }
+
+  selectSampleAvatar(url: string): void {
+    this.profileErr.set('');
+    this.profileMsg.set('');
+    this.profileApi.updateAvatar(url).subscribe({
+      next: (res) => {
+        this.profileMsg.set(res.message);
+        this.emitUser(res.user);
+      },
+      error: (err) => this.profileErr.set(this.errMsg(err, 'Không cập nhật được ảnh.'))
     });
   }
 

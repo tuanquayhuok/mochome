@@ -80,6 +80,8 @@ export interface UserRow {
   phone?: string;
   role: 'admin' | 'user' | string;
   isActive: boolean;
+  avatarUrl?: string;
+  emailVerifiedAt?: string | null;
   isVip?: boolean;
   createdAt?: string;
   orderCount?: number;

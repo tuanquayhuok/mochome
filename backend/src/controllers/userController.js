@@ -79,7 +79,7 @@ const updateUser = async (req, res) => {
     return res.status(404).json({ message: 'Không tìm thấy người dùng' });
   }
 
-  const { fullName, email, password, phone, role, isActive, isVip } = req.body;
+  const { fullName, email, password, phone, role, isActive, isVip, isVerified } = req.body;
 
   if (fullName) user.fullName = fullName;
   if (phone !== undefined) user.phone = phone;
@@ -88,6 +88,15 @@ const updateUser = async (req, res) => {
     user.isActive = isActive === true || String(isActive) === 'true';
   }
   if (typeof isVip === 'boolean') user.isVip = isVip;
+  if (isVerified !== undefined && isVerified !== null) {
+    if (isVerified === true || String(isVerified) === 'true') {
+      if (!user.emailVerifiedAt) {
+        user.emailVerifiedAt = new Date();
+      }
+    } else {
+      user.emailVerifiedAt = null;
+    }
+  }
 
   if (email && email.toLowerCase() !== user.email) {
     const existing = await User.findOne({ email: email.toLowerCase() });

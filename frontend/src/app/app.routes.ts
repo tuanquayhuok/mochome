@@ -66,6 +66,12 @@ export const appRoutes: Routes = [
           import('./pages/checkout/checkout.component').then((m) => m.CheckoutComponent)
       },
       {
+        path: 'dat-hang-thanh-cong',
+        canActivate: [storeAuthGuard],
+        loadComponent: () =>
+          import('./pages/checkout/checkout-success.component').then((m) => m.CheckoutSuccessComponent)
+      },
+      {
         path: 'dang-ky',
         canActivate: [storeGuestGuard],
         loadComponent: () => import('./pages/register/register.component').then((m) => m.RegisterComponent)

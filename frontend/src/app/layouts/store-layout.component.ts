@@ -1697,25 +1697,17 @@ export class StoreLayoutComponent {
 
   private applyTheme(dark: boolean): void {
     if (typeof document !== 'undefined') {
-      if (dark) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        document.body.classList.add('dark-mode');
-        localStorage.setItem('store_theme', 'dark');
-      } else {
-        document.documentElement.removeAttribute('data-theme');
-        document.body.classList.remove('dark-mode');
-        localStorage.setItem('store_theme', 'light');
-      }
+      document.documentElement.removeAttribute('data-theme');
+      document.body.classList.remove('dark-mode');
+      localStorage.setItem('store_theme', 'light');
     }
   }
 
   constructor() {
-    // Khôi phục theme từ localstorage
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('store_theme');
-      const startDark = savedTheme === 'dark';
-      this.isDarkMode.set(startDark);
-      this.applyTheme(startDark);
+      localStorage.setItem('store_theme', 'light');
+      this.isDarkMode.set(false);
+      this.applyTheme(false);
     }
 
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => {

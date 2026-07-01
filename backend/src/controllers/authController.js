@@ -339,7 +339,7 @@ const googleLogin = async (req, res) => {
 
   try {
     const googleProfile = await verifyGoogleToken(accessToken);
-    const { email, name } = googleProfile;
+    const { email, name, picture } = googleProfile;
 
     if (!email) {
       return res.status(400).json({ message: 'Không thể lấy email từ tài khoản Google này.' });
@@ -357,7 +357,8 @@ const googleLogin = async (req, res) => {
         password: hashedPassword,
         role: 'user',
         isActive: true,
-        emailVerifiedAt: new Date()
+        emailVerifiedAt: new Date(),
+        avatarUrl: picture || ''
       });
     } else {
       if (user.role === 'admin') {
@@ -365,6 +366,11 @@ const googleLogin = async (req, res) => {
       }
       if (user.isActive === false) {
         return res.status(403).json({ message: 'Tài khoản đã bị vô hiệu hóa' });
+      }
+      // Cập nhật avatar từ Google nếu chưa có hoặc nếu avatar cũ là ảnh Google
+      if (picture && (!user.avatarUrl || user.avatarUrl.includes('googleusercontent.com'))) {
+        user.avatarUrl = picture;
+        await user.save();
       }
     }
 

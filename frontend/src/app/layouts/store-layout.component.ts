@@ -365,6 +365,59 @@ import { SettingsService } from '../core/services/settings.service';
         <router-outlet />
       </main>
 
+      <!-- Mobile Bottom Tab Bar -->
+      <nav class="mobile-bottom-tabbar">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="tabbar-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="tabbar-icon">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span class="tabbar-label">Trang chủ</span>
+        </a>
+        
+        <a routerLink="/san-pham" routerLinkActive="active" class="tabbar-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="tabbar-icon">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          <span class="tabbar-label">Cửa hàng</span>
+        </a>
+
+        <!-- Central Prominent Button (Nâng Gold style / Bảng tin) -->
+        <a routerLink="/tin-tuc" routerLinkActive="active" class="tabbar-item central-button-wrapper">
+          <div class="central-circle-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="central-icon">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8 14H6v-6h5v6zm8 0h-6v-2h6v2zm0-4h-6v-2h6v2zm0-4H6V6h13v2z"/>
+            </svg>
+          </div>
+          <span class="tabbar-label central-label">Bảng tin</span>
+        </a>
+        
+        <a routerLink="/gio-hang" routerLinkActive="active" class="tabbar-item">
+          <div class="icon-with-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="tabbar-icon">
+              <circle cx="9" cy="21" r="1"/>
+              <circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            @if (cartCount() > 0) {
+              <span class="tabbar-badge">{{ cartCount() }}</span>
+            }
+          </div>
+          <span class="tabbar-label">Giỏ hàng</span>
+        </a>
+        
+        <a routerLink="/tai-khoan" routerLinkActive="active" class="tabbar-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="tabbar-icon">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 00-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span class="tabbar-label">Tài khoản</span>
+        </a>
+      </nav>
+
       @if (isHomePage()) {
         <app-store-chatbot />
       }
@@ -1114,6 +1167,22 @@ import { SettingsService } from '../core/services/settings.service';
         flex: 1;
       }
 
+      .store-main > * {
+        display: block;
+        animation: page-fade-in 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      }
+
+      @keyframes page-fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
       .site-footer {
         background: #ebebeb;
         border-top: 1px solid #ddd;
@@ -1648,6 +1717,126 @@ import { SettingsService } from '../core/services/settings.service';
       .dropdown-link:hover {
         background: #fcf9f6;
         color: #8c7161;
+      }
+
+      .mobile-bottom-tabbar {
+        display: none;
+      }
+
+      @media (max-width: 768px) {
+        .mobile-bottom-tabbar {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 64px;
+          background: #ffffff;
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
+          border-top: 1px solid #eaeaea;
+          box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+          z-index: 999;
+          border-top-left-radius: 20px;
+          border-top-right-radius: 20px;
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .tabbar-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          color: #5a4d41;
+          flex: 1;
+          height: 100%;
+          position: relative;
+          transition: color 0.2s;
+        }
+
+        .tabbar-item.active {
+          color: #8c7161;
+        }
+
+        .tabbar-icon {
+          width: 20px;
+          height: 20px;
+          margin-bottom: 2px;
+        }
+
+        .tabbar-label {
+          font-size: 10px;
+          font-weight: 600;
+        }
+
+        /* Central raised button */
+        .central-button-wrapper {
+          position: relative;
+          overflow: visible;
+        }
+
+        .central-circle-btn {
+          width: 54px;
+          height: 54px;
+          background: #8c7161;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #ffffff;
+          position: absolute;
+          top: -24px;
+          left: 50%;
+          transform: translateX(-50%);
+          box-shadow: 0 4px 15px rgba(140, 113, 97, 0.35);
+          border: 4px solid #ffffff;
+          transition: transform 0.2s, background 0.2s;
+        }
+
+        .tabbar-item.central-button-wrapper:hover .central-circle-btn,
+        .tabbar-item.central-button-wrapper.active .central-circle-btn {
+          background: #705648;
+          transform: translateX(-50%) scale(1.05);
+        }
+
+        .central-icon {
+          width: 22px;
+          height: 22px;
+        }
+
+        .central-label {
+          margin-top: 28px;
+          font-weight: 700;
+          color: #8c7161;
+        }
+
+        .icon-with-badge {
+          position: relative;
+        }
+
+        .tabbar-badge {
+          position: absolute;
+          top: -6px;
+          right: -10px;
+          background: #f02849;
+          color: #ffffff;
+          font-size: 9px;
+          font-weight: 700;
+          height: 16px;
+          min-width: 16px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0 4px;
+          border: 1.5px solid #ffffff;
+        }
+
+        /* Prevent footer overlap */
+        .site-footer {
+          padding-bottom: 80px !important;
+        }
       }
     `
   ]

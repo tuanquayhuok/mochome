@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, signal, viewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ChatMessage, ChatService } from '../../core/services/chat.service';
@@ -37,7 +37,7 @@ const QUICK_START = ['Sofa phòng khách', 'Chính sách giao hàng', 'Sản ph�
                 </span>
               </div>
             </div>
-            <button type="button" class="chat-close" (click)="toggle()" aria-label="Đóng chat">
+            <button type="button" class="chat-close" (click)="toggleClose()" aria-label="Đóng chat">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
@@ -96,6 +96,8 @@ const QUICK_START = ['Sofa phòng khách', 'Chính sách giao hàng', 'Sản ph�
         class="chat-fab"
         [class.chat-fab--open]="open()"
         (click)="toggle()"
+        (mousedown)="onMouseDown($event)"
+        (touchstart)="onTouchStart($event)"
         [attr.aria-expanded]="open()"
         aria-label="Mở trợ lý AI Mộc Home"
       >
@@ -120,6 +122,7 @@ const QUICK_START = ['Sofa phòng khách', 'Chính sách giao hàng', 'Sản ph�
         right: 1.25rem;
         bottom: 1.25rem;
         pointer-events: none;
+        touch-action: none;
       }
 
       .chatbot-root {
@@ -136,12 +139,17 @@ const QUICK_START = ['Sofa phòng khách', 'Chính sách giao hàng', 'Sản ph�
         border-radius: 50%;
         background: linear-gradient(145deg, #6b5344, #5c4033);
         color: #fff;
-        cursor: pointer;
+        cursor: grab;
         box-shadow: 0 4px 20px rgba(92, 64, 51, 0.45);
         display: grid;
         place-items: center;
         transition: transform 0.2s, box-shadow 0.2s;
         animation: fab-pulse 2.5s ease-in-out infinite;
+        user-select: none;
+      }
+
+      .chat-fab:active {
+        cursor: grabbing;
       }
 
       @keyframes fab-pulse {
@@ -172,7 +180,7 @@ const QUICK_START = ['Sofa phòng khách', 'Chính sách giao hàng', 'Sản ph�
       .chat-panel {
         position: absolute;
         right: 0;
-        bottom: calc(56px + 0.75rem);
+        bottom: calc(60px + 0.75rem);
         width: min(380px, calc(100vw - 2rem));
         height: min(520px, calc(100vh - 8rem));
         max-height: 520px;
@@ -250,12 +258,17 @@ const QUICK_START = ['Sofa phòng khách', 'Chính sách giao hàng', 'Sản ph�
         width: 36px;
         height: 36px;
         border: none;
+        border-radius: 50%;
         background: rgba(255, 255, 255, 0.15);
         color: #fff;
-        border-radius: 8px;
         cursor: pointer;
         display: grid;
         place-items: center;
+        transition: background 0.2s;
+      }
+
+      .chat-close:hover {
+        background: rgba(255, 255, 255, 0.25);
       }
 
       .chat-close svg {
@@ -270,64 +283,65 @@ const QUICK_START = ['Sofa phòng khách', 'Chính sách giao hàng', 'Sản ph�
         display: flex;
         flex-direction: column;
         gap: 0.75rem;
-        background: #fafafa;
+        background: #fdfdfd;
       }
 
       .msg-row {
         display: flex;
+        align-items: flex-start;
         gap: 0.5rem;
-        align-items: flex-end;
-        max-width: 92%;
+        max-width: 85%;
       }
 
       .msg-row--user {
         align-self: flex-end;
-        flex-direction: row-reverse;
         max-width: 85%;
+        flex-direction: row-reverse;
       }
 
       .msg-avatar {
         width: 28px;
         height: 28px;
         border-radius: 50%;
-        background: #5c4033;
-        color: #fff;
-        font-size: 0.5625rem;
-        font-weight: 800;
+        background: #ebdcd0;
+        color: #5c4033;
         display: grid;
         place-items: center;
+        font-size: 0.625rem;
+        font-weight: 800;
         flex-shrink: 0;
+        border: 1px solid #ebdcd0;
       }
 
       .msg-bubble {
         padding: 0.65rem 0.85rem;
-        border-radius: 12px 12px 12px 4px;
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        font-size: 0.8125rem;
+        border-radius: 14px;
+        background: #f1f5f9;
+        color: #1f2937;
+        font-size: 0.875rem;
         line-height: 1.5;
-        color: #374151;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
       }
 
       .msg-bubble--user {
-        background: #5c4033;
-        color: #fff;
-        border-color: #5c4033;
-        border-radius: 12px 12px 4px 12px;
+        background: #ebdcd0;
+        color: #5c4033;
+        border-radius: 14px;
       }
 
-      .msg-bubble--typing {
-        padding: 0.75rem 1rem;
+      .msg-text {
+        white-space: pre-wrap;
       }
 
       .msg-text :global(a.chat-link) {
-        color: #5c4033;
-        font-weight: 600;
+        color: #1877f2;
         text-decoration: underline;
+        word-break: break-all;
+        font-weight: 500;
       }
 
-      .msg-bubble--user .msg-text :global(a.chat-link) {
-        color: #fef3c7;
+      .msg-text :global(a.chat-link:hover) {
+        color: #1565c0;
       }
 
       .msg-text :global(strong) {
@@ -401,21 +415,21 @@ const QUICK_START = ['Sofa phòng khách', 'Chính sách giao hàng', 'Sản ph�
 
       .chat-input input {
         flex: 1;
-        min-width: 0;
-        padding: 0.6rem 0.85rem;
         border: 1px solid #e5e7eb;
-        border-radius: 999px;
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
         font-size: 0.875rem;
+        outline: none;
+        transition: border-color 0.2s;
       }
 
       .chat-input input:focus {
-        outline: none;
-        border-color: #9ca3af;
+        border-color: #5c4033;
       }
 
       .chat-input button {
-        width: 42px;
-        height: 42px;
+        width: 36px;
+        height: 36px;
         border: none;
         border-radius: 50%;
         background: #5c4033;
@@ -424,6 +438,11 @@ const QUICK_START = ['Sofa phòng khách', 'Chính sách giao hàng', 'Sản ph�
         display: grid;
         place-items: center;
         flex-shrink: 0;
+        transition: background 0.2s;
+      }
+
+      .chat-input button:hover:not(:disabled) {
+        background: #4a3329;
       }
 
       .chat-input button:disabled {
@@ -436,24 +455,25 @@ const QUICK_START = ['Sofa phòng khách', 'Chính sách giao hàng', 'Sản ph�
         height: 18px;
       }
 
-      @media (max-width: 480px) {
+      @media (max-width: 768px) {
         :host {
-          right: 0.75rem;
-          bottom: 0.75rem;
+          right: 1rem;
+          bottom: 80px; /* Elevated above the mobile bottom tab bar */
         }
 
         .chat-panel {
           width: min(380px, calc(100vw - 1.5rem));
           height: min(70vh, 480px);
+          bottom: calc(60px + 0.5rem);
         }
-
       }
     `
   ]
 })
-export class StoreChatbotComponent {
+export class StoreChatbotComponent implements OnDestroy {
   private readonly chat = inject(ChatService);
   private readonly router = inject(Router);
+  private readonly hostElement = inject(ElementRef);
   private readonly messagesEl = viewChild<ElementRef<HTMLDivElement>>('messagesEl');
 
   readonly open = signal(false);
@@ -462,11 +482,108 @@ export class StoreChatbotComponent {
   readonly suggestions = signal<string[]>([...QUICK_START]);
   inputText = '';
 
+  // Drag-and-drop state properties
+  private isDragging = false;
+  private startX = 0;
+  private startY = 0;
+  private initialRight = 20;
+  private initialBottom = 20;
+  private dragThreshold = 5;
+  private dragMoved = false;
+
+  ngOnDestroy(): void {
+    // Cleanup any global listeners
+  }
+
+  // Desktop Mouse Events
+  onMouseDown(event: MouseEvent): void {
+    if (typeof window === 'undefined') return;
+    this.startDrag(event.clientX, event.clientY);
+
+    const onMouseMove = (e: MouseEvent) => this.drag(e.clientX, e.clientY);
+    const onMouseUp = () => {
+      this.endDrag();
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }
+
+  // Mobile Touch Events
+  onTouchStart(event: TouchEvent): void {
+    if (typeof window === 'undefined' || event.touches.length === 0) return;
+    const touch = event.touches[0];
+    this.startDrag(touch.clientX, touch.clientY);
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 0) return;
+      this.drag(e.touches[0].clientX, e.touches[0].clientY);
+    };
+    const onTouchEnd = () => {
+      this.endDrag();
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+    };
+
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('touchend', onTouchEnd);
+  }
+
+  private startDrag(clientX: number, clientY: number): void {
+    this.isDragging = true;
+    this.dragMoved = false;
+    this.startX = clientX;
+    this.startY = clientY;
+
+    const host = this.hostElement.nativeElement as HTMLElement;
+    const rect = host.getBoundingClientRect();
+
+    this.initialRight = window.innerWidth - rect.right;
+    this.initialBottom = window.innerHeight - rect.bottom;
+  }
+
+  private drag(clientX: number, clientY: number): void {
+    if (!this.isDragging) return;
+    const deltaX = clientX - this.startX;
+    const deltaY = clientY - this.startY;
+
+    if (Math.abs(deltaX) > this.dragThreshold || Math.abs(deltaY) > this.dragThreshold) {
+      this.dragMoved = true;
+    }
+
+    const host = this.hostElement.nativeElement as HTMLElement;
+
+    let newRight = this.initialRight - deltaX;
+    let newBottom = this.initialBottom - deltaY;
+
+    // Keep constraints
+    newRight = Math.max(10, Math.min(window.innerWidth - 70, newRight));
+    newBottom = Math.max(10, Math.min(window.innerHeight - 70, newBottom));
+
+    host.style.right = `${newRight}px`;
+    host.style.bottom = `${newBottom}px`;
+  }
+
+  private endDrag(): void {
+    this.isDragging = false;
+  }
+
   toggle(): void {
+    // If the button was dragged, ignore click event
+    if (this.dragMoved) {
+      this.dragMoved = false;
+      return;
+    }
     this.open.update((v) => !v);
     if (this.open()) {
       setTimeout(() => this.scrollBottom(), 100);
     }
+  }
+
+  toggleClose(): void {
+    this.open.set(false);
   }
 
   onSubmit(event: Event): void {

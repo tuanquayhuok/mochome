@@ -467,9 +467,16 @@ const TIER_BADGE: Record<string, string> = {
         object-fit: cover;
       }
 
+      .profile-summary div {
+        min-width: 0;
+      }
+
       .profile-summary strong {
         display: block;
         font-size: 0.9375rem;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
 
       .email-line {
@@ -477,6 +484,7 @@ const TIER_BADGE: Record<string, string> = {
         font-size: 0.7rem;
         color: #9ca3af;
         margin-top: 0.15rem;
+        word-break: break-all;
       }
 
       .tier-pill {
@@ -1089,7 +1097,76 @@ const TIER_BADGE: Record<string, string> = {
       @media (max-width: 768px) {
         .account-grid {
           grid-template-columns: 1fr;
+          gap: 1.25rem;
         }
+
+        .account-nav {
+          padding: 1rem;
+        }
+
+        .profile-summary {
+          margin-bottom: 0.75rem;
+          padding-bottom: 0.75rem;
+          align-items: center;
+        }
+
+        .account-menu {
+          display: flex;
+          flex-direction: row;
+          overflow-x: auto;
+          gap: 0.5rem;
+          padding: 0.25rem 0.25rem 0.75rem;
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+          border-bottom: 1px solid #f0f2f5;
+          margin-top: 0.25rem;
+        }
+
+        .account-menu::-webkit-scrollbar {
+          display: none;
+        }
+
+        .menu-item {
+          white-space: nowrap;
+          padding: 0.45rem 1rem !important;
+          border-radius: 20px !important;
+          border: 1.5px solid #ebdcd0 !important;
+          background: #fdfdfd;
+          font-size: 0.8125rem;
+          text-align: center;
+          width: auto;
+          flex-shrink: 0;
+          border-left: 1.5px solid #ebdcd0 !important;
+        }
+
+        .menu-item.active {
+          background: #8c6239 !important;
+          color: #fff !important;
+          border-color: #8c6239 !important;
+          padding-left: 1rem !important;
+        }
+
+        .menu-item:hover {
+          transform: none;
+        }
+
+        .logout-btn {
+          margin-top: 0.75rem;
+          width: auto;
+          align-self: flex-end;
+          padding: 0.4rem 1.25rem;
+          font-size: 0.8125rem;
+        }
+
+        .account-panel {
+          padding: 1.25rem 1rem;
+        }
+
+        .form-row {
+          grid-template-columns: 1fr !important;
+          gap: 0.75rem;
+        }
+
         .flex-2 {
           grid-column: span 1;
         }

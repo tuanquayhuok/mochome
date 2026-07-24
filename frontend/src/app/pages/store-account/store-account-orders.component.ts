@@ -57,15 +57,15 @@ const CANCEL_REASONS: { code: CancellationReasonCode; label: string }[] = [
           <tbody>
             @for (o of orders(); track o.id) {
               <tr>
-                <td class="cell-strong">{{ o.orderCode }}</td>
-                <td class="cell-muted">{{ formatDate(o.createdAt) }}</td>
-                <td>{{ o.totalAmount | number }} đ</td>
-                <td>
+                <td data-label="Mã đơn" class="cell-strong">{{ o.orderCode }}</td>
+                <td data-label="Ngày đặt" class="cell-muted">{{ formatDate(o.createdAt) }}</td>
+                <td data-label="Tổng tiền">{{ o.totalAmount | number }} đ</td>
+                <td data-label="Trạng thái">
                   <span class="order-status" [class]="o.status" [class.unpaid]="o.status === 'pending' && o.paymentMethod === 'vnpay'">
                     {{ o.status === 'pending' && o.paymentMethod === 'vnpay' ? 'Chưa thanh toán' : orderStatusLabel(o.status) }}
                   </span>
                 </td>
-                <td>
+                <td data-label="Thao tác">
                   <button type="button" class="store-btn store-btn-outline btn-sm" (click)="openDetail(o)">
                     Xem đơn hàng
                   </button>
@@ -734,6 +734,45 @@ const CANCEL_REASONS: { code: CancellationReasonCode; label: string }[] = [
         background: #b91c1c;
         border-color: #b91c1c;
         color: #fff;
+      }
+
+      @media (max-width: 600px) {
+        .orders-table thead {
+          display: none;
+        }
+        .orders-table, .orders-table tbody, .orders-table tr, .orders-table td {
+          display: block;
+          width: 100%;
+        }
+        .orders-table tr {
+          margin-bottom: 1rem;
+          border: 1px solid #ebdcd0;
+          border-radius: 12px;
+          padding: 0.75rem;
+          background: #fff;
+          box-shadow: 0 2px 8px rgba(62, 42, 30, 0.02);
+        }
+        .orders-table td {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.5rem 0;
+          border-bottom: 1px dashed #f0f2f5;
+          text-align: right;
+        }
+        .orders-table td:last-child {
+          border-bottom: none;
+          padding-top: 0.75rem;
+          justify-content: flex-end;
+        }
+        .orders-table td::before {
+          content: attr(data-label);
+          font-weight: 700;
+          color: #8c8175;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          text-align: left;
+        }
       }
     `
   ]

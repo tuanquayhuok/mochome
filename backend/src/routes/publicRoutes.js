@@ -8,7 +8,9 @@ const {
   createPostComment,
   likePostComment,
   getCollections,
-  getCollectionBySlug
+  getCollectionBySlug,
+  getPublicPosts,
+  viewPost
 } = require('../controllers/publicController');
 const { storeChat } = require('../controllers/chatController');
 const { storeLogin, storeRegister, activateStoreAccount, mailDebug, googleLogin } = require('../controllers/authController');
@@ -38,8 +40,10 @@ router.get('/vouchers/picker', asyncHandler(listPickerVouchers));
 router.post('/vouchers/validate', asyncHandler(validateVoucherPublic));
 
 // Posts & Comments routes
+router.get('/posts', asyncHandler(getPublicPosts));
 router.get('/posts/:slug', asyncHandler(getPostBySlug));
 router.post('/posts/:id/like', protect, asyncHandler(likePost));
+router.post('/posts/:id/view', asyncHandler(viewPost));
 router.get('/posts/:id/comments', asyncHandler(getPostComments));
 router.post('/posts/:id/comments', protect, asyncHandler(createPostComment));
 router.post('/comments/:id/like', protect, asyncHandler(likePostComment));

@@ -29,7 +29,8 @@ export const appRoutes: Routes = [
       },
       {
         path: 'bai-viet/:slug',
-        loadComponent: () => import('./pages/post-detail/post-detail.component').then((m) => m.PostDetailComponent)
+        redirectTo: 'tin-tuc',
+        pathMatch: 'full'
       },
       {
         path: 'tin-tuc',
@@ -50,6 +51,10 @@ export const appRoutes: Routes = [
       {
         path: 'lien-he',
         loadComponent: () => import('./pages/contact/contact.component').then((m) => m.ContactComponent)
+      },
+      {
+        path: 'ho-tro',
+        loadComponent: () => import('./pages/faq/faq.component').then((m) => m.FaqComponent)
       },
       {
         path: 'yeu-thich',

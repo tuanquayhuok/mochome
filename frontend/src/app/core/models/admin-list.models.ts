@@ -98,8 +98,14 @@ export interface PostRow {
   isVisible?: boolean;
   viewCount?: number;
   likeCount?: number;
-  likes?: string[];
+  likes?: any[];
   shareCount?: number;
+  author?: {
+    _id: string;
+    fullName: string;
+    email: string;
+    role: string;
+  };
   createdAt?: string;
   updatedAt?: string;
 }

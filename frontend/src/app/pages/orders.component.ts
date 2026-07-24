@@ -269,7 +269,19 @@ interface StatCard {
                 <p class="modal-sub">{{ editOrder()!.orderCode }} — {{ editOrder()!.customerName }}</p>
               }
             </div>
-            <button type="button" class="modal-close" (click)="closeEditModal()" aria-label="Đóng">×</button>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              @if (editOrder()) {
+                <button type="button" class="btn-action secondary print-btn" (click)="printInvoice()" style="padding: 0.4rem 0.85rem; font-size: 0.8125rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;" aria-hidden="true">
+                    <polyline points="6 9 6 2 18 2 18 9"/>
+                    <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+                    <rect x="6" y="14" width="12" height="8"/>
+                  </svg>
+                  In hóa đơn
+                </button>
+              }
+              <button type="button" class="modal-close" (click)="closeEditModal()" aria-label="Đóng" style="margin-bottom: 0;">×</button>
+            </div>
           </header>
 
           @if (editLoading()) {
@@ -473,9 +485,105 @@ interface StatCard {
         </div>
       </div>
     }
+
+    @if (editOrder()) {
+      <div class="print-invoice-only">
+        <div class="invoice-header">
+          <div class="logo-area">
+            <h1>MỘC HOME</h1>
+            <p>Nội Thất Hiện Đại & Cao Cấp</p>
+          </div>
+          <div class="invoice-title">
+            <h2>HÓA ĐƠN BÁN HÀNG</h2>
+            <p class="invoice-code">Số hóa đơn: {{ editOrder()!.orderCode }}</p>
+            <p class="invoice-date">Ngày lập: {{ formatDateTime(editOrder()!.createdAt) }}</p>
+          </div>
+        </div>
+        <hr class="invoice-divider" />
+        <div class="invoice-details">
+          <div class="details-col">
+            <h3>Thông tin đơn vị cung cấp:</h3>
+            <p><strong>CÔNG TY NỘI THẤT MỘC HOME</strong></p>
+            <p>Địa chỉ: Số 12 Khu đô thị mới Trung Hòa - Nhân Chính, Cầu Giấy, Hà Nội</p>
+            <p>Hotline: 1900 1234 | Email: support&#64;mochome.com</p>
+          </div>
+          <div class="details-col">
+            <h3>Thông tin khách hàng nhận nhận:</h3>
+            <p>Khách hàng: <strong>{{ editOrder()!.customerName }}</strong></p>
+            <p>Số điện thoại: <strong>{{ editOrder()!.phone || editOrder()!.receiverPhone || '—' }}</strong></p>
+            <p>Địa chỉ giao hàng: {{ editOrder()!.shippingAddress || '—' }}</p>
+            <p>Phương thức thanh toán: {{ PAYMENT_LABELS[editOrder()!.paymentMethod] || editOrder()!.paymentMethod }}</p>
+          </div>
+        </div>
+        @if (editOrder()!.note) {
+          <div class="invoice-note">
+            <strong>Ghi chú đơn hàng:</strong> {{ editOrder()!.note }}
+          </div>
+        }
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th style="width: 60px; text-align: center;">STT</th>
+              <th>Sản phẩm / Quy cách</th>
+              <th style="width: 130px; text-align: right;">Đơn giá (đ)</th>
+              <th style="width: 80px; text-align: center;">SL</th>
+              <th style="width: 150px; text-align: right;">Thành tiền (đ)</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of editOrder()!.items; track $index; let idx = $index) {
+              <tr>
+                <td style="text-align: center;">{{ idx + 1 }}</td>
+                <td>
+                  <strong>{{ item.productName }}</strong>
+                </td>
+                <td style="text-align: right;">{{ item.price | number }}</td>
+                <td style="text-align: center;">{{ item.quantity }}</td>
+                <td style="text-align: right;">{{ (item.price * item.quantity) | number }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div class="invoice-summary">
+          <div class="summary-row">
+            <span>Tạm tính:</span>
+            <span>{{ formatCurrency(editOrder()!.totalAmount) }}</span>
+          </div>
+          <div class="summary-row font-large">
+            <span>Tổng tiền thanh toán:</span>
+            <strong>{{ formatCurrency(editOrder()!.totalAmount) }}</strong>
+          </div>
+        </div>
+        <div class="invoice-signatures">
+          <div class="signature-box">
+            <p><strong>Người lập phiếu</strong></p>
+            <span class="sig-space"></span>
+            <p>(Ký, ghi rõ họ tên)</p>
+          </div>
+          <div class="signature-box">
+            <p><strong>Khách hàng nhận hàng</strong></p>
+            <span class="sig-space"></span>
+            <p>(Ký, xác nhận hàng nguyên vẹn)</p>
+          </div>
+        </div>
+        <p class="invoice-thanks">Cảm ơn Quý khách đã tin tưởng và lựa chọn sản phẩm từ Mộc Home!</p>
+      </div>
+    }
   `,
   styles: [
     `
+      .print-invoice-only { display: none; }
+      @media print {
+        .modal-backdrop, .modal-panel { display: none !important; }
+        .print-invoice-only { display: block; padding: 2cm; }
+        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .invoice-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .invoice-table th, .invoice-table td { border: 1px solid #000; padding: 8px; }
+        .invoice-summary { text-align: right; margin-top: 10px; }
+        .invoice-signatures { display: flex; justify-content: space-between; margin-top: 40px; }
+        .signature-box { width: 200px; text-align: center; }
+        .sig-space { display: block; height: 80px; }
+      }
       :host ::ng-deep .catalog-actions {
         display: none;
       }
@@ -818,29 +926,216 @@ interface StatCard {
         border-radius: 8px;
       }
 
-      .history-list {
-        list-style: none;
-        margin: 0;
-        padding: 0;
+      .modal-foot {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
       }
 
+      /* Print Styles */
+      .print-invoice-only {
+        display: none;
+      }
+
+      @media print {
+        body * {
+          visibility: hidden;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+        .print-invoice-only, .print-invoice-only * {
+          visibility: visible;
+        }
+        .print-invoice-only {
+          display: block !important;
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          color: #000;
+          padding: 10px;
+          box-sizing: border-box;
+        }
+        .invoice-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 1.5rem;
+        }
+        .logo-area h1 {
+          font-size: 1.75rem;
+          font-weight: 800;
+          color: #2c2520;
+          margin: 0 0 0.25rem;
+          letter-spacing: 0.05em;
+        }
+        .logo-area p {
+          font-size: 0.8125rem;
+          color: #7a6e67;
+          margin: 0;
+        }
+        .invoice-title {
+          text-align: right;
+        }
+        .invoice-title h2 {
+          font-size: 1.5rem;
+          font-weight: 800;
+          margin: 0 0 0.5rem;
+          color: #2c2520;
+        }
+        .invoice-title p {
+          font-size: 0.875rem;
+          margin: 0.15rem 0;
+          color: #5c5047;
+        }
+        .invoice-divider {
+          border: 0;
+          border-top: 2px solid #2c2520;
+          margin: 0 0 1.5rem;
+        }
+        .invoice-details {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 2rem;
+          margin-bottom: 2rem;
+        }
+        .details-col h3 {
+          font-size: 0.95rem;
+          font-weight: 700;
+          margin: 0 0 0.65rem;
+          color: #2c2520;
+          text-transform: uppercase;
+          border-bottom: 1px solid #eae6e2;
+          padding-bottom: 0.25rem;
+        }
+        .details-col p {
+          font-size: 0.875rem;
+          margin: 0.35rem 0;
+          line-height: 1.4;
+          color: #444;
+        }
+        .invoice-note {
+          background: #fbf9f7;
+          border-left: 3px solid #8c7161;
+          padding: 0.75rem 1rem;
+          font-size: 0.875rem;
+          margin-bottom: 2rem;
+          color: #444;
+        }
+        .invoice-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 2rem;
+        }
+        .invoice-table th, .invoice-table td {
+          border: 1px solid #ccc;
+          padding: 0.65rem 0.75rem;
+          font-size: 0.875rem;
+        }
+        .invoice-table th {
+          background: #f5efe9 !important;
+          font-weight: 700;
+          color: #2c2520;
+        }
+        .invoice-summary {
+          margin-left: auto;
+          width: 350px;
+          margin-bottom: 3rem;
+        }
+        .summary-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 0.5rem 0;
+          font-size: 0.875rem;
+          border-bottom: 1px solid #eae6e2;
+        }
+        .summary-row.font-large {
+          font-size: 1.1rem;
+          font-weight: 700;
+          border-bottom: 2px double #2c2520;
+        }
+        .invoice-signatures {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 4rem;
+          text-align: center;
+          margin-bottom: 4rem;
+        }
+        .signature-box p {
+          font-size: 0.875rem;
+          margin: 0.25rem 0;
+        }
+        .sig-space {
+          display: block;
+          height: 60px;
+        }
+        .invoice-thanks {
+          text-align: center;
+          font-style: italic;
+          font-size: 0.875rem;
+          color: #666;
+        }
+      }
+
+      /* Vertical Timeline Log styling */
+      .history-list {
+        position: relative;
+        padding-left: 1.75rem;
+        margin: 0.75rem 0 0 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        list-style: none;
+      }
+      .history-list::before {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 6px;
+        bottom: 6px;
+        width: 2px;
+        background: #ebdcd0;
+      }
       .history-list li {
-        padding: 0.65rem 0;
-        border-bottom: 1px solid var(--border-light);
+        position: relative;
+        padding: 0;
+        border: none !important;
         font-size: 0.875rem;
       }
-
+      .history-list li::before {
+        content: '';
+        position: absolute;
+        left: calc(-1.75rem - 1px);
+        top: 4px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #8c7161;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 2px #ebdcd0;
+        z-index: 2;
+        transition: all 0.2s ease;
+      }
+      .history-list li:hover::before {
+        background: #2c2520;
+        transform: scale(1.2);
+      }
       .history-time {
-        display: block;
+        display: inline-block;
         font-size: 0.75rem;
         color: var(--muted);
-        margin-top: 0.15rem;
+        margin-left: 0.5rem;
       }
-
       .history-reason {
-        margin: 0.35rem 0 0;
+        margin: 0.25rem 0 0;
         font-size: 0.8125rem;
-        color: var(--text-secondary);
+        color: #7a6e67;
+        background: #fbf9f7;
+        padding: 0.4rem 0.75rem;
+        border-radius: 6px;
+        display: inline-block;
       }
 
       .status-form label {
@@ -1197,6 +1492,10 @@ export class OrdersComponent implements OnInit {
     this.editLoadError.set(null);
     this.formError.set(null);
     this.statusForm.reset();
+  }
+
+  printInvoice(): void {
+    window.print();
   }
 
   statusFlowLabel(status: OrderStatus | string): string {

@@ -136,7 +136,15 @@ const STATUS_LABEL: Record<ProductSaleStatus, string> = {
                   <td>{{ item.category?.name || '—' }}</td>
                   <td>{{ item.collection || '—' }}</td>
                   <td>{{ item.price | number }}</td>
-                  <td>{{ item.stock }}</td>
+                  <td>
+                    @if (item.stock === 0) {
+                      <span class="status-badge cancelled" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 700;">Hết hàng</span>
+                    } @else if (item.stock <= 5) {
+                      <span class="status-badge pending" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 700;">Sắp hết ({{ item.stock }})</span>
+                    } @else {
+                      <span class="status-badge completed" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 700;">Còn {{ item.stock }}</span>
+                    }
+                  </td>
                   <td>
                     <span class="status-badge" [class]="saleStatusClass(item)">
                       {{ statusLabel(item) }}
@@ -358,7 +366,6 @@ export class ProductsComponent implements OnInit {
 
   inferStatus(row: ProductRow): ProductSaleStatus {
     if (row.stock === 0) return 'out_of_stock';
-    if (row.stock <= 2) return 'stopped';
     return 'selling';
   }
 

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AdminCatalogPageComponent } from '../../shared/admin-catalog-page.component';
 import { ApiService } from '../../core/services/api.service';
 import { PostRow } from '../../core/models/admin-list.models';
@@ -9,7 +9,7 @@ import { PostRow } from '../../core/models/admin-list.models';
 @Component({
   selector: 'app-posts',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, AdminCatalogPageComponent],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, AdminCatalogPageComponent],
   template: `
     <app-admin-catalog-page
       title="Quản lý bài viết"
@@ -20,6 +20,12 @@ import { PostRow } from '../../core/models/admin-list.models';
       ]"
     >
       <a catalogActions routerLink="/admin/posts/new" class="btn-action primary">+ Viết bài mới</a>
+
+      <div class="admin-tabs">
+        <a routerLink="/admin/posts" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="tab-item">Tất cả bài viết</a>
+        <a routerLink="/admin/posts/comments" routerLinkActive="active" class="tab-item">Quản lý bình luận</a>
+        <a routerLink="/admin/posts/interactions" routerLinkActive="active" class="tab-item">Thống kê tương tác</a>
+      </div>
 
       <div pageToolbar class="catalog-filter-bar">
         <div class="filter-fields">
@@ -58,6 +64,7 @@ import { PostRow } from '../../core/models/admin-list.models';
               <tr>
                 <th class="col-index">#</th>
                 <th>Bài viết</th>
+                <th>Người đăng</th>
                 <th>Lượt xem</th>
                 <th>Thích</th>
                 <th>Trạng thái</th>
@@ -81,6 +88,12 @@ import { PostRow } from '../../core/models/admin-list.models';
                         <div class="cell-strong">{{ item.title }}</div>
                         <div class="cell-muted slug-line">/{{ item.slug }}</div>
                       </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="user-info">
+                      <div class="cell-strong">{{ item.author?.fullName || 'Mộc Home' }}</div>
+                      <div class="cell-muted">{{ item.author?.email || 'admin@mochome.vn' }}</div>
                     </div>
                   </td>
                   <td>{{ (item.viewCount ?? 0) | number }}</td>
@@ -200,6 +213,43 @@ import { PostRow } from '../../core/models/admin-list.models';
 
       .data-table--posts .col-actions {
         width: 120px;
+      }
+
+      .admin-tabs {
+        display: flex;
+        gap: 0.5rem;
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.25rem;
+      }
+      .tab-item {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #4a5568;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+      }
+      .tab-item:hover {
+        background: #f7fafc;
+        color: #1877f2;
+      }
+      .tab-item.active {
+        background: #e7f3ff;
+        color: #1877f2;
+      }
+      .user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+      }
+      .user-info .cell-strong {
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+      .user-info .cell-muted {
+        font-size: 0.75rem;
       }
     `
   ]

@@ -12,7 +12,8 @@ const postSchema = new mongoose.Schema(
     viewCount: { type: Number, default: 0, min: 0 },
     likeCount: { type: Number, default: 0, min: 0 },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    shareCount: { type: Number, default: 0, min: 0 }
+    shareCount: { type: Number, default: 0, min: 0 },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
   },
   { timestamps: true }
 );

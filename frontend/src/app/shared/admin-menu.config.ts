@@ -106,8 +106,7 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
     children: [
       { label: 'Thông tin liên hệ', route: '/admin/system-settings' },
       { label: 'Phát thông báo', route: '/admin/notifications' },
-      { label: 'Liên hệ (Khách gửi)', route: '/admin/contacts' },
-      { label: 'Test mail', route: '/admin/test-mail' }
+      { label: 'Liên hệ (Khách gửi)', route: '/admin/contacts' }
     ]
   },
   {

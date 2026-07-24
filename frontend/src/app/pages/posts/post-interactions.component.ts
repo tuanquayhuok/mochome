@@ -1,7 +1,7 @@
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AdminCatalogPageComponent } from '../../shared/admin-catalog-page.component';
 import { ApiService } from '../../core/services/api.service';
 import { PostRow } from '../../core/models/admin-list.models';
@@ -15,7 +15,7 @@ interface DraftCounts {
 @Component({
   selector: 'app-post-interactions',
   standalone: true,
-  imports: [CommonModule, FormsModule, DecimalPipe, RouterLink, AdminCatalogPageComponent],
+  imports: [CommonModule, FormsModule, DecimalPipe, RouterLink, RouterLinkActive, AdminCatalogPageComponent],
   template: `
     <app-admin-catalog-page
       title="Lượt tương tác bài viết"
@@ -26,6 +26,11 @@ interface DraftCounts {
         { label: 'Lượt tương tác' }
       ]"
     >
+      <div class="admin-tabs">
+        <a routerLink="/admin/posts" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="tab-item">Tất cả bài viết</a>
+        <a routerLink="/admin/posts/comments" routerLinkActive="active" class="tab-item">Quản lý bình luận</a>
+        <a routerLink="/admin/posts/interactions" routerLinkActive="active" class="tab-item">Thống kê tương tác</a>
+      </div>
       @if (loading()) {
         <div class="page-state">Đang tải thống kê...</div>
       } @else {
@@ -189,6 +194,31 @@ interface DraftCounts {
 
       .link-edit:hover {
         color: var(--text);
+      }
+
+      .admin-tabs {
+        display: flex;
+        gap: 0.5rem;
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.25rem;
+      }
+      .tab-item {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #4a5568;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+      }
+      .tab-item:hover {
+        background: #f7fafc;
+        color: #1877f2;
+      }
+      .tab-item.active {
+        background: #e7f3ff;
+        color: #1877f2;
       }
     `
   ]

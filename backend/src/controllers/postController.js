@@ -2,12 +2,12 @@ const Post = require('../models/Post');
 const slugify = require('../utils/slugify');
 
 const listPosts = async (req, res) => {
-  const posts = await Post.find().sort('-createdAt');
+  const posts = await Post.find().populate('author', 'fullName email role').sort('-createdAt');
   return res.json(posts);
 };
 
 const getPost = async (req, res) => {
-  const post = await Post.findById(req.params.id);
+  const post = await Post.findById(req.params.id).populate('author', 'fullName email role');
   if (!post) {
     return res.status(404).json({ message: 'Không tìm thấy bài viết' });
   }
@@ -65,7 +65,8 @@ const createPost = async (req, res) => {
     isVisible: isVisible !== false,
     viewCount: Number(req.body.viewCount) || 0,
     likeCount: Number(req.body.likeCount) || 0,
-    shareCount: Number(req.body.shareCount) || 0
+    shareCount: Number(req.body.shareCount) || 0,
+    author: req.user?._id || null
   });
 
   return res.status(201).json(post);

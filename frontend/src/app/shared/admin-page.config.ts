@@ -303,10 +303,13 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   {
 
     id: 'system',
-
-    match: (p) => p.startsWith('/admin/contacts'),
-
-    tabs: [{ label: 'Liên hệ', route: '/admin/contacts' }]
+    match: (p) =>
+      /^\/admin\/(system-settings|notifications|contacts)(\/|$)/.test(p),
+    tabs: [
+      { label: 'Cấu hình liên hệ', route: '/admin/system-settings' },
+      { label: 'Phát thông báo', route: '/admin/notifications' },
+      { label: 'Liên hệ (Khách gửi)', route: '/admin/contacts' }
+    ]
 
   }
 

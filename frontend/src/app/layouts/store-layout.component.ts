@@ -64,6 +64,7 @@ import { SettingsService } from '../core/services/settings.service';
               <a routerLink="/bo-suu-tap" routerLinkActive="active" class="nav-item">Bộ sưu tập</a>
               <a routerLink="/tin-tuc" routerLinkActive="active" class="nav-item">Bài viết</a>
               <a routerLink="/gioi-thieu" routerLinkActive="active" class="nav-item">Giới thiệu</a>
+              <a routerLink="/ho-tro" routerLinkActive="active" class="nav-item">Hỗ trợ</a>
               <a routerLink="/lien-he" routerLinkActive="active" class="nav-item">Liên hệ</a>
             </nav>
 
@@ -86,6 +87,7 @@ import { SettingsService } from '../core/services/settings.service';
                 <a routerLink="/san-pham" (click)="closeMobileNav()" routerLinkActive="active">Sản phẩm</a>
                 <a routerLink="/tin-tuc" (click)="closeMobileNav()" routerLinkActive="active">Bài viết</a>
                 <a routerLink="/gioi-thieu" (click)="closeMobileNav()" routerLinkActive="active">Giới thiệu</a>
+                <a routerLink="/ho-tro" (click)="closeMobileNav()" routerLinkActive="active">Hỗ trợ</a>
                 <a routerLink="/lien-he" (click)="closeMobileNav()" routerLinkActive="active">Liên hệ</a>
               </nav>
             }
@@ -312,6 +314,7 @@ import { SettingsService } from '../core/services/settings.service';
               <a routerLink="/bo-suu-tap" routerLinkActive="active" class="nav-link">BỘ SƯU TẬP</a>
               <a routerLink="/tin-tuc" routerLinkActive="active" class="nav-link">BÀI VIẾT</a>
               <a routerLink="/gioi-thieu" routerLinkActive="active" class="nav-link">GIỚI THIỆU</a>
+              <a routerLink="/ho-tro" routerLinkActive="active" class="nav-link">HỖ TRỢ</a>
               <a routerLink="/lien-he" routerLinkActive="active" class="nav-link">LIÊN HỆ</a>
             </div>
           </nav>
@@ -336,6 +339,7 @@ import { SettingsService } from '../core/services/settings.service';
               <a routerLink="/bo-suu-tap" (click)="closeMobileNav()" routerLinkActive="active">Bộ sưu tập</a>
               <a routerLink="/tin-tuc" (click)="closeMobileNav()" routerLinkActive="active">Bài viết</a>
               <a routerLink="/gioi-thieu" (click)="closeMobileNav()" routerLinkActive="active">Giới thiệu</a>
+              <a routerLink="/ho-tro" (click)="closeMobileNav()" routerLinkActive="active">Hỗ trợ</a>
               <a routerLink="/lien-he" (click)="closeMobileNav()" routerLinkActive="active">Liên hệ</a>
             </nav>
           }

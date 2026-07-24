@@ -11,6 +11,7 @@ export interface PostCommentRow {
     _id: string;
     fullName: string;
     email: string;
+    role?: string;
   };
   content: string;
   parentId: string | null;
@@ -51,7 +52,11 @@ export class PublicApiService {
   }
 
   likePost(postId: string) {
-    return this.http.post<{ likeCount: number; isLiked: boolean }>(`${API_URL}/public/posts/${postId}/like`, {});
+    return this.http.post<{ likeCount: number; isLiked: boolean; likes: any[] }>(`${API_URL}/public/posts/${postId}/like`, {});
+  }
+
+  viewPost(postId: string) {
+    return this.http.post<{ viewCount: number }>(`${API_URL}/public/posts/${postId}/view`, {});
   }
 
   getComments(postId: string) {
@@ -64,6 +69,10 @@ export class PublicApiService {
 
   likeComment(commentId: string) {
     return this.http.post<PostCommentRow>(`${API_URL}/public/comments/${commentId}/like`, {});
+  }
+
+  getPublicPosts() {
+    return this.http.get<PostRow[]>(`${API_URL}/public/posts`);
   }
 
   getCollections() {

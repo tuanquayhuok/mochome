@@ -141,16 +141,18 @@ const likePost = async (req, res) => {
 
   post.likeCount = post.likes.length;
   await post.save();
+  await post.populate('likes', 'fullName');
 
   return res.json({
     likeCount: post.likeCount,
-    isLiked: !isLiked
+    isLiked: !isLiked,
+    likes: post.likes
   });
 };
 
 const getPostComments = async (req, res) => {
   const comments = await PostComment.find({ post: req.params.id, isHidden: { $ne: true } })
-    .populate('user', 'fullName email')
+    .populate('user', 'fullName email role')
     .sort({ createdAt: 1 });
 
   return res.json(comments);
@@ -170,7 +172,7 @@ const createPostComment = async (req, res) => {
   });
 
   await comment.save();
-  await comment.populate('user', 'fullName email');
+  await comment.populate('user', 'fullName email role');
 
   return res.status(201).json(comment);
 };
@@ -191,7 +193,7 @@ const likePostComment = async (req, res) => {
   }
 
   await comment.save();
-  await comment.populate('user', 'fullName email');
+  await comment.populate('user', 'fullName email role');
 
   return res.json(comment);
 };
@@ -215,6 +217,26 @@ const getCollectionBySlug = async (req, res) => {
   });
 };
 
+const getPublicPosts = async (req, res) => {
+  const posts = await Post.find({ published: true, isVisible: { $ne: false } })
+    .populate('likes', 'fullName')
+    .populate('author', 'fullName email role')
+    .sort('-createdAt');
+  return res.json(posts);
+};
+
+const viewPost = async (req, res) => {
+  const post = await Post.findByIdAndUpdate(
+    req.params.id,
+    { $inc: { viewCount: 1 } },
+    { new: true }
+  );
+  if (!post) {
+    return res.status(404).json({ message: 'Không tìm thấy bài viết' });
+  }
+  return res.json({ viewCount: post.viewCount });
+};
+
 module.exports = {
   getCatalog,
   getProductBySlug,
@@ -224,5 +246,7 @@ module.exports = {
   createPostComment,
   likePostComment,
   getCollections,
-  getCollectionBySlug
+  getCollectionBySlug,
+  getPublicPosts,
+  viewPost
 };

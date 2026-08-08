@@ -12,18 +12,30 @@ const CatalogCollection = require('../models/CatalogCollection');
 const Attribute = require('../models/Attribute');
 const ProductVariant = require('../models/ProductVariant');
 const Voucher = require('../models/Voucher');
+const Brand = require('../models/Brand');
+const PartnerStore = require('../models/PartnerStore');
 const slugify = require('./slugify');
 
 dotenv.config();
 
-const SOFA_IMG =
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=80';
-const SOFA_IMG_2 =
-  'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=900&q=80';
-const SOFA_IMG_3 =
-  'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=900&q=80';
-const SOFA_IMG_4 =
-  'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=900&q=80';
+const IMG_SOFA_1 = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=80';
+const IMG_SOFA_2 = 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=900&q=80';
+const IMG_SOFA_3 = 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=900&q=80';
+const IMG_SOFA_4 = 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=900&q=80';
+
+const IMG_DINING_1 = 'https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?auto=format&fit=crop&w=900&q=80';
+const IMG_DINING_2 = 'https://images.unsplash.com/photo-1617806118233-18e1db207f62?auto=format&fit=crop&w=900&q=80';
+const IMG_DINING_3 = 'https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?auto=format&fit=crop&w=900&q=80';
+
+const IMG_BED_1 = 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80';
+const IMG_BED_2 = 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&w=900&q=80';
+const IMG_BED_3 = 'https://images.unsplash.com/photo-1505693395321-883724634266?auto=format&fit=crop&w=900&q=80';
+
+const IMG_WARDROBE_1 = 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=900&q=80';
+const IMG_WARDROBE_2 = 'https://images.unsplash.com/photo-1558882224-dda166733079?auto=format&fit=crop&w=900&q=80';
+
+const IMG_TV_1 = 'https://images.unsplash.com/photo-1593508512255-86ab42a8e620?auto=format&fit=crop&w=900&q=80';
+const IMG_TV_2 = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80';
 
 const run = async () => {
   await connectDb();
@@ -37,6 +49,8 @@ const run = async () => {
     Review.deleteMany({}),
     Contact.deleteMany({}),
     CatalogCollection.deleteMany({}),
+    Brand.deleteMany({}),
+    PartnerStore.deleteMany({}),
     Attribute.deleteMany({}),
     ProductVariant.deleteMany({}),
     Voucher.deleteMany({})
@@ -54,195 +68,174 @@ const run = async () => {
       isActive: true
     },
     {
+      fullName: 'Trần anh khoa',
+      email: 'lionelmessivodichworldcup@gmail.com',
+      password: userPassword,
+      role: 'user',
+      isActive: true,
+      createdAt: new Date(2026, 5, 10)
+    },
+    {
       fullName: 'Nguyễn Văn A',
       email: 'customer1@furniture.com',
       password: userPassword,
       role: 'user',
-      isActive: true
+      isActive: true,
+      createdAt: new Date(2026, 7, 2)
     },
     {
       fullName: 'Trần Thị B',
       email: 'customer2@furniture.com',
       password: userPassword,
       role: 'user',
-      isActive: true
-    },
-    {
-      fullName: 'Lê Văn C',
-      email: 'customer3@furniture.com',
-      password: userPassword,
-      role: 'user',
-      isActive: true
-    },
-    {
-      fullName: 'Phạm Thị D',
-      email: 'customer4@furniture.com',
-      password: userPassword,
-      role: 'user',
-      isActive: true
-    },
-    {
-      fullName: 'Hoàng Văn E',
-      email: 'customer5@furniture.com',
-      password: userPassword,
-      role: 'user',
-      isActive: true
+      isActive: true,
+      createdAt: new Date(2026, 6, 12)
     }
   ]);
 
   const categories = await Category.insertMany([
-    { name: 'Sofa', slug: 'sofa', description: 'Sofa và phòng khách' },
-    { name: 'Bàn ăn', slug: 'ban-an', description: 'Bàn ghế ăn uống' },
-    { name: 'Giường ngủ', slug: 'giuong-ngu', description: 'Giường nệm phòng ngủ' },
-    { name: 'Tủ quần áo', slug: 'tu-quan-ao', description: 'Tủ quần áo tủ kệ' },
-    { name: 'Kệ tivi', slug: 'ke-tivi', description: 'Kệ tivi phòng khách' }
+    { name: 'Sofa', slug: 'sofa', description: 'Sofa phong cách tối giản & hiện đại' },
+    { name: 'Bàn ăn', slug: 'ban-an', description: 'Bàn ghế ăn gỗ tự nhiên' },
+    { name: 'Giường ngủ', slug: 'giuong-ngu', description: 'Giường ngủ thông minh' },
+    { name: 'Tủ quần áo', slug: 'tu-quan-ao', description: 'Tủ quần áo hiện đại' },
+    { name: 'Kệ tivi', slug: 'ke-tivi', description: 'Kệ tivi phòng khách tinh tế' }
   ]);
 
   const cat = (slug) => categories.find((c) => c.slug === slug)._id;
 
   const productRows = [
+    // --- SOFA CATEGORY ---
     {
-      name: 'Sofa văng gỗ tự nhiên',
-      slug: 'sofa-vang-go-tu-nhien',
+      name: 'Sofa văng gỗ sồi tự nhiên Mộc Home',
+      slug: 'sofa-vang-go-soi-tu-nhien-moc-home',
       sku: 'SVG001',
       price: 12500000,
       stock: 12,
       category: cat('sofa'),
-      imageUrl: SOFA_IMG,
-      images: [SOFA_IMG, SOFA_IMG_2, SOFA_IMG_3, SOFA_IMG_4],
-      description:
-        'Sofa văng gỗ sồi tự nhiên kết hợp nệm vải cao cấp, thiết kế tối giản phù hợp phòng khách hiện đại.',
-      longDescription:
-        'Sofa văng gỗ tự nhiên mang phong cách Scandinavian, khung gỗ sồi nguyên khối chắc chắn, nệm bọc vải thoáng khí. Sản phẩm phù hợp không gian phòng khách, phòng đọc sách hoặc góc thư giãn.',
-      colors: [
-        { name: 'Xám', hex: '#9ca3af' },
-        { name: 'Be', hex: '#d4b896' },
-        { name: 'Nâu', hex: '#8b6914' }
-      ],
-      sizes: ['180cm', '200cm', '220cm'],
-      material: 'Gỗ sồi tự nhiên, Nệm vải cao cấp',
-      origin: 'Việt Nam',
+      imageUrl: IMG_SOFA_1,
+      images: [IMG_SOFA_1, IMG_SOFA_2, IMG_SOFA_3, IMG_SOFA_4],
+      description: 'Sofa văng gỗ sồi Nga tự nhiên 100% kết hợp nệm bọc vải nỉ cao cấp.',
+      longDescription: 'Sofa văng gỗ sồi tự nhiên mang phong cách thiết kế Japandi. Khung gỗ sồi nguyên khối được xử lý tẩm sấy chống cong vênh mối mọt, bề mặt sơn phủ mịn màng giữ nguyên vân gỗ tự nhiên ấm áp.',
+      colors: [{ name: 'Xám', hex: '#9ca3af' }, { name: 'Be', hex: '#d4b896' }],
+      sizes: ['180cm', '200cm'],
+      material: 'Gỗ sồi Nga tự nhiên',
+      origin: 'Việt Nam (Mộc Home)',
       detailSpecs: [
-        { label: 'Chất liệu', value: 'Gỗ sồi tự nhiên, vải bọc cao cấp' },
-        { label: 'Màu sắc', value: 'Xám / Be / Nâu' },
-        { label: 'Kích thước', value: '180cm / 200cm / 220cm' },
-        { label: 'Xuất xứ', value: 'Việt Nam' }
+        { label: 'Chất liệu khung', value: 'Gỗ sồi Nga cao cấp' },
+        { label: 'Chất liệu nệm', value: 'Mút D40 cao cấp bọc nỉ Nhật Bản' }
       ],
-      careGuide:
-        'Tránh ánh nắng trực tiếp và độ ẩm cao. Lau bụi bằng khăn mềm khô hàng tuần. Không dùng hóa chất mạnh.',
-      returnPolicy: 'Đổi trả trong 7 ngày nếu sản phẩm lỗi từ nhà sản xuất.',
-      featured: true
+      featured: true,
+      collection: 'Japandi'
     },
     {
-      name: 'Ghế sofa góc L hiện đại',
+      name: 'Sofa góc L bọc da bò Ý cao cấp',
+      slug: 'sofa-goc-l-boc-da-bo-y-cao-cap',
       sku: 'SF-001',
-      price: 18500000,
-      stock: 45,
+      price: 24500000,
+      stock: 5,
       category: cat('sofa'),
-      description: 'Sofa da cao cấp phòng khách',
-      featured: true
+      imageUrl: IMG_SOFA_2,
+      images: [IMG_SOFA_2, IMG_SOFA_3],
+      description: 'Sofa góc chữ L cỡ lớn, chất liệu da bò thật nhập khẩu từ Ý.',
+      longDescription: 'Sofa góc L cao cấp dành cho không gian phòng khách rộng rãi. Hệ khung sắt kết hợp gỗ thông chịu lực cực cao, nệm lò xo túi êm ái đàn hồi vượt trội.',
+      featured: true,
+      collection: 'Scandinavian'
     },
     {
-      name: 'Sofa bọc nỉ 3 chỗ',
+      name: 'Sofa nỉ Velvet phong cách Retro hoài cổ',
+      slug: 'sofa-ni-velvet-phong-cach-retro',
       sku: 'SF-002',
-      price: 12900000,
-      stock: 32,
+      price: 11900000,
+      stock: 8,
       category: cat('sofa'),
-      featured: true
+      imageUrl: IMG_SOFA_3,
+      description: 'Thiết kế cổ điển quý phái, bọc vải nhung mịn màng sang trọng.',
+      featured: false,
+      collection: 'Cổ điển'
     },
+
+    // --- BÀN ĂN CATEGORY ---
     {
-      name: 'Bàn ăn gỗ sồi 6 ghế',
+      name: 'Bàn ăn gỗ sồi Nga 6 ghế hiện đại',
+      slug: 'ban-an-go-soi-nga-6-ghe-hien-dai',
       sku: 'BA-001',
       price: 9700000,
-      stock: 28,
+      stock: 15,
       category: cat('ban-an'),
-      featured: true
+      imageUrl: IMG_DINING_1,
+      images: [IMG_DINING_1, IMG_DINING_2],
+      description: 'Bộ bàn ghế ăn gia đình gồm 1 bàn dài 1m6 và 6 ghế tựa lưng sọc dọc.',
+      featured: true,
+      collection: 'Japandi'
     },
     {
-      name: 'Bàn ăn tròn 4 ghế',
+      name: 'Bàn ăn thông minh kéo dài gỗ óc chó',
+      slug: 'ban-an-thong-minh-keo-dai-go-oc-cho',
       sku: 'BA-002',
-      price: 6500000,
-      stock: 18,
-      category: cat('ban-an')
+      price: 18500000,
+      stock: 4,
+      category: cat('ban-an'),
+      imageUrl: IMG_DINING_2,
+      description: 'Khả năng thu hẹp hoặc kéo dài linh hoạt từ 1m4 lên 2m.',
+      featured: true,
+      collection: 'Scandinavian'
     },
+
+    // --- GIƯỜNG NGỦ CATEGORY ---
     {
-      name: 'Giường ngủ bọc nỉ cao cấp',
+      name: 'Giường ngủ bọc nỉ Cozy Mộc Home',
+      slug: 'giuong-ngu-boc-ni-cozy-moc-home',
       sku: 'GN-001',
       price: 15600000,
-      stock: 22,
+      stock: 10,
       category: cat('giuong-ngu'),
-      featured: true
+      imageUrl: IMG_BED_1,
+      images: [IMG_BED_1, IMG_BED_2],
+      description: 'Giường ngủ cỡ King size, tựa đầu giường bọc nệm bông dày dặn.',
+      featured: true,
+      collection: 'Scandinavian'
     },
     {
-      name: 'Giường tầng trẻ em',
+      name: 'Giường ngủ thông minh có ngăn kéo gỗ sồi',
+      slug: 'giuong-ngu-thong-minh-co-ngan-keo-go-soi',
       sku: 'GN-002',
-      price: 8900000,
-      stock: 12,
-      category: cat('giuong-ngu')
+      price: 12800000,
+      stock: 6,
+      category: cat('giuong-ngu'),
+      imageUrl: IMG_BED_2,
+      description: 'Tích hợp 4 hộc kéo để đồ ở thành giường cực kỳ tối ưu diện tích.',
+      featured: false,
+      collection: 'Japandi'
     },
+
+    // --- TỦ QUẦN ÁO CATEGORY ---
     {
-      name: 'Tủ quần áo 4 cánh',
+      name: 'Tủ quần áo cánh kính cao cấp Mộc Home',
+      slug: 'tu-quan-ao-canh-kinh-cao-cap-moc-home',
       sku: 'TQ-001',
-      price: 11200000,
-      stock: 24,
+      price: 16900000,
+      stock: 7,
       category: cat('tu-quan-ao'),
-      featured: true
+      imageUrl: IMG_WARDROBE_1,
+      images: [IMG_WARDROBE_1, IMG_WARDROBE_2],
+      description: 'Khung nhôm kính cường lực tối màu, tích hợp dải đèn LED cảm biến thông minh.',
+      featured: true,
+      collection: 'Scandinavian'
     },
+
+    // --- KỆ TIVI CATEGORY ---
     {
-      name: 'Tủ quần áo 2 cánh',
-      sku: 'TQ-002',
-      price: 5400000,
-      stock: 15,
-      category: cat('tu-quan-ao')
-    },
-    {
-      name: 'Kệ tivi treo tường',
+      name: 'Kệ tivi rút hai đầu mặt đá Ceramic',
+      slug: 'ke-tivi-rut-hai-dau-mat-da-ceramic',
       sku: 'TV-001',
-      price: 3200000,
-      stock: 19,
-      category: cat('ke-tivi')
-    },
-    {
-      name: 'Kệ tivi gỗ tự nhiên',
-      sku: 'TV-002',
-      price: 5600000,
-      stock: 14,
-      category: cat('ke-tivi')
-    },
-    {
-      name: 'Ghế bar gỗ sồi',
-      sku: 'GB-001',
-      price: 2100000,
-      stock: 2,
-      category: cat('ban-an')
-    },
-    {
-      name: 'Đèn bàn trang trí',
-      sku: 'DT-001',
-      price: 890000,
-      stock: 3,
-      category: cat('ke-tivi')
-    },
-    {
-      name: 'Thảm phòng khách',
-      sku: 'TK-001',
-      price: 2400000,
-      stock: 5,
-      category: cat('sofa')
-    },
-    {
-      name: 'Bàn trà phòng khách',
-      sku: 'BT-001',
-      price: 1800000,
-      stock: 35,
-      category: cat('sofa')
-    },
-    {
-      name: 'Tủ giày đa năng',
-      sku: 'TG-001',
-      price: 3200000,
-      stock: 8,
-      category: cat('tu-quan-ao')
+      price: 6800000,
+      stock: 11,
+      category: cat('ke-tivi'),
+      imageUrl: IMG_TV_1,
+      images: [IMG_TV_1, IMG_TV_2],
+      description: 'Khả năng điều chỉnh chiều dài linh động từ 1m6 đến 2m2.',
+      featured: true,
+      collection: 'Japandi'
     }
   ];
 
@@ -251,28 +244,75 @@ const run = async () => {
       const stock = row.stock ?? 0;
       let saleStatus = 'selling';
       if (stock === 0) saleStatus = 'out_of_stock';
-      else if (stock <= 2) saleStatus = 'stopped';
-
       return {
         ...row,
-        slug: row.slug || slugify(row.name),
-        collection: row.collection || (row.featured ? 'Japandi' : 'Cổ điển'),
-        saleStatus: row.saleStatus || saleStatus,
-        isVisible: row.isVisible ?? true
+        collection: row.collection || 'Japandi',
+        saleStatus,
+        isVisible: true
       };
     })
   );
 
   await CatalogCollection.insertMany([
-    { name: 'Japandi', slug: 'japandi', description: 'Phong cách tối giản Nhật Bản' },
-    { name: 'Scandinavian', slug: 'scandinavian', description: 'Bắc Âu ấm áp' },
-    { name: 'Cổ điển', slug: 'co-dien', description: 'Nội thất truyền thống' }
+    { name: 'Japandi', slug: 'japandi', description: 'Phong cách tối giản Nhật Bản kết hợp Scandinavian ấm áp' },
+    { name: 'Scandinavian', slug: 'scandinavian', description: 'Bắc Âu mộc mạc tinh tế với gỗ sáng màu và nệm lông' },
+    { name: 'Cổ điển', slug: 'co-dien', description: 'Đậm chất truyền thống Việt Nam kết hợp huỳnh họa soi tinh xảo' }
+  ]);
+
+  await Brand.insertMany([
+    { name: 'Mộc Home', slug: 'moc-home', logoUrl: 'logonew.png', description: 'Thương hiệu nội thất gỗ tự nhiên chất lượng cao', isActive: true },
+    { name: 'An Cường', slug: 'an-cuong', logoUrl: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=100', description: 'Nhà sản xuất ván gỗ công nghiệp hàng đầu', isActive: true },
+    { name: 'Mộc Walnut', slug: 'moc-walnut', logoUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=100', description: 'Nội thất gỗ óc chó Bắc Mỹ nhập khẩu', isActive: true }
+  ]);
+
+  const seededProducts = await Product.find({});
+  const inventory1 = seededProducts.slice(0, 3).map(p => ({ product: p._id, stock: 15 }));
+  const inventory2 = seededProducts.slice(1, 4).map(p => ({ product: p._id, stock: 8 }));
+  const inventory3 = seededProducts.slice(2, 5).map(p => ({ product: p._id, stock: 22 }));
+
+  await PartnerStore.insertMany([
+    {
+      name: 'Mộc Home Hà Nội (Tổng đại lý miền Bắc)',
+      address: '12 Cầu Giấy, Quận Cầu Giấy, Hà Nội',
+      googleMapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.8639847206126!2d105.7937812!3d21.0361288!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab354920c233%3A0x5d0313a3ee313e2f!2zMTIgQ-G6p3UgR2nhuqV5LCBIw6AgTuG7mWk!5e0!3m2!1svi!2s!4v1786163900000',
+      phone: '0987654321',
+      email: 'hanoi@mochome.vn',
+      manager: 'Nguyễn Văn Nam',
+      tier: 'Platinum',
+      supplyVolume: 850000000,
+      inventory: inventory1,
+      isActive: true
+    },
+    {
+      name: 'Mộc Home Đà Nẵng (Đại lý miền Trung)',
+      address: '45 Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng',
+      googleMapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3833.967891234567!2d108.2189012!3d16.0612345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x314219b123456789%3A0x9876543210fedcba!2zNDUgTmd1eeG7hW4gVsSDbiBMaW5oLCDEkMOgIE7hurVuZw!5e0!3m2!1svi!2s!4v1786163900000',
+      phone: '0912345678',
+      email: 'danang@mochome.vn',
+      manager: 'Lê Hoàng Long',
+      tier: 'Gold',
+      supplyVolume: 420000000,
+      inventory: inventory2,
+      isActive: true
+    },
+    {
+      name: 'Mộc Home Cần Thơ (Đại lý miền Nam)',
+      address: '102 Nguyễn Trãi, Quận Ninh Kiều, Cần Thơ',
+      googleMapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3928.845678912345!2d105.7812345!3d10.0312345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31a062b123456789%3A0x1234567890abcdef!2zMTAyIE5ndXnhu4VuIFRyw6NpLCBD4bqnbiBUaMah!5e0!3m2!1svi!2s!4v1786163900000',
+      phone: '0909998877',
+      email: 'cantho@mochome.vn',
+      manager: 'Phạm Minh Tuấn',
+      tier: 'Standard',
+      supplyVolume: 120000000,
+      inventory: inventory3,
+      isActive: true
+    }
   ]);
 
   await Attribute.insertMany([
     { name: 'Màu sắc', slug: 'mau-sac', type: 'color', values: ['Xám', 'Be', 'Nâu', 'Trắng'] },
     { name: 'Kích thước', slug: 'kich-thuoc', type: 'size', values: ['180cm', '200cm', '220cm'] },
-    { name: 'Chất liệu', slug: 'chat-lieu', type: 'text', values: ['Gỗ sồi', 'Gỗ óc chó', 'Vải bọc'] }
+    { name: 'Chất liệu', slug: 'chat-lieu', type: 'text', values: ['Gỗ sồi', 'Gỗ óc chó', 'Da bò thật'] }
   ]);
 
   const p = (sku) => products.find((x) => x.sku === sku);
@@ -293,203 +333,118 @@ const run = async () => {
       price: 13200000,
       stock: 5,
       attributes: { color: 'Be', size: '200cm' }
-    },
-    {
-      product: p('SF-001')._id,
-      sku: 'SF-001-L',
-      name: 'Sofa góc L — Da nâu',
-      price: 18500000,
-      stock: 8,
-      attributes: { color: 'Nâu', size: '280cm' }
     }
   ]);
 
-  const orders = await Order.insertMany([
-    {
-      user: customers[0]._id,
-      items: [{ product: p('SF-001')._id, quantity: 1, price: p('SF-001').price }],
-      totalAmount: p('SF-001').price,
-      status: 'pending',
-      paymentMethod: 'cod',
-      shippingAddress: 'TP. Hồ Chí Minh'
-    },
+  await Order.insertMany([
     {
       user: customers[1]._id,
-      items: [{ product: p('BA-001')._id, quantity: 1, price: p('BA-001').price }],
-      totalAmount: p('BA-001').price,
-      status: 'processing',
-      paymentMethod: 'VNPay',
-      shippingAddress: 'Hà Nội'
+      items: [{ product: p('SVG001')._id, quantity: 1, price: p('SVG001').price }],
+      totalAmount: p('SVG001').price,
+      status: 'pending',
+      paymentMethod: 'cod',
+      shippingAddress: 'TP. Hồ Chí Minh',
+      createdAt: new Date(2026, 7, 8)
     },
     {
       user: customers[2]._id,
-      items: [{ product: p('GN-001')._id, quantity: 1, price: p('GN-001').price }],
-      totalAmount: p('GN-001').price,
-      status: 'shipping',
-      paymentMethod: 'Momo',
-      shippingAddress: 'Đà Nẵng'
-    },
-    {
-      user: customers[3]._id,
-      items: [{ product: p('TQ-001')._id, quantity: 1, price: p('TQ-001').price }],
-      totalAmount: p('TQ-001').price,
+      items: [{ product: p('BA-001')._id, quantity: 1, price: p('BA-001').price }],
+      totalAmount: p('BA-001').price,
       status: 'completed',
-      paymentMethod: 'cod',
-      shippingAddress: 'Cần Thơ'
-    },
-    {
-      user: customers[4]._id,
-      items: [{ product: p('TV-002')._id, quantity: 2, price: p('TV-002').price }],
-      totalAmount: p('TV-002').price * 2,
-      status: 'cancelled',
       paymentMethod: 'VNPay',
-      shippingAddress: 'Hải Phòng'
-    },
-    {
-      user: customers[0]._id,
-      items: [
-        { product: p('SF-001')._id, quantity: 2, price: p('SF-001').price },
-        { product: p('BT-001')._id, quantity: 1, price: p('BT-001').price }
-      ],
-      totalAmount: p('SF-001').price * 2 + p('BT-001').price,
-      status: 'completed',
-      paymentMethod: 'cod',
-      shippingAddress: 'TP. Hồ Chí Minh'
+      shippingAddress: 'Hà Nội',
+      createdAt: new Date(2026, 7, 5)
     },
     {
       user: customers[1]._id,
-      items: [{ product: p('BA-001')._id, quantity: 3, price: p('BA-001').price }],
-      totalAmount: p('BA-001').price * 3,
+      items: [{ product: p('SVG001')._id, quantity: 1, price: p('SVG001').price }],
+      totalAmount: 12500000,
       status: 'completed',
-      paymentMethod: 'VNPay',
-      shippingAddress: 'Hà Nội'
+      paymentMethod: 'vnpay',
+      shippingAddress: 'Đà Nẵng',
+      createdAt: new Date(2026, 6, 12)
+    },
+    {
+      user: customers[2]._id,
+      items: [{ product: p('BA-001')._id, quantity: 1, price: p('BA-001').price }],
+      totalAmount: 9700000,
+      status: 'completed',
+      paymentMethod: 'cod',
+      shippingAddress: 'Hải Phòng',
+      createdAt: new Date(2026, 5, 20)
+    },
+    {
+      user: customers[1]._id,
+      items: [{ product: p('SVG001')._id, quantity: 1, price: p('SVG001').price }],
+      totalAmount: 8500000,
+      status: 'completed',
+      paymentMethod: 'vnpay',
+      shippingAddress: 'Cần Thơ',
+      createdAt: new Date(2026, 4, 15)
     }
   ]);
 
   await Review.insertMany([
     {
-      user: customers[0]._id,
-      product: p('SF-001')._id,
-      rating: 5,
-      comment: 'Sofa đẹp, giao hàng nhanh',
-      approved: true
-    },
-    {
       user: customers[1]._id,
-      product: p('BA-001')._id,
-      rating: 4,
-      comment: 'Bàn ăn chắc chắn',
-      approved: true
-    },
-    {
-      user: customers[2]._id,
-      product: p('GN-001')._id,
+      product: p('SVG001')._id,
       rating: 5,
-      comment: 'Giường ngủ rất êm',
-      approved: false
+      comment: 'Sofa gỗ sồi rất đẹp và chắc chắn, vân gỗ sáng sang trọng!',
+      approved: true
     }
   ]);
 
   await Contact.insertMany([
     {
-      fullName: 'Trần Thị B',
-      email: 'support@example.com',
-      subject: 'Hỏi về bảo hành',
-      message: 'Chính sách bảo hành sofa như thế nào?',
+      fullName: 'Nguyễn Văn A',
+      email: 'customer1@furniture.com',
+      subject: 'Hỏi về kích thước tủ bếp',
+      message: 'Tôi muốn đặt đóng tủ bếp theo kích thước riêng có được không?',
       status: 'new'
     }
   ]);
 
   await Voucher.insertMany([
     {
-      code: 'MOCHOME10',
-      name: 'Giảm 10% đơn từ 1 triệu',
-      description: 'Áp dụng cho mọi khách, giảm tối đa 200.000đ',
+      code: 'MOCHOME50K',
+      name: 'Giảm 50k tri ân',
+      description: 'Quà tặng từ vòng quay may mắn',
+      discountType: 'fixed',
+      discountValue: 50000,
+      minOrderAmount: 500000,
+      maxDiscountAmount: 50000,
+      isActive: true,
+      showInStorePicker: false
+    },
+    {
+      code: 'MOCHOMELOYAL10',
+      name: 'Ưu đãi Loyalty 10%',
+      description: 'Voucher may mắn giảm giá 10%',
       discountType: 'percent',
       discountValue: 10,
       minOrderAmount: 1000000,
-      maxDiscountAmount: 200000,
-      firstOrderOnly: false,
-      usageLimit: 500,
-      usedCount: 12,
+      maxDiscountAmount: 500000,
       isActive: true,
-      showInStorePicker: true
-    },
-    {
-      code: 'KHACHMOI',
-      name: 'Khách mua lần đầu — giảm 15%',
-      description: 'Chỉ dành cho khách chưa từng có đơn hàng thành công',
-      discountType: 'percent',
-      discountValue: 15,
-      minOrderAmount: 500000,
-      maxDiscountAmount: 300000,
-      firstOrderOnly: true,
-      usageLimit: 0,
-      usedCount: 3,
-      isActive: true,
-      showInStorePicker: true
-    },
-    {
-      code: 'GIAM100K',
-      name: 'Giảm 100.000đ đơn từ 2 triệu',
-      description: 'Giảm cố định khi đơn đạt ngưỡng',
-      discountType: 'fixed',
-      discountValue: 100000,
-      minOrderAmount: 2000000,
-      maxDiscountAmount: 0,
-      firstOrderOnly: false,
-      usageLimit: 200,
-      usedCount: 45,
-      isActive: true,
-      showInStorePicker: true
-    },
-    { code: 'T5THANG', name: 'Tích lũy tháng 5%', discountType: 'percent', discountValue: 5, minOrderAmount: 500000, maxDiscountAmount: 300000, isActive: true, showInStorePicker: false },
-    { code: 'T10THANG', name: 'Tích lũy tháng 10%', discountType: 'percent', discountValue: 10, minOrderAmount: 1000000, maxDiscountAmount: 500000, isActive: true, showInStorePicker: false },
-    { code: 'T15THANG', name: 'Tích lũy tháng 15%', discountType: 'percent', discountValue: 15, minOrderAmount: 2000000, maxDiscountAmount: 800000, isActive: true, showInStorePicker: false },
-    { code: 'T20THANG', name: 'Tích lũy tháng 20%', discountType: 'percent', discountValue: 20, minOrderAmount: 3000000, maxDiscountAmount: 1200000, isActive: true, showInStorePicker: false },
-    { code: 'N8NAM', name: 'Tích lũy năm 8%', discountType: 'percent', discountValue: 8, minOrderAmount: 1000000, maxDiscountAmount: 600000, isActive: true, showInStorePicker: false },
-    { code: 'N12NAM', name: 'Tích lũy năm 12%', discountType: 'percent', discountValue: 12, minOrderAmount: 2000000, maxDiscountAmount: 1000000, isActive: true, showInStorePicker: false },
-    { code: 'N18NAM', name: 'Tích lũy năm 18%', discountType: 'percent', discountValue: 18, minOrderAmount: 5000000, maxDiscountAmount: 1500000, isActive: true, showInStorePicker: false },
-    { code: 'N25NAM', name: 'Tích lũy năm 25%', discountType: 'percent', discountValue: 25, minOrderAmount: 8000000, maxDiscountAmount: 2500000, isActive: true, showInStorePicker: false },
-    { code: 'TVIPTHANG', name: 'VIP tháng 20%', discountType: 'percent', discountValue: 20, minOrderAmount: 3000000, maxDiscountAmount: 1200000, isActive: true, showInStorePicker: false },
-    { code: 'NVIP', name: 'VIP năm 12%', discountType: 'percent', discountValue: 12, minOrderAmount: 2000000, maxDiscountAmount: 800000, isActive: true, showInStorePicker: false },
-    { code: 'NDOITAC', name: 'Đối tác 18%', discountType: 'percent', discountValue: 18, minOrderAmount: 5000000, maxDiscountAmount: 1500000, isActive: true, showInStorePicker: false },
-    { code: 'NSIEUTHAN', name: 'Siêu thân thiết 25%', discountType: 'percent', discountValue: 25, minOrderAmount: 8000000, maxDiscountAmount: 2500000, isActive: true, showInStorePicker: false }
+      showInStorePicker: false
+    }
   ]);
 
   await Post.insertMany([
     {
-      title: '5 xu hướng nội thất hiện đại 2026',
-      slug: '5-xu-huong-noi-that-2026',
-      excerpt: 'Tổng hợp xu hướng nội thất được ưa chuộng.',
-      content: 'Nội dung bài viết Mộc Home.',
-      thumbnail: SOFA_IMG,
+      title: '5 xu hướng thiết kế nội thất gỗ tự nhiên 2026',
+      slug: '5-xu-huong-thiet-ke-noi-that-go-tu-nhien-2026',
+      excerpt: 'Mộc Home tổng hợp xu hướng thiết kế nội thất gỗ tự nhiên tối giản bền đẹp trong năm mới.',
+      content: 'Nội thất gỗ sồi và gỗ óc chó tiếp tục dẫn đầu xu hướng nhờ tính chất bền bỉ và vẻ ngoài sang trọng ấm áp...',
+      thumbnail: IMG_SOFA_1,
       published: true,
       isVisible: true,
-      viewCount: 1240,
-      likeCount: 86,
-      shareCount: 24
-    },
-    {
-      title: 'Cách chọn sofa phòng khách',
-      slug: 'cach-chon-sofa-phong-khach',
-      excerpt: 'Hướng dẫn chọn sofa phù hợp không gian.',
-      content: 'Nội dung bài viết Mộc Home.',
-      thumbnail: SOFA_IMG_2,
-      published: false,
-      isVisible: true,
-      viewCount: 320,
-      likeCount: 18,
-      shareCount: 5
+      viewCount: 1280,
+      likeCount: 92,
+      shareCount: 18
     }
   ]);
 
-  console.log('Seed completed:');
-  console.log(`  - ${categories.length} categories`);
-  console.log(`  - ${products.length} products`);
-  console.log(`  - ${orders.length} orders`);
-  console.log(`  - ${customers.length + 1} users (1 admin)`);
-  console.log('Admin: admin@furniture.com / Admin@123');
+  console.log('Database re-seed finished successfully.');
   process.exit(0);
 };
 

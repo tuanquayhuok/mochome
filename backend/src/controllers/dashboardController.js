@@ -9,14 +9,20 @@ const getSummary = async (req, res) => {
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const lowStockThreshold = 6;
 
   const [
     revenueTodayResult,
     revenueMonthResult,
+    revenuePrevMonthResult,
     revenueAllResult,
-    totalOrders,
-    totalUsers,
+    totalOrdersAll,
+    totalOrdersMonth,
+    totalOrdersPrevMonth,
+    totalUsersAll,
+    totalUsersMonth,
+    totalUsersPrevMonth,
     totalProducts,
     lowStockCount,
     recentOrders,
@@ -46,11 +52,24 @@ const getSummary = async (req, res) => {
       { $group: { _id: null, total: { $sum: '$totalAmount' } } }
     ]),
     Order.aggregate([
+      {
+        $match: {
+          status: { $in: ['processing', 'shipping', 'completed'] },
+          createdAt: { $gte: startOfPrevMonth, $lt: startOfMonth }
+        }
+      },
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+    ]),
+    Order.aggregate([
       { $match: { status: { $in: ['processing', 'shipping', 'completed'] } } },
       { $group: { _id: null, total: { $sum: '$totalAmount' } } }
     ]),
     Order.countDocuments(),
+    Order.countDocuments({ createdAt: { $gte: startOfMonth } }),
+    Order.countDocuments({ createdAt: { $gte: startOfPrevMonth, $lt: startOfMonth } }),
     User.countDocuments({ role: 'user' }),
+    User.countDocuments({ role: 'user', createdAt: { $gte: startOfMonth } }),
+    User.countDocuments({ role: 'user', createdAt: { $gte: startOfPrevMonth, $lt: startOfMonth } }),
     Product.countDocuments(),
     Product.countDocuments({ stock: { $lte: lowStockThreshold } }),
     Order.find()
@@ -208,9 +227,16 @@ const getSummary = async (req, res) => {
     cards: {
       revenueToday: revenueTodayResult[0]?.total || 0,
       revenueMonth: revenueMonthResult[0]?.total || 0,
+      revenuePrevMonth: revenuePrevMonthResult[0]?.total || 0,
       revenueAll: revenueAllResult[0]?.total || 0,
-      totalOrders,
-      totalUsers,
+      totalOrders: totalOrdersAll,
+      totalOrdersAll,
+      totalOrdersMonth,
+      totalOrdersPrevMonth,
+      totalUsers: totalUsersAll,
+      totalUsersAll,
+      totalUsersMonth,
+      totalUsersPrevMonth,
       totalProducts,
       lowStockCount
     },

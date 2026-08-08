@@ -102,9 +102,16 @@ export class ApiService {
       cards: {
         revenueToday: number;
         revenueMonth: number;
+        revenuePrevMonth: number;
         revenueAll: number;
         totalOrders: number;
+        totalOrdersAll: number;
+        totalOrdersMonth: number;
+        totalOrdersPrevMonth: number;
         totalUsers: number;
+        totalUsersAll: number;
+        totalUsersMonth: number;
+        totalUsersPrevMonth: number;
         totalProducts: number;
         lowStockCount: number;
       };

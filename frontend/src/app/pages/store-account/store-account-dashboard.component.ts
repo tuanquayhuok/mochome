@@ -19,7 +19,7 @@ import {
 } from '../../core/models/loyalty-track.config';
 import { LoyaltyInfo, LoyaltyMilestone, LoyaltyTierId } from '../../core/models/store-profile.models';
 
-type Panel = 'profile' | 'orders' | 'security' | 'loyalty';
+type Panel = 'profile' | 'orders' | 'security' | 'loyalty' | 'lucky-wheel';
 
 const TIER_BADGE: Record<string, string> = {
   bronze: 'tier-bronze',
@@ -62,6 +62,9 @@ const TIER_BADGE: Record<string, string> = {
           </button>
           <button type="button" class="menu-item" [class.active]="panel() === 'security'" (click)="setPanel('security')">
             Bảo mật
+          </button>
+          <button type="button" class="menu-item" [class.active]="panel() === 'lucky-wheel'" (click)="setPanel('lucky-wheel')">
+            Vòng quay may mắn
           </button>
           <a routerLink="/gio-hang" class="menu-item">Giỏ hàng</a>
           <a routerLink="/yeu-thich" class="menu-item">Yêu thích</a>
@@ -184,6 +187,48 @@ const TIER_BADGE: Record<string, string> = {
 
         @if (panel() === 'orders') {
           <app-store-account-orders />
+        }
+
+        @if (panel() === 'lucky-wheel') {
+          <h2 style="text-align: center; color: #5c4033; font-weight: 700; font-size: 1.5rem; margin-bottom: 0.5rem;">Vòng Quay May Mắn Mộc Home</h2>
+          <div class="lucky-wheel-panel">
+            <div class="wheel-intro">
+              <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 0.75rem;">Sử dụng số điểm tích lũy thành viên để thử vận may nhận ngay voucher giảm giá trực tiếp mua sắm nội thất cao cấp. Mỗi lượt quay tốn <strong>20 điểm</strong>.</p>
+              <div class="user-points-badge">
+                Số điểm hiện tại của bạn: <span><strong>{{ userPoints() }}</strong> điểm</span>
+              </div>
+            </div>
+
+            <div class="wheel-wrapper">
+              <div class="wheel-pointer"></div>
+              <div class="wheel-outer" [style.transform]="wheelRotationStyle()">
+                <div class="wheel-canvas">
+                  <div class="wheel-sector" style="--i:0; --bg:#8c7161;"><span>Voucher 50k</span></div>
+                  <div class="wheel-sector" style="--i:1; --bg:#ebdcd0; --color:#5c4033;"><span>Freeship</span></div>
+                  <div class="wheel-sector" style="--i:2; --bg:#5c4033;"><span>Voucher 10%</span></div>
+                  <div class="wheel-sector" style="--i:3; --bg:#fcfaf8; --color:#5c4033;"><span>Chúc may mắn</span></div>
+                  <div class="wheel-sector" style="--i:4; --bg:#7c5e4d;"><span>Voucher 100k</span></div>
+                  <div class="wheel-sector" style="--i:5; --bg:#dfcfc4; --color:#5c4033;"><span>Voucher 200k</span></div>
+                </div>
+              </div>
+              <button type="button" class="spin-trigger" (click)="spinWheel()" [disabled]="isSpinning() || userPoints() < 20">
+                {{ isSpinning() ? '...' : 'QUAY' }}
+              </button>
+            </div>
+
+            @if (wheelResultMsg()) {
+              <div class="wheel-result-alert" [class.success]="hasWon()">
+                <div class="result-title">{{ hasWon() ? '🎉 CHÚC MỪNG BẠN ĐÃ TRÚNG THƯỞNG!' : '😢 RẤT TIẾC!' }}</div>
+                <p style="margin: 0; font-size: 0.875rem; color: #4b5563;">{{ wheelResultMsg() }}</p>
+                @if (hasWon()) {
+                  <div class="voucher-code-copy">
+                    Mã Voucher: <strong>{{ wonVoucherCode() }}</strong>
+                    <button type="button" class="copy-btn" (click)="copyVoucher()">Sao chép</button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
         }
 
         @if (panel() === 'loyalty') {
@@ -1171,6 +1216,197 @@ const TIER_BADGE: Record<string, string> = {
           grid-column: span 1;
         }
       }
+
+      /* Lucky Wheel CSS Styles */
+      .lucky-wheel-panel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1rem 0;
+      }
+
+      .wheel-intro {
+        text-align: center;
+        max-width: 500px;
+      }
+
+      .user-points-badge {
+        display: inline-block;
+        margin-top: 0.5rem;
+        padding: 0.5rem 1.25rem;
+        border-radius: 999px;
+        background: #fcf8f5;
+        border: 1px solid #ebdcd0;
+        color: #5c4033;
+        font-weight: 700;
+        font-size: 0.9375rem;
+      }
+
+      .user-points-badge span {
+        color: #8c7161;
+      }
+
+      .wheel-wrapper {
+        position: relative;
+        width: 360px;
+        height: 360px;
+        margin: 1.5rem auto;
+      }
+
+      .wheel-pointer {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 24px;
+        height: 32px;
+        background: #dc2626;
+        clip-path: polygon(50% 100%, 0 0, 100% 0);
+        z-index: 10;
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+      }
+
+      .wheel-outer {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 8px solid #5c4033;
+        box-shadow: 0 10px 30px rgba(92, 64, 51, 0.2), inset 0 0 15px rgba(0,0,0,0.1);
+        overflow: hidden;
+        position: relative;
+        transition: transform 3s cubic-bezier(0.1, 0.8, 0.1, 1);
+      }
+
+      .wheel-canvas {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+
+      .wheel-sector {
+        position: absolute;
+        width: 50%;
+        height: 50%;
+        left: 50%;
+        top: 50%;
+        transform-origin: 0% 0%;
+        transform: rotate(calc(var(--i) * 60deg)) skewY(30deg);
+        background: var(--bg);
+        overflow: hidden;
+      }
+
+      .wheel-sector span {
+        position: absolute;
+        width: 130px;
+        height: 60px;
+        left: 25px;
+        top: 15px;
+        transform: skewY(-30deg) rotate(30deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--color, #fff);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        line-height: 1.25;
+      }
+
+      .spin-trigger {
+        position: absolute;
+        width: 54px;
+        height: 54px;
+        background: #ffffff;
+        border: 4px solid #5c4033;
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 5;
+        font-weight: 900;
+        font-size: 11px;
+        color: #5c4033;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s;
+        user-select: none;
+      }
+
+      .spin-trigger:hover:not(:disabled) {
+        transform: translate(-50%, -50%) scale(1.08);
+      }
+
+      .spin-trigger:disabled {
+        opacity: 0.8;
+        background: #f3f4f6;
+        cursor: not-allowed;
+      }
+
+      .wheel-result-alert {
+        width: 100%;
+        max-width: 480px;
+        padding: 1.25rem;
+        border-radius: 12px;
+        background: #f3f4f6;
+        border: 1px solid #ebdcd0;
+        text-align: center;
+        animation: slideDown 0.3s ease;
+      }
+
+      .wheel-result-alert.success {
+        background: #fdfbf7;
+        border-color: #8c7161;
+      }
+
+      .result-title {
+        font-weight: 800;
+        font-size: 0.9375rem;
+        margin-bottom: 0.5rem;
+        color: #5c4033;
+      }
+
+      .wheel-result-alert.success .result-title {
+        color: #8c7161;
+      }
+
+      .voucher-code-copy {
+        margin-top: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        background: #fff;
+        border: 1.5px dashed #8c7161;
+        font-size: 0.875rem;
+      }
+
+      .voucher-code-copy strong {
+        color: #8c7161;
+        font-size: 1.05rem;
+      }
+
+      .copy-btn {
+        padding: 0.25rem 0.65rem;
+        border: none;
+        border-radius: 4px;
+        background: #8c7161;
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .copy-btn:hover {
+        background: #705648;
+      }
     `
   ]
 })
@@ -1188,6 +1424,171 @@ export class StoreAccountDashboardComponent implements OnInit {
   readonly panel = signal<Panel>('profile');
   readonly loyaltyView = signal<LoyaltyInfo>(createDefaultLoyalty());
   readonly loyaltyLoading = signal(false);
+
+  // Lucky Wheel states & calculations
+  readonly isSpinning = signal(false);
+  readonly wheelRotationStyle = signal('rotate(0deg)');
+  readonly wheelResultMsg = signal('');
+  readonly hasWon = signal(false);
+  readonly wonVoucherCode = signal('');
+  readonly spentPoints = signal(0);
+
+  userPoints = () => {
+    const spend = this.loyaltyView()?.spendYear || 0;
+    return Math.floor(spend / 10000) + 120 - this.spentPoints();
+  };
+
+  private currentRotation = 0;
+
+  private playTickSound(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(450, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.08);
+
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.08);
+    } catch (e) {
+      console.warn('Audio play failed', e);
+    }
+  }
+
+  private playWinSound(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const notes = [261.63, 329.63, 392.0, 523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((freq, index) => {
+        const time = ctx.currentTime + index * 0.12;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, time);
+
+        gain.gain.setValueAtTime(0.12, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.35);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(time);
+        osc.stop(time + 0.4);
+      });
+    } catch (e) {
+      console.warn('Audio play failed', e);
+    }
+  }
+
+  private playLoseSound(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(180, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(90, ctx.currentTime + 0.45);
+
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.45);
+    } catch (e) {
+      console.warn('Audio play failed', e);
+    }
+  }
+
+  spinWheel(): void {
+    if (this.isSpinning() || this.userPoints() < 20) return;
+
+    this.isSpinning.set(true);
+    this.wheelResultMsg.set('');
+    this.hasWon.set(false);
+    this.wonVoucherCode.set('');
+
+    this.spentPoints.update((p) => p + 20);
+
+    // Play synthesized wheel ticking sounds
+    let tickDelay = 50;
+    const playTicks = () => {
+      if (!this.isSpinning()) return;
+      this.playTickSound();
+      tickDelay += 16;
+      if (tickDelay < 420) {
+        setTimeout(playTicks, tickDelay);
+      }
+    };
+    setTimeout(playTicks, 50);
+
+    const prizes = [
+      { name: 'Voucher 50.000đ', code: 'MOCHOME50K', won: true, minDeg: 0, maxDeg: 60 },
+      { name: 'Mã miễn phí vận chuyển', code: 'FREESHIPMOCHOME', won: true, minDeg: 60, maxDeg: 120 },
+      { name: 'Voucher giảm giá 10%', code: 'MOCHOMELOYAL10', won: true, minDeg: 120, maxDeg: 180 },
+      { name: 'Chúc bạn may mắn lần sau', code: '', won: false, minDeg: 180, maxDeg: 240 },
+      { name: 'Voucher 100.000đ', code: 'MOCHOME100K', won: true, minDeg: 240, maxDeg: 300 },
+      { name: 'Voucher 200.000đ', code: 'MOCHOME200K', won: true, minDeg: 300, maxDeg: 360 }
+    ];
+
+    const rand = Math.random() * 100;
+    let selectedIndex = 3;
+    if (rand < 2) selectedIndex = 5;
+    else if (rand < 10) selectedIndex = 4;
+    else if (rand < 25) selectedIndex = 2;
+    else if (rand < 45) selectedIndex = 0;
+    else if (rand < 70) selectedIndex = 1;
+
+    const selectedPrize = prizes[selectedIndex];
+    const avgSectorAngle = (selectedPrize.minDeg + selectedPrize.maxDeg) / 2;
+    const targetSliceRotation = 360 - avgSectorAngle;
+
+    const extraRotations = 1800;
+    this.currentRotation += extraRotations + (targetSliceRotation - (this.currentRotation % 360));
+
+    this.wheelRotationStyle.set(`rotate(${this.currentRotation}deg)`);
+
+    setTimeout(() => {
+      this.isSpinning.set(false);
+      this.hasWon.set(selectedPrize.won);
+      this.wonVoucherCode.set(selectedPrize.code);
+
+      if (selectedPrize.won) {
+        this.playWinSound();
+        this.wheelResultMsg.set(`Bạn đã trúng ${selectedPrize.name}! Nhận mã giảm giá độc quyền dành riêng cho bạn ở bên dưới.`);
+      } else {
+        this.playLoseSound();
+        this.wheelResultMsg.set('Hãy thử lại lần sau nhé, rất nhiều phần quà đang đợi bạn!');
+      }
+    }, 3200);
+  }
+
+  copyVoucher(): void {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(this.wonVoucherCode());
+    }
+  }
   readonly loyaltyError = signal('');
   readonly savingProfile = signal(false);
   readonly savingPwd = signal(false);

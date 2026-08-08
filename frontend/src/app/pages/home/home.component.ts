@@ -753,19 +753,20 @@ const PLACEHOLDER_POSTS = [
       }
 
       .product-img {
-        aspect-ratio: 1;
-        background: #e5e5e5;
+        display: block;
+        width: 100%;
+        height: 240px;
+        background: #fdfbf9;
         border-bottom: 1px solid #f0f2f5;
-        display: grid;
-        place-items: center;
-        color: #b0b0b0;
         position: relative;
+        overflow: hidden;
       }
 
       .product-img img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        display: block;
       }
 
       .product-img svg {

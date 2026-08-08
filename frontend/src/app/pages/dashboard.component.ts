@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
@@ -6,9 +6,14 @@ import { ApiService } from '../core/services/api.service';
 interface SummaryCards {
   revenueToday: number;
   revenueMonth: number;
+  revenuePrevMonth: number;
   revenueAll: number;
-  totalOrders: number;
-  totalUsers: number;
+  totalOrdersAll: number;
+  totalOrdersMonth: number;
+  totalOrdersPrevMonth: number;
+  totalUsersAll: number;
+  totalUsersMonth: number;
+  totalUsersPrevMonth: number;
   totalProducts: number;
   lowStockCount: number;
 }
@@ -66,12 +71,38 @@ const STATUS_LABEL: Record<string, string> = {
       <section class="kpi-row">
         @for (kpi of kpis(); track kpi.label) {
           <article class="kpi panel">
-            <div class="kpi-head">
-              <span class="kpi-ico" [innerHTML]="kpi.icon"></span>
-              <span class="kpi-label">{{ kpi.label }}</span>
+            <div class="kpi-main">
+              <div class="kpi-info">
+                <span class="kpi-label">{{ kpi.label }}</span>
+                <p class="kpi-value">{{ kpi.display }}</p>
+              </div>
+              <div class="kpi-badge">
+                @switch (kpi.key) {
+                  @case ('revenue') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="icon-svg coin"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9 12h6"/></svg>
+                  }
+                  @case ('orders') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="icon-svg cart"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+                  }
+                  @case ('users') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="icon-svg users"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  }
+                  @case ('products') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="icon-svg box"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+                  }
+                  @case ('lowStock') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="icon-svg alert"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  }
+                }
+              </div>
             </div>
-            <p class="kpi-value">{{ kpi.display }}</p>
-            <p class="kpi-sub muted">{{ kpi.sub }}</p>
+            <div class="kpi-footer">
+              <select class="kpi-select" [value]="kpi.periodValue" (change)="onKpiFilterChange(kpi.key, $event)">
+                <option value="all">Tất cả thời gian</option>
+                <option value="month">Tháng này</option>
+                <option value="prevMonth">Tháng trước</option>
+              </select>
+            </div>
             <svg class="kpi-spark" viewBox="0 0 120 32" preserveAspectRatio="none">
               <polyline [attr.points]="kpi.spark" fill="none" stroke="currentColor" stroke-width="1.5" />
             </svg>
@@ -195,8 +226,8 @@ const STATUS_LABEL: Record<string, string> = {
                     <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
                   </svg>
                 </span>
-                <span class="cat-name">{{ c.name }}</span>
-                <span class="cat-count muted">{{ c.count }} sản phẩm</span>
+                <a routerLink="/admin/categories" class="cat-name-link">{{ c.name }}</a>
+                <a routerLink="/admin/products" class="cat-count-link muted">{{ c.count }} sản phẩm</a>
               </li>
             }
           </ul>
@@ -219,14 +250,18 @@ const STATUS_LABEL: Record<string, string> = {
                     <td>
                       <div class="stock-name">
                         <div class="thumb sm"></div>
-                        <span>{{ p.name }}</span>
+                        <a routerLink="/admin/products" class="stock-name-link">{{ p.name }}</a>
                       </div>
                     </td>
-                    <td>{{ p.stock }}</td>
                     <td>
-                      <span class="status-badge" [class]="p.level === 'critical' ? 'critical' : 'low'">
-                        {{ p.level === 'critical' ? 'Rất thấp' : 'Thấp' }}
-                      </span>
+                      <a routerLink="/admin/products" class="stock-count-link">{{ p.stock }}</a>
+                    </td>
+                    <td>
+                      <a routerLink="/admin/products" class="status-badge-link">
+                        <span class="status-badge" [class]="p.level === 'critical' ? 'critical' : 'low'">
+                          {{ p.level === 'critical' ? 'Rất thấp' : 'Thấp' }}
+                        </span>
+                      </a>
                     </td>
                   </tr>
                 }
@@ -263,23 +298,28 @@ const STATUS_LABEL: Record<string, string> = {
         overflow: hidden;
       }
 
-      .kpi-head {
+      .kpi-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+      }
+
+      .kpi-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .kpi-badge {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.65rem;
-      }
-
-      .kpi-ico {
-        display: flex;
-        width: 16px;
-        height: 16px;
-        color: var(--muted);
-      }
-
-      .kpi-ico :deep(svg) {
-        width: 16px;
-        height: 16px;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: #faf8f6;
+        border: 1px solid #ebdcd0;
       }
 
       .kpi-label {
@@ -296,9 +336,25 @@ const STATUS_LABEL: Record<string, string> = {
         line-height: 1.2;
       }
 
-      .kpi-sub {
-        margin: 0.2rem 0 0.5rem;
+      .kpi-footer {
+        margin-top: 0.2rem;
+        position: relative;
+        z-index: 10;
+      }
+
+      .kpi-select {
+        border: none;
+        background: transparent;
         font-size: 0.75rem;
+        color: var(--muted);
+        outline: none;
+        cursor: pointer;
+        padding: 0;
+        font-weight: 500;
+      }
+
+      .kpi-select:hover {
+        color: #8c7161;
       }
 
       .kpi-spark {
@@ -523,9 +579,52 @@ const STATUS_LABEL: Record<string, string> = {
         height: 16px;
       }
 
-      .cat-name {
+      .cat-name-link {
         flex: 1;
         font-weight: 500;
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .cat-name-link:hover {
+        color: #8c7161;
+        text-decoration: underline;
+      }
+
+      .cat-count-link {
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .cat-count-link:hover {
+        color: #8c7161;
+        text-decoration: underline;
+      }
+
+      .stock-name-link {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+      .stock-name-link:hover {
+        color: #8c7161;
+        text-decoration: underline;
+      }
+
+      .stock-count-link {
+        color: inherit;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.2s;
+      }
+      .stock-count-link:hover {
+        color: #8c7161;
+        text-decoration: underline;
+      }
+
+      .status-badge-link {
+        text-decoration: none;
+        display: inline-block;
       }
 
       .stock-name {
@@ -589,9 +688,14 @@ export class DashboardComponent implements OnInit {
   cards = signal<SummaryCards>({
     revenueToday: 0,
     revenueMonth: 0,
+    revenuePrevMonth: 0,
     revenueAll: 0,
-    totalOrders: 0,
-    totalUsers: 0,
+    totalOrdersAll: 0,
+    totalOrdersMonth: 0,
+    totalOrdersPrevMonth: 0,
+    totalUsersAll: 0,
+    totalUsersMonth: 0,
+    totalUsersPrevMonth: 0,
     totalProducts: 0,
     lowStockCount: 0
   });
@@ -602,15 +706,27 @@ export class DashboardComponent implements OnInit {
   lowStock = signal<LowStockRow[]>([]);
   private summaryChartFallback = signal<ChartPoint[]>([]);
 
+  // Individual card filter states
+  revenueFilter = signal<'all' | 'month' | 'prevMonth'>('all');
+  ordersFilter = signal<'all' | 'month' | 'prevMonth'>('all');
+  usersFilter = signal<'all' | 'month' | 'prevMonth'>('all');
+  productsFilter = signal<'all' | 'month' | 'prevMonth'>('all');
+  lowStockFilter = signal<'all' | 'month' | 'prevMonth'>('all');
+
   ngOnInit(): void {
     this.api.getDashboardSummary().subscribe({
       next: (data) => {
         this.cards.set({
           revenueToday: data.cards.revenueToday ?? 0,
           revenueMonth: data.cards.revenueMonth ?? 0,
+          revenuePrevMonth: data.cards.revenuePrevMonth ?? 0,
           revenueAll: data.cards.revenueAll ?? 0,
-          totalOrders: data.cards.totalOrders ?? 0,
-          totalUsers: data.cards.totalUsers ?? 0,
+          totalOrdersAll: data.cards.totalOrdersAll ?? 0,
+          totalOrdersMonth: data.cards.totalOrdersMonth ?? 0,
+          totalOrdersPrevMonth: data.cards.totalOrdersPrevMonth ?? 0,
+          totalUsersAll: data.cards.totalUsersAll ?? 0,
+          totalUsersMonth: data.cards.totalUsersMonth ?? 0,
+          totalUsersPrevMonth: data.cards.totalUsersPrevMonth ?? 0,
           totalProducts: data.cards.totalProducts ?? 0,
           lowStockCount: data.cards.lowStockCount ?? 0
         });
@@ -663,46 +779,73 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  kpis() {
+  onKpiFilterChange(key: string, event: Event): void {
+    const val = (event.target as HTMLSelectElement).value as 'all' | 'month' | 'prevMonth';
+    if (key === 'revenue') this.revenueFilter.set(val);
+    else if (key === 'orders') this.ordersFilter.set(val);
+    else if (key === 'users') this.usersFilter.set(val);
+    else if (key === 'products') this.productsFilter.set(val);
+    else if (key === 'lowStock') this.lowStockFilter.set(val);
+  }
+
+  kpis = computed(() => {
     const c = this.cards();
+
+    let revVal = c.revenueAll;
+    if (this.revenueFilter() === 'month') revVal = c.revenueMonth;
+    else if (this.revenueFilter() === 'prevMonth') revVal = c.revenuePrevMonth;
+
+    let ordVal = c.totalOrdersAll;
+    if (this.ordersFilter() === 'month') ordVal = c.totalOrdersMonth;
+    else if (this.ordersFilter() === 'prevMonth') ordVal = c.totalOrdersPrevMonth;
+
+    let usrVal = c.totalUsersAll;
+    if (this.usersFilter() === 'month') usrVal = c.totalUsersMonth;
+    else if (this.usersFilter() === 'prevMonth') usrVal = c.totalUsersPrevMonth;
+
     return [
       {
+        key: 'revenue',
         label: 'Tổng doanh thu',
-        display: this.formatMoney(c.revenueAll),
-        sub: 'Tất cả thời gian',
+        display: this.formatMoney(revVal),
+        periodValue: this.revenueFilter(),
         icon: this.ico('coin'),
         spark: this.spark(42, 55, 48, 62, 58, 70, 75)
       },
       {
+        key: 'orders',
         label: 'Đơn hàng',
-        display: this.formatNum(c.totalOrders),
-        sub: 'Tất cả thời gian',
+        display: this.formatNum(ordVal),
+        periodValue: this.ordersFilter(),
         icon: this.ico('cart'),
         spark: this.spark(30, 38, 35, 45, 42, 50, 48)
       },
       {
+        key: 'users',
         label: 'Khách hàng',
-        display: this.formatNum(c.totalUsers),
-        sub: 'Tất cả thời gian',
+        display: this.formatNum(usrVal),
+        periodValue: this.usersFilter(),
         icon: this.ico('users'),
         spark: this.spark(20, 28, 32, 30, 38, 40, 44)
       },
       {
+        key: 'products',
         label: 'Sản phẩm',
         display: this.formatNum(c.totalProducts),
-        sub: 'Tất cả thời gian',
+        periodValue: this.productsFilter(),
         icon: this.ico('box'),
         spark: this.spark(25, 30, 28, 35, 33, 38, 36)
       },
       {
+        key: 'lowStock',
         label: 'Tồn kho thấp',
         display: this.formatNum(c.lowStockCount),
-        sub: 'Tất cả thời gian',
+        periodValue: this.lowStockFilter(),
         icon: this.ico('alert'),
         spark: this.spark(50, 45, 40, 38, 35, 32, 28)
       }
     ];
-  }
+  });
 
   chartTitle(): string {
     switch (this.chartPeriod()) {
@@ -908,11 +1051,11 @@ export class DashboardComponent implements OnInit {
 
   private ico(type: string): string {
     const icons: Record<string, string> = {
-      coin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9 12h6"/></svg>`,
-      cart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>`,
-      users: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`,
-      box: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>`,
-      alert: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+      coin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="width: 20px; height: 20px; color: #8c7161;"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9 12h6"/></svg>`,
+      cart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="width: 20px; height: 20px; color: #3b82f6;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>`,
+      users: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="width: 20px; height: 20px; color: #10b981;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`,
+      box: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="width: 20px; height: 20px; color: #f59e0b;"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>`,
+      alert: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="width: 20px; height: 20px; color: #ef4444;"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
     };
     return icons[type] ?? icons['box'];
   }

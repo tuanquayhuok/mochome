@@ -23,6 +23,7 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
       { label: 'Biến thể', route: '/admin/variants' }
     ]
   },
+  { label: 'Quản lý thương hiệu', route: '/admin/brands' },
   {
     label: 'Quản lý đơn hàng',
     children: [
@@ -57,7 +58,6 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
       { label: 'Quản lý bình luận', route: '/admin/posts/comments' }
     ]
   },
-  { label: 'Quản lý banner', route: '/admin/banners' },
   {
     label: 'Khuyến mãi',
     children: [
@@ -90,23 +90,20 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
     ]
   },
   {
-    label: 'Quản lý tài chính',
+    label: 'Quản lý đại lý',
     children: [
-      { label: 'Doanh thu', route: '/admin/finance/revenue' },
-      { label: 'Chi phí', route: '/admin/finance/expenses' },
-      { label: 'Lợi nhuận', route: '/admin/finance/profit' },
-      { label: 'Quản lý thanh toán', route: '/admin/finance/payments' },
-      { label: 'Lịch sử giao dịch', route: '/admin/finance/transactions' },
-      { label: 'Yêu cầu hoàn tiền', route: '/admin/finance/refunds' },
-      { label: 'Công nợ khách hàng', route: '/admin/finance/receivables' }
+      { label: 'Danh sách đại lý', route: '/admin/stores' },
+      { label: 'Tồn kho đại lý', route: '/admin/stores/inventory' },
+      { label: 'Báo cáo phân phối', route: '/admin/stores/reports' }
     ]
   },
   {
     label: 'Cấu hình hệ thống',
     children: [
-      { label: 'Thông tin liên hệ', route: '/admin/system-settings' },
-      { label: 'Phát thông báo', route: '/admin/notifications' },
-      { label: 'Liên hệ (Khách gửi)', route: '/admin/contacts' }
+      { label: 'Thông tin cửa hàng', route: '/admin/system-settings' },
+      { label: 'Banner quảng cáo', route: '/admin/banners' },
+      { label: 'Ý kiến khách hàng', route: '/admin/contacts' },
+      { label: 'Phát thông báo', route: '/admin/notifications' }
     ]
   },
   {

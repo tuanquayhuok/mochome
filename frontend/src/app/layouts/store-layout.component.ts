@@ -62,6 +62,7 @@ import { SettingsService } from '../core/services/settings.service';
                 </div>
               </div>
               <a routerLink="/bo-suu-tap" routerLinkActive="active" class="nav-item">Bộ sưu tập</a>
+              <a routerLink="/lookbook" routerLinkActive="active" class="nav-item">Hình thực tế</a>
               <a routerLink="/tin-tuc" routerLinkActive="active" class="nav-item">Bài viết</a>
               <a routerLink="/gioi-thieu" routerLinkActive="active" class="nav-item">Giới thiệu</a>
               <a routerLink="/ho-tro" routerLinkActive="active" class="nav-item">Hỗ trợ</a>
@@ -312,6 +313,7 @@ import { SettingsService } from '../core/services/settings.service';
                 </div>
               </div>
               <a routerLink="/bo-suu-tap" routerLinkActive="active" class="nav-link">BỘ SƯU TẬP</a>
+              <a routerLink="/lookbook" routerLinkActive="active" class="nav-link">HÌNH THỰC TẾ</a>
               <a routerLink="/tin-tuc" routerLinkActive="active" class="nav-link">BÀI VIẾT</a>
               <a routerLink="/gioi-thieu" routerLinkActive="active" class="nav-link">GIỚI THIỆU</a>
               <a routerLink="/ho-tro" routerLinkActive="active" class="nav-link">HỖ TRỢ</a>
@@ -445,6 +447,7 @@ import { SettingsService } from '../core/services/settings.service';
               <h4>VỀ CHÚNG TÔI</h4>
               <ul>
                 <li><a routerLink="/gioi-thieu">Giới thiệu</a></li>
+                <li><a routerLink="/lookbook">Hình thực tế</a></li>
                 <li><a routerLink="/bo-suu-tap">Bộ sưu tập</a></li>
                 <li><a routerLink="/tin-tuc">Tin tức</a></li>
                 <li><a routerLink="/lien-he">Liên hệ</a></li>
@@ -513,6 +516,7 @@ import { SettingsService } from '../core/services/settings.service';
               <h4>VỀ MỘC HOME</h4>
               <ul>
                 <li><a routerLink="/gioi-thieu">Giới thiệu</a></li>
+                <li><a routerLink="/lookbook">Hình thực tế</a></li>
                 <li><a href="#">Chính sách giao hàng</a></li>
                 <li><a href="#">Chính sách đổi trả</a></li>
                 <li><a href="#">Chính sách bảo hành</a></li>

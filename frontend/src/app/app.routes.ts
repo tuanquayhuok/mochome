@@ -45,6 +45,10 @@ export const appRoutes: Routes = [
         loadComponent: () => import('./pages/collection/collection.component').then((m) => m.CollectionComponent)
       },
       {
+        path: 'lookbook',
+        loadComponent: () => import('./pages/lookbook/lookbook.component').then((m) => m.LookbookComponent)
+      },
+      {
         path: 'gioi-thieu',
         loadComponent: () => import('./pages/about/about.component').then((m) => m.AboutComponent)
       },
@@ -207,14 +211,30 @@ export const appRoutes: Routes = [
         loadComponent: () => import('./pages/banners/banners.component').then((m) => m.BannersComponent)
       },
       {
+        path: 'brands',
+        loadComponent: () => import('./pages/brands/brands.component').then((m) => m.BrandsComponent)
+      },
+      {
+        path: 'stores',
+        loadComponent: () => import('./pages/stores/stores.component').then((m) => m.StoresComponent)
+      },
+      {
+        path: 'stores/inventory',
+        loadComponent: () => import('./pages/stores/stores-inventory.component').then((m) => m.StoresInventoryComponent)
+      },
+      {
+        path: 'stores/reports',
+        loadComponent: () => import('./pages/stores/stores-reports.component').then((m) => m.StoresReportsComponent)
+      },
+      {
         path: 'account',
         loadComponent: () => import('./pages/account/account.component').then((m) => m.AccountComponent)
-      },
+      }, // forced refresh
       {
         path: 'account/password',
         loadComponent: () =>
           import('./pages/account/account-password.component').then((m) => m.AccountPasswordComponent)
-      },
+      }, // forced reload check
       {
         path: 'system-settings',
         loadComponent: () =>
@@ -231,4 +251,4 @@ export const appRoutes: Routes = [
   },
   { path: '**', redirectTo: '' }
 ];
-// rebuild trigger
+// rebuild trigger - updated brand page

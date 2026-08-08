@@ -22,6 +22,7 @@ import { AuthService } from '../../core/services/auth.service';
           <a routerLink="/dashboard" routerLinkActive="active"><span>⌂</span> Dashboard</a>
           <a routerLink="/products" routerLinkActive="active"><span>▦</span> Quản lý sản phẩm</a>
           <a routerLink="/categories" routerLinkActive="active"><span>◫</span> Quản lý danh mục</a>
+          <a routerLink="/brands" routerLinkActive="active"><span>⚐</span> Quản lý thương hiệu</a>
           <a routerLink="/orders" routerLinkActive="active"><span>☰</span> Quản lý đơn hàng</a>
           <a routerLink="/users" routerLinkActive="active"><span>◉</span> Quản lý khách hàng</a>
           <a routerLink="/reviews" routerLinkActive="active"><span>★</span> Quản lý đánh giá</a>
